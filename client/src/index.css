@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 11% 98%; /* #F5F7FA */
+  --foreground: 210 11% 15%; /* #2D3748 */
+  --muted: 210 11% 95%; /* #F1F5F9 */
+  --muted-foreground: 210 6% 46%; /* #64748B */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 210 11% 15%; /* #2D3748 */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 210 11% 15%; /* #2D3748 */
+  --border: 210 11% 82%; /* #CBD5E1 */
+  --input: 210 11% 82%; /* #CBD5E1 */
+  --primary: 154 52% 52%; /* #52B788 */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --secondary: 210 11% 95%; /* #F1F5F9 */
+  --secondary-foreground: 210 11% 15%; /* #2D3748 */
+  --accent: 210 11% 95%; /* #F1F5F9 */
+  --accent-foreground: 210 11% 15%; /* #2D3748 */
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+  --ring: 154 52% 52%; /* #52B788 */
+  --radius: 0.5rem;
+
+  /* Custom cannabis theme colors */
+  --forest: 154 48% 20%; /* #1B4332 */
+  --cannabis: 154 52% 52%; /* #52B788 */
+  --sage: 82 26% 47%; /* #87A96B */
+  --warm-gold: 45 100% 50%; /* #FFB700 */
+  --charcoal: 210 11% 15%; /* #2D3748 */
+}
+
+.dark {
+  --background: 210 11% 8%; /* #0F1419 */
+  --foreground: 210 11% 98%; /* #F5F7FA */
+  --muted: 210 11% 15%; /* #2D3748 */
+  --muted-foreground: 210 6% 64%; /* #94A3B8 */
+  --popover: 210 11% 8%; /* #0F1419 */
+  --popover-foreground: 210 11% 98%; /* #F5F7FA */
+  --card: 210 11% 8%; /* #0F1419 */
+  --card-foreground: 210 11% 98%; /* #F5F7FA */
+  --border: 210 11% 20%; /* #334155 */
+  --input: 210 11% 20%; /* #334155 */
+  --primary: 154 52% 52%; /* #52B788 */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --secondary: 210 11% 15%; /* #2D3748 */
+  --secondary-foreground: 210 11% 98%; /* #F5F7FA */
+  --accent: 210 11% 15%; /* #2D3748 */
+  --accent-foreground: 210 11% 98%; /* #F5F7FA */
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+  --ring: 154 52% 52%; /* #52B788 */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .chat-overlay {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+  }
+  
+  .gradient-overlay {
+    background: linear-gradient(135deg, rgba(27, 67, 50, 0.8) 0%, rgba(82, 183, 136, 0.6) 100%);
+  }
+
+  .text-forest {
+    color: hsl(var(--forest));
+  }
+
+  .text-cannabis {
+    color: hsl(var(--cannabis));
+  }
+
+  .text-sage {
+    color: hsl(var(--sage));
+  }
+
+  .text-warm-gold {
+    color: hsl(var(--warm-gold));
+  }
+
+  .text-charcoal {
+    color: hsl(var(--charcoal));
+  }
+
+  .bg-forest {
+    background-color: hsl(var(--forest));
+  }
+
+  .bg-cannabis {
+    background-color: hsl(var(--cannabis));
+  }
+
+  .bg-sage {
+    background-color: hsl(var(--sage));
+  }
+
+  .bg-warm-gold {
+    background-color: hsl(var(--warm-gold));
+  }
+
+  .bg-charcoal {
+    background-color: hsl(var(--charcoal));
+  }
+
+  .hover\:bg-forest:hover {
+    background-color: hsl(var(--forest));
+  }
+
+  .hover\:bg-sage:hover {
+    background-color: hsl(var(--sage));
+  }
+
+  .hover\:text-warm-gold:hover {
+    color: hsl(var(--warm-gold));
+  }
+
+  .hover\:text-cannabis:hover {
+    color: hsl(var(--cannabis));
+  }
+
+  .hover\:text-sage:hover {
+    color: hsl(var(--sage));
+  }
+
+  .border-cannabis {
+    border-color: hsl(var(--cannabis));
+  }
+}
