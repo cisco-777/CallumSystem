@@ -5,14 +5,8 @@ import marinaImage from '@assets/pexels-arvid-knutsen-1892648-3511307.jpg';
 import { Leaf, ShoppingBag, Star, Shield, Clock, Truck } from 'lucide-react';
 
 export function OrderLandingPage() {
-  const [showWebChat, setShowWebChat] = useState(false);
-
   const handleMakeOrder = () => {
-    setShowWebChat(true);
-  };
-
-  const closeWebChat = () => {
-    setShowWebChat(false);
+    window.open('https://bizichat.ai/webchat/?p=1899468&id=zzV863MpKDk', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
   };
 
   return (
@@ -159,30 +153,6 @@ export function OrderLandingPage() {
           </div>
         </section>
       </div>
-
-      {/* Web Chat Overlay */}
-      {showWebChat && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
-          <div className="absolute inset-4 md:inset-8 bg-white rounded-3xl shadow-2xl overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b bg-leaf-green">
-              <h3 className="font-inter font-semibold text-xl text-white">Make Your Donation</h3>
-              <button 
-                onClick={closeWebChat}
-                className="text-white hover:text-gray-200 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-            <iframe
-              src="https://bizichat.ai/webchat/?p=1899468&id=zzV863MpKDk"
-              className="w-full h-full border-0"
-              title="Donation Chat"
-              allow="camera; microphone; geolocation"
-              sandbox="allow-same-origin allow-scripts allow-forms allow-top-navigation allow-popups"
-            />
-          </div>
-        </div>
-      )}
     </>
   );
 }
