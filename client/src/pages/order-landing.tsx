@@ -31,7 +31,7 @@ export function OrderLandingPage() {
                 className="leaf-gradient text-white px-6 py-2 rounded-full font-medium hover:shadow-medium transition-all duration-300"
               >
                 <ShoppingBag className="w-4 h-4 mr-2" />
-                Make an Order
+                Make a Donation
               </Button>
             </div>
           </div>
@@ -56,7 +56,7 @@ export function OrderLandingPage() {
                 className="leaf-gradient text-white px-12 py-6 rounded-full text-xl font-semibold hover:shadow-medium transition-all duration-300 transform hover:scale-105"
               >
                 <ShoppingBag className="w-6 h-6 mr-3" />
-                Make an Order
+                Make a Donation
               </Button>
             </div>
           </div>
@@ -154,7 +154,7 @@ export function OrderLandingPage() {
               className="leaf-gradient text-white px-16 py-8 rounded-full text-2xl font-semibold hover:shadow-medium transition-all duration-300 transform hover:scale-105"
             >
               <ShoppingBag className="w-8 h-8 mr-4" />
-              Make an Order
+              Make a Donation
             </Button>
           </div>
         </section>
@@ -165,7 +165,7 @@ export function OrderLandingPage() {
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
           <div className="absolute inset-4 md:inset-8 bg-white rounded-3xl shadow-2xl overflow-hidden">
             <div className="flex justify-between items-center p-6 border-b bg-leaf-green">
-              <h3 className="font-inter font-semibold text-xl text-white">Place Your Order</h3>
+              <h3 className="font-inter font-semibold text-xl text-white">Make Your Donation</h3>
               <button 
                 onClick={closeWebChat}
                 className="text-white hover:text-gray-200 text-2xl"
@@ -176,7 +176,9 @@ export function OrderLandingPage() {
             <iframe
               src="https://bizichat.ai/webchat/?p=1899468&id=zzV863MpKDk"
               className="w-full h-full border-0"
-              title="Order Chat"
+              title="Donation Chat"
+              allow="camera; microphone; geolocation"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-top-navigation allow-popups"
             />
           </div>
         </div>
