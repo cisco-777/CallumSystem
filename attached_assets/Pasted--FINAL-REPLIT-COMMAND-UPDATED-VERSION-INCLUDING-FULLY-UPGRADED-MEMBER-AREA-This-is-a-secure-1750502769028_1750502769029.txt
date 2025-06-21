@@ -1,0 +1,184 @@
+✅ FINAL REPLIT COMMAND (UPDATED VERSION INCLUDING FULLY UPGRADED MEMBER AREA)
+
+🚨 This is a secure, private platform for Marbella Social Club. All flows must be functional, clean, and production-ready. No placeholders. No broken links. No pricing. Follow the exact instructions below.
+
+⸻
+
+✅ 1. LOGIN + REGISTER PAGE (/)
+	•	Route: /
+	•	Show login and register forms only (no other site access)
+
+Login Form:
+	•	Email
+	•	Password
+	•	Button: Login
+✅ Redirect to: /home
+
+Register Form:
+	•	Email
+	•	Password
+	•	Confirm Password
+✅ Redirect to: /onboarding
+✅ Validate:
+	•	Email format
+	•	Password and Confirm Password must match
+
+⸻
+
+✅ 2. /onboarding PAGE
+
+Heading: “Welcome to Marbella Social Club”
+Text: “Please complete onboarding to access your member portal.”
+Button: Begin Onboarding
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1747235127465
+✅ No auto-redirect after. User must manually return to /home after completing onboarding.
+
+⸻
+
+✅ 3. /home – MEMBER PORTAL
+
+Hero Section:
+	•	Heading: Welcome To Marbella Social Club
+	•	Subtext: Order your favorite products, check updates, and manage your account — all in one place.
+	•	Button: Order Now →
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1748031551607
+
+Product Carousel:
+	•	Show 3–4 product cards:
+	•	Product name (e.g. “Zkittlez”)
+	•	Image placeholder
+	•	Short description
+	•	Button: Donate Now → links to chatbot
+
+✅ No price shown anywhere
+
+⸻
+
+✅ 4. /member-area – FULLY MOCKED MEMBER DASHBOARD
+
+⸻
+
+Section 1: Past Orders
+
+Display a clean list format:
+	•	✔ Zkittlez – Ordered: 12 June 2025
+	•	✔ Banana OG – Ordered: 6 June 2025
+	•	✔ Wedding Cake – Ordered: 30 May 2025
+
+✅ Max 5 entries
+✅ No price or donation data
+
+⸻
+
+Section 2: Saved Products
+
+3 product cards, styled professionally:
+	•	Card Title: Product name (e.g. “Lemon Haze”)
+	•	Image placeholder
+	•	Note: e.g. “Saved on 10 June”
+	•	Button: Reorder Now
+→ Link to: https://bizichat.ai/webchat/?p=1899468&ref=1748031551607
+
+
+✅ No “View More” or other non-functional buttons
+✅ Every button must work
+
+⸻
+
+Section 3: Personalized Member Notes
+
+Show a clean block or list:
+	•	“Prefers fruity strains”
+	•	“Requested edibles during last visit”
+	•	“Referred by: Jake M.”
+	•	“Member since Feb 2024”
+
+✅ small icon or color tag next to each note for visual polish
+
+⸻
+
+Section 4: Birthday Gift Tracker
+
+🎁 “You’re eligible for a special gift during your birthday month. Ask in person or via chat to claim it.”
+
+✅ Static message
+✅ No donation value or balance shown
+
+⸻
+
+✅ 5. /admin-login → /admin – SECURE BACKEND ACCESS
+
+/admin-login
+	•	Email
+	•	Password
+	•	Button: Login to Admin
+✅ Mock credentials for demo:
+	•	Email: admin@msc.com
+	•	Password: admin123
+
+✅ On success → redirect to /admin
+✅ Block direct access to /admin unless logged in
+
+⸻
+
+/admin Dashboard:
+	•	Display:
+	•	Total Members: 134
+	•	Orders This Week: 92
+	•	Most Requested: Zkittlez 5g
+	•	Button: Access Bouncer Panel
+→ Link: https://bizichat.ai/webchat/?p=1899468&ref=1748302315388
+
+✅ Clean, professional layout
+✅ Optional future upgrade: role-based access (not needed yet)
+
+⸻
+
+✅ 6. STYLING
+	•	Fonts: Inter or Montserrat
+	•	Primary color: #116149 (green)
+	•	Text: #1a1a1a
+	•	Background: #f9f9f9
+	•	Buttons: Rounded with hover state
+	•	Max-width container layout
+	•	Fully responsive (mobile/tablet)
+
+Sticky Top Navigation:
+	•	Home
+	•	Products
+	•	Member Area
+	•	Events
+	•	Order
+	•	Admin
+	•	Logout
+✅ Collapsible to hamburger on mobile
+
+⸻
+
+✅ 7. PAGE STRUCTURE
+	•	/ → Login/Register
+	•	/onboarding → Onboarding message + bot
+	•	/home → Main portal
+	•	/member-area → Full dashboard with all 4 mocked sections
+	•	/admin-login → Admin login only
+	•	/admin → Admin dashboard (only after login)
+
+
+
+✅ 7. LINK DESTINATIONS
+
+Action: Register (first time)
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1747235127465
+
+Action: “Order Now” button 
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1748031551607
+
+Action: "reorder now" button
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1748031551607
+
+
+Action: Admin – Bouncer Panel
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1748302315388
+
+Action: Support WhatsApp Button
+Link: https://wa.me/+34607813795

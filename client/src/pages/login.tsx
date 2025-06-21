@@ -10,22 +10,14 @@ export function LoginPage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    // Mock login validation
-    if (email === 'demo@msc.com' && password === 'demo123') {
-      localStorage.setItem('msc-authenticated', 'true');
-      setLocation('/home');
-    } else {
-      setError('Invalid credentials. Use demo@msc.com / demo123');
-    }
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -34,17 +26,42 @@ export function LoginPage() {
       return;
     }
 
-    // For demo purposes, any registration is successful
-    localStorage.setItem('msc-authenticated', 'true');
-    localStorage.setItem('msc-first-time', 'true');
-    
-    // Redirect to onboarding chatbot
-    window.open('https://bizichat.ai/webchat/?p=1899468&ref=1747235127465', '_blank');
-    
-    // Then redirect to home
-    setTimeout(() => {
+    // Demo login for any valid email/password combination
+    if (validateEmail(email) && password.length >= 3) {
+      localStorage.setItem('msc-authenticated', 'true');
       setLocation('/home');
-    }, 1000);
+    } else {
+      setError('Invalid email format or password too short');
+    }
+  };
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!email || !password || !confirmPassword) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    // Registration successful
+    localStorage.setItem('msc-authenticated', 'true');
+    setLocation('/onboarding');
   };
 
   return (
@@ -84,6 +101,20 @@ export function LoginPage() {
               />
             </div>
 
+            {!isLoginMode && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your password"
+                  required
+                />
+              </div>
+            )}
+
             {error && (
               <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
                 {error}
@@ -105,6 +136,7 @@ export function LoginPage() {
                 setError('');
                 setEmail('');
                 setPassword('');
+                setConfirmPassword('');
               }}
               className="text-[#116149] hover:underline text-sm"
             >
