@@ -19,13 +19,11 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const queryClient = useQueryClient();
 
   const { data: products = [] } = useQuery({
-    queryKey: ['/api/products'],
-    queryFn: () => apiRequest('/api/products')
+    queryKey: ['/api/products']
   });
 
   const { data: basketItems = [] } = useQuery({
-    queryKey: ['/api/basket'],
-    queryFn: () => apiRequest('/api/basket')
+    queryKey: ['/api/basket']
   });
 
   const addToBasketMutation = useMutation({

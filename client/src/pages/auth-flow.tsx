@@ -45,7 +45,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
 
   const checkEmailMutation = useMutation({
     mutationFn: async (email: string) => {
-      return await apiRequest(`/api/auth/check-email`, {
+      return await apiRequest('/api/auth/check-email', {
         method: 'POST',
         body: JSON.stringify({ email }),
         headers: { 'Content-Type': 'application/json' }
@@ -71,7 +71,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
 
   const loginMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/auth/login`, {
+      return await apiRequest('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
         headers: { 'Content-Type': 'application/json' }
@@ -96,7 +96,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
 
   const registerMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/auth/register`, {
+      return await apiRequest('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
         headers: { 'Content-Type': 'application/json' }
@@ -126,7 +126,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
         }
       });
       
-      return await apiRequest(`/api/auth/complete-onboarding`, {
+      return await apiRequest('/api/auth/complete-onboarding', {
         method: 'POST',
         body: formData
       });
