@@ -21,31 +21,31 @@ export function SinglePageHome() {
       <Navigation />
       
       {/* Home Section */}
-      <section id="home" className="pt-16 pb-20 bg-white">
+      <section 
+        id="home" 
+        className="pt-16 pb-20 relative"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://cdn.pixabay.com/photo/2021/12/10/13/17/cannabis-lounge-6854823_1280.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Welcome To Marbella Social Club
-              </h1>
-              <p className="text-xl text-gray-600 mb-8">
-                Order your favorite products, check updates, and manage your account — all in one place.
-              </p>
-              <Button
-                onClick={handleOrderNow}
-                size="lg"
-                className="bg-[#116149] hover:bg-[#0d4d3a] text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                Order Now →
-              </Button>
-            </div>
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                alt="Elegant club lounge interior"
-                className="w-full h-96 object-cover rounded-2xl shadow-xl"
-              />
-            </div>
+          <div className="text-center text-white">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Welcome To Marbella Social Club
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+              Order your favorite products, check updates, and manage your account — all in one place.
+            </p>
+            <Button
+              onClick={handleOrderNow}
+              size="lg"
+              className="bg-[#116149] hover:bg-[#0d4d3a] text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Order Now →
+            </Button>
           </div>
         </div>
       </section>
@@ -56,7 +56,7 @@ export function SinglePageHome() {
           <h2 className="text-3xl font-bold text-gray-900 mb-8">🎥 Take a Look Inside</h2>
           <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl mb-6">
             <iframe
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+              src="https://www.youtube.com/embed/B6NFTno59zw"
               title="Club Interior Video"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -70,8 +70,17 @@ export function SinglePageHome() {
       </section>
 
       {/* Products Section */}
-      <section id="products" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="products" className="py-20 bg-white relative">
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `url('https://cdn.pixabay.com/photo/2021/10/15/15/11/interior-6719306_1280.jpg')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Featured Products</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="hover:shadow-lg transition-shadow duration-300">
@@ -171,7 +180,7 @@ export function SinglePageHome() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Member Dashboard</h2>
             <img
-              src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80"
+              src="https://cdn.pixabay.com/photo/2022/01/05/18/26/people-6912589_1280.jpg"
               alt="Happy club members"
               className="w-full h-64 object-cover rounded-2xl shadow-xl mb-8"
             />
@@ -316,40 +325,18 @@ export function SinglePageHome() {
                 <CardTitle className="flex items-center">
                   🎂 Birthday Gift Tracker
                 </CardTitle>
-                <CardDescription>Track upcoming birthdays and see if your club gift is ready</CardDescription>
+                <CardDescription>Your birthday and club gift status</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-center">
-                      <Gift className="w-4 h-4 text-green-600 mr-3" />
-                      <div>
-                        <span className="font-medium text-gray-900">Sofia</span>
-                        <p className="text-sm text-gray-600">July 2</p>
-                      </div>
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Gift className="w-5 h-5 text-green-600 mr-3" />
+                    <div>
+                      <span className="font-medium text-gray-900 text-lg">Alex Johnson</span>
+                      <p className="text-sm text-gray-600">August 15, 2025</p>
                     </div>
-                    <span className="text-green-600 font-medium">Gift Ready</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                    <div className="flex items-center">
-                      <Gift className="w-4 h-4 text-yellow-600 mr-3" />
-                      <div>
-                        <span className="font-medium text-gray-900">Matteo</span>
-                        <p className="text-sm text-gray-600">August 9</p>
-                      </div>
-                    </div>
-                    <span className="text-yellow-600 font-medium">Gift Pending</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-center">
-                      <Gift className="w-4 h-4 text-green-600 mr-3" />
-                      <div>
-                        <span className="font-medium text-gray-900">Jamal</span>
-                        <p className="text-sm text-gray-600">September 12</p>
-                      </div>
-                    </div>
-                    <span className="text-green-600 font-medium">Gift Ready</span>
-                  </div>
+                  <span className="text-green-600 font-medium">Gift Ready</span>
                 </div>
               </CardContent>
             </Card>
@@ -358,8 +345,17 @@ export function SinglePageHome() {
       </section>
 
       {/* Events Section */}
-      <section id="events" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section 
+        id="events" 
+        className="py-20 relative"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://cdn.pixabay.com/photo/2020/11/12/07/52/lounge-5730385_1280.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Upcoming Events</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="hover:shadow-lg transition-shadow duration-300">
