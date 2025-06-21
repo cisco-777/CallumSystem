@@ -4,9 +4,13 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LoginPage } from "@/pages/login";
+import { OnboardingPage } from "@/pages/onboarding";
 import { HomePage } from "@/pages/home";
+import { MemberAreaPage } from "@/pages/member-area";
+import { AdminLoginPage } from "@/pages/admin-login";
 import { AdminPage } from "@/pages/admin";
 import { ProtectedRoute } from "@/components/protected-route";
+import { AdminProtectedRoute } from "@/components/admin-protected-route";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -14,15 +18,26 @@ function Router() {
     <div className="min-h-screen">
       <Switch>
         <Route path="/" component={LoginPage} />
+        <Route path="/onboarding">
+          <ProtectedRoute>
+            <OnboardingPage />
+          </ProtectedRoute>
+        </Route>
         <Route path="/home">
           <ProtectedRoute>
             <HomePage />
           </ProtectedRoute>
         </Route>
-        <Route path="/admin">
+        <Route path="/member-area">
           <ProtectedRoute>
-            <AdminPage />
+            <MemberAreaPage />
           </ProtectedRoute>
+        </Route>
+        <Route path="/admin-login" component={AdminLoginPage} />
+        <Route path="/admin">
+          <AdminProtectedRoute>
+            <AdminPage />
+          </AdminProtectedRoute>
         </Route>
         <Route component={NotFound} />
       </Switch>

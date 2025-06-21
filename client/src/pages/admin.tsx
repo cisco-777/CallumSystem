@@ -1,6 +1,6 @@
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, ShoppingCart, Star, Settings } from 'lucide-react';
 
 export function AdminPage() {
@@ -10,8 +10,9 @@ export function AdminPage() {
     window.open('https://bizichat.ai/webchat/?p=1899468&ref=1748302315388', '_blank');
   };
 
-  const handleBackToHome = () => {
-    setLocation('/home');
+  const handleLogout = () => {
+    localStorage.removeItem('msc-admin-authenticated');
+    setLocation('/admin-login');
   };
 
   return (
@@ -22,12 +23,12 @@ export function AdminPage() {
           <div className="flex justify-between items-center h-16">
             <h1 className="text-xl font-bold text-[#116149]">Marbella Social Club - Admin Panel</h1>
             <Button
-              onClick={handleBackToHome}
+              onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="text-[#116149] border-[#116149] hover:bg-[#116149] hover:text-white"
+              className="text-gray-600 border-gray-300 hover:bg-gray-100"
             >
-              Back to Home
+              Logout
             </Button>
           </div>
         </div>
@@ -64,7 +65,7 @@ export function AdminPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Top Product</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600">Most Requested</CardTitle>
               <Star className="h-4 w-4 text-[#116149]" />
             </CardHeader>
             <CardContent>
@@ -83,7 +84,7 @@ export function AdminPage() {
               className="bg-[#116149] hover:bg-[#0d4d3a] text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center"
             >
               <Settings className="w-5 h-5 mr-2" />
-              Open Bouncer Panel →
+              Access Bouncer Panel
             </Button>
           </div>
         </div>
