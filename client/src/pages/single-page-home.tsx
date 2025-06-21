@@ -2,6 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Navigation } from '@/components/navigation';
 import { CheckCircle, Heart, Gift, User, Calendar, Users } from 'lucide-react';
+import marbellaImage from '@assets/Marbella_1750505556334.jpg';
+import loungeImage from '@assets/lounge_1750505580573.jpg';
 
 export function SinglePageHome() {
   const handleOrderNow = () => {
@@ -25,7 +27,7 @@ export function SinglePageHome() {
         id="home" 
         className="pt-16 pb-20 relative"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/attached_assets/Marbella_1750505556334.jpg')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${marbellaImage}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -163,7 +165,7 @@ export function SinglePageHome() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Member Dashboard</h2>
             <img
-              src="/attached_assets/lounge_1750505580573.jpg"
+              src={loungeImage}
               alt="Club lounge interior"
               className="w-full h-64 object-cover rounded-2xl shadow-xl mb-8"
             />
