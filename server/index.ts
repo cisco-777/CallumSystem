@@ -1,10 +1,22 @@
 import express, { type Request, Response, NextFunction } from "express";
+import multer from "multer";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Configure multer for handling multipart/form-data
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
+
+// Add multer middleware for form data handling
+app.use('/api/auth/complete-onboarding', upload.any());
 
 app.use((req, res, next) => {
   const start = Date.now();
