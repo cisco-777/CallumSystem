@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'wouter';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem('msc-authenticated');
@@ -17,59 +17,67 @@ export function Navigation() {
     window.open('https://bizichat.ai/webchat/?p=1899468&ref=1748031551607', '_blank');
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
-  const isActive = (path: string) => location === path;
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/home">
-            <div className="flex items-center cursor-pointer">
-              <span className="font-bold text-xl text-[#116149]">Marbella Social Club</span>
-            </div>
-          </Link>
+          <button 
+            onClick={() => scrollToSection('home')}
+            className="flex items-center cursor-pointer"
+          >
+            <span className="font-bold text-xl text-[#116149]">Marbella Social Club</span>
+          </button>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/home">
-              <button className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/home') ? 'text-[#116149] bg-green-50' : 'text-gray-700 hover:text-[#116149]'
-              }`}>
-                Home
-              </button>
-            </Link>
-            <Link href="/home">
-              <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors">
-                Products
-              </button>
-            </Link>
-            <Link href="/member-area">
-              <button className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/member-area') ? 'text-[#116149] bg-green-50' : 'text-gray-700 hover:text-[#116149]'
-              }`}>
-                Member Area
-              </button>
-            </Link>
-            <Link href="/home">
-              <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors">
-                Events
-              </button>
-            </Link>
+            <button 
+              onClick={() => scrollToSection('home')}
+              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => scrollToSection('products')}
+              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+            >
+              Products
+            </button>
+            <button 
+              onClick={() => scrollToSection('member-area')}
+              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+            >
+              Member Area
+            </button>
+            <button 
+              onClick={() => scrollToSection('events')}
+              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+            >
+              Events
+            </button>
             <Button 
               onClick={handleOrder}
               className="bg-[#116149] hover:bg-[#0d4d3a] text-white px-4 py-2 rounded-md text-sm font-medium"
             >
               Order
             </Button>
-            <Link href="/admin-login">
-              <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors">
-                Admin
-              </button>
-            </Link>
+            <button 
+              onClick={() => setLocation('/admin-login')}
+              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+            >
+              Admin
+            </button>
             <Button 
               onClick={handleLogout}
               variant="ghost"
@@ -94,42 +102,30 @@ export function Navigation() {
         {isMobileMenuOpen && (
           <div className="md:hidden pb-4 border-t">
             <div className="flex flex-col space-y-2 pt-4">
-              <Link href="/home">
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive('/home') ? 'text-[#116149] bg-green-50' : 'text-gray-700 hover:text-[#116149]'
-                  }`}
-                >
-                  Home
-                </button>
-              </Link>
-              <Link href="/home">
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
-                >
-                  Products
-                </button>
-              </Link>
-              <Link href="/member-area">
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive('/member-area') ? 'text-[#116149] bg-green-50' : 'text-gray-700 hover:text-[#116149]'
-                  }`}
-                >
-                  Member Area
-                </button>
-              </Link>
-              <Link href="/home">
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
-                >
-                  Events
-                </button>
-              </Link>
+              <button 
+                onClick={() => scrollToSection('home')}
+                className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+              >
+                Home
+              </button>
+              <button 
+                onClick={() => scrollToSection('products')}
+                className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+              >
+                Products
+              </button>
+              <button 
+                onClick={() => scrollToSection('member-area')}
+                className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+              >
+                Member Area
+              </button>
+              <button 
+                onClick={() => scrollToSection('events')}
+                className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+              >
+                Events
+              </button>
               <Button 
                 onClick={() => {
                   handleOrder();
@@ -139,14 +135,15 @@ export function Navigation() {
               >
                 Order
               </Button>
-              <Link href="/admin-login">
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
-                >
-                  Admin
-                </button>
-              </Link>
+              <button 
+                onClick={() => {
+                  setLocation('/admin-login');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#116149] transition-colors"
+              >
+                Admin
+              </button>
               <Button 
                 onClick={() => {
                   handleLogout();

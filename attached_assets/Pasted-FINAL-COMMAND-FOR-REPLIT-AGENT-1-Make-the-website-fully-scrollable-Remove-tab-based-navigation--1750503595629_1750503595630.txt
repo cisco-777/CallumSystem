@@ -1,0 +1,45 @@
+FINAL COMMAND FOR REPLIT AGENT:
+	1.	Make the website fully scrollable:
+Remove tab-based navigation. Replace it with anchor-linked sections in a single-page scroll layout. All navigation buttons (Home, Products, Member Area, Events, Order) must scroll to the matching section on the same page, not load a new one.
+	2.	Replace the “Events” section with a full scroll section called “Upcoming Events” including the following 3 real cards:
+
+	•	Event 1:
+	•	Title: “Welcome Night - July 10th”
+	•	Description: “Meet other members and enjoy exclusive samples.”
+	•	Image: Use a generic club/lounge interior photo.
+	•	No buttons.
+	•	Event 2:
+	•	Title: “420 Celebration - August 20th”
+	•	Description: “Live music, free gifts, and club updates.”
+	•	Image: Use a generic festive image (not weed-themed).
+	•	No buttons.
+	•	Event 3:
+	•	Title: “Autumn Tasting - September 15th”
+	•	Description: “Explore our latest strains with guided tastings.”
+	•	Image: Use a cozy cafe or indoor tasting image.
+	•	No buttons.
+
+	3.	In the Member Area section, add a fully visible “🎂 Birthday Gift Tracker” section with mock data:
+
+	•	Heading: “🎂 Birthday Gift Tracker”
+	•	Description: “Track upcoming birthdays and see if your club gift is ready.”
+	•	Add the following list:
+	•	Sofia – July 2 – Gift Ready
+	•	Matteo – August 9 – Gift Pending
+	•	Jamal – September 12 – Gift Ready
+
+No chatbot used. All content must be native to the site.
+	4.	Add stock images throughout the site (must be visually visible on screen):
+
+	•	Homepage hero section: use stock image of a classy lounge or indoor club space.
+	•	Products section: stock photos of generic cannabis jars (do not show buds directly).
+	•	Member Area: image of smiling members inside a stylish club.
+	•	Events section: use images as described in the event cards above.
+
+Make sure all images are embedded and scrollable — no image placeholders or broken links.
+	5.	Add a section on the homepage titled “🎥 Take a Look Inside”
+
+	•	Below the main welcome text.
+	•	Embed this YouTube video link: https://www.youtube.com/embed/dQw4w9WgXcQ
+	•	Below the video, add this caption:
+	•	“Here’s a peek into the vibe and style of our club — stay tuned for more.”

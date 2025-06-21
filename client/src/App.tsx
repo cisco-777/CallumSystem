@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LoginPage } from "@/pages/login";
 import { OnboardingPage } from "@/pages/onboarding";
-import { HomePage } from "@/pages/home";
+import { SinglePageHome } from "@/pages/single-page-home";
 import { MemberAreaPage } from "@/pages/member-area";
 import { AdminLoginPage } from "@/pages/admin-login";
 import { AdminPage } from "@/pages/admin";
@@ -25,7 +25,7 @@ function Router() {
         </Route>
         <Route path="/home">
           <ProtectedRoute>
-            <HomePage />
+            <SinglePageHome />
           </ProtectedRoute>
         </Route>
         <Route path="/member-area">
