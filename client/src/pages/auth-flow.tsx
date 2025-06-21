@@ -117,27 +117,34 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
 
   const completeOnboardingMutation = useMutation({
     mutationFn: async () => {
+      console.log('Preparing form data for onboarding...');
       const formData = new FormData();
       Object.entries(onboardingData).forEach(([key, value]) => {
         if (value instanceof File) {
           formData.append(key, value);
+          console.log(`Added file: ${key}`);
         } else {
           formData.append(key, String(value));
+          console.log(`Added field: ${key} = ${value}`);
         }
       });
       
+      console.log('Sending onboarding request...');
       return await apiRequest('/api/auth/complete-onboarding', {
         method: 'POST',
         body: formData
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Onboarding completed successfully:', data);
+      localStorage.setItem('msc-user', JSON.stringify(data.user));
       onSuccess();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Onboarding error:', error);
       toast({
         title: "Onboarding Failed",
-        description: "Please try again.",
+        description: error.message || "Please try again.",
         variant: "destructive",
       });
     }
@@ -173,14 +180,21 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
   };
 
   const handleOnboardingSubmit = () => {
-    if (!onboardingData.firstName || !onboardingData.lastName || !onboardingData.phoneNumber) {
+    console.log('Current onboarding data:', onboardingData);
+    
+    if (!onboardingData.firstName || !onboardingData.lastName || !onboardingData.phoneNumber || 
+        !onboardingData.dateOfBirth || !onboardingData.address || !onboardingData.privacyConsent || 
+        !onboardingData.termsAccepted) {
+      console.log('Validation failed - missing required fields');
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields and accept the terms.",
         variant: "destructive",
       });
       return;
     }
+    
+    console.log('Validation passed, submitting onboarding...');
     completeOnboardingMutation.mutate();
   };
 

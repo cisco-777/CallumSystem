@@ -59,23 +59,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/complete-onboarding", async (req, res) => {
     try {
-      const userId = 1; // Would get from session/token in real app
+      console.log("Onboarding request received:", req.body);
+      
+      // For now, get the most recent user (in a real app, use session/token)
+      const users = await storage.getUsers();
+      if (users.length === 0) {
+        return res.status(400).json({ message: "No user found" });
+      }
+      
+      const userId = users[users.length - 1].id; // Get the latest user
+      console.log("Updating user:", userId);
       
       const updates = {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        phoneNumber: req.body.phoneNumber,
-        dateOfBirth: req.body.dateOfBirth,
-        address: req.body.address,
-        isOnboarded: true,
-        onboardingData: req.body
+        firstName: req.body.firstName || '',
+        lastName: req.body.lastName || '',
+        phoneNumber: req.body.phoneNumber || '',
+        dateOfBirth: req.body.dateOfBirth || '',
+        address: req.body.address || '',
+        isOnboarded: true
       };
 
+      console.log("Updates to apply:", updates);
       const user = await storage.updateUser(userId, updates);
       const { password: _, ...userWithoutPassword } = user;
+      console.log("User updated successfully:", userWithoutPassword);
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      res.status(500).json({ message: "Failed to complete onboarding" });
+      console.error("Onboarding error:", error);
+      res.status(500).json({ message: "Failed to complete onboarding", error: String(error) });
     }
   });
 
