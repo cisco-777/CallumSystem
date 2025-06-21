@@ -133,7 +133,7 @@ export function Navigation() {
                 }}
                 className="bg-[#116149] hover:bg-[#0d4d3a] text-white mx-3 mt-2"
               >
-                Order
+                Donate
               </Button>
               <button 
                 onClick={() => {
