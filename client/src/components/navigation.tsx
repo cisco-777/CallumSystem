@@ -70,7 +70,7 @@ export function Navigation() {
               onClick={handleOrder}
               className="bg-[#116149] hover:bg-[#0d4d3a] text-white px-4 py-2 rounded-md text-sm font-medium"
             >
-              Order
+              Donate
             </Button>
             <button 
               onClick={() => setLocation('/admin-login')}

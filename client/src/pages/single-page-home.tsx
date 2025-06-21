@@ -25,7 +25,7 @@ export function SinglePageHome() {
         id="home" 
         className="pt-16 pb-20 relative"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/attached_assets/Marbella_1750505556334.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -44,7 +44,7 @@ export function SinglePageHome() {
               size="lg"
               className="bg-[#116149] hover:bg-[#0d4d3a] text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              Order Now →
+              Donate Now →
             </Button>
           </div>
         </div>
@@ -70,26 +70,15 @@ export function SinglePageHome() {
       </section>
 
       {/* Products Section */}
-      <section id="products" className="py-20 bg-white relative">
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }}
-        />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Featured Products</h2>
+      <section id="products" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Top Featured Products</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <img
-                  src="https://images.unsplash.com/photo-1605640840605-14ac1855827b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-                  alt="Premium cannabis jar"
-                  className="w-full h-32 object-cover rounded-lg mb-4"
-                />
+                <div className="w-full h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Image Placeholder</span>
+                </div>
                 <CardTitle className="text-lg">Zkittlez</CardTitle>
               </CardHeader>
               <CardContent>
@@ -107,11 +96,9 @@ export function SinglePageHome() {
 
             <Card className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <img
-                  src="https://images.unsplash.com/photo-1585711585521-d74b2f566a5e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-                  alt="Premium cannabis jar"
-                  className="w-full h-32 object-cover rounded-lg mb-4"
-                />
+                <div className="w-full h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Image Placeholder</span>
+                </div>
                 <CardTitle className="text-lg">Blue Dream</CardTitle>
               </CardHeader>
               <CardContent>
@@ -129,11 +116,9 @@ export function SinglePageHome() {
 
             <Card className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <img
-                  src="https://images.unsplash.com/photo-1566169405338-c7030a9e8d05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-                  alt="Premium cannabis jar"
-                  className="w-full h-32 object-cover rounded-lg mb-4"
-                />
+                <div className="w-full h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Image Placeholder</span>
+                </div>
                 <CardTitle className="text-lg">Lemon Haze</CardTitle>
               </CardHeader>
               <CardContent>
@@ -151,11 +136,9 @@ export function SinglePageHome() {
 
             <Card className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <img
-                  src="https://images.unsplash.com/photo-1605640840594-6b2461b91195?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-                  alt="Premium cannabis jar"
-                  className="w-full h-32 object-cover rounded-lg mb-4"
-                />
+                <div className="w-full h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Image Placeholder</span>
+                </div>
                 <CardTitle className="text-lg">Wedding Cake</CardTitle>
               </CardHeader>
               <CardContent>
@@ -180,8 +163,8 @@ export function SinglePageHome() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Member Dashboard</h2>
             <img
-              src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80"
-              alt="Happy club members"
+              src="/attached_assets/lounge_1750505580573.jpg"
+              alt="Club lounge interior"
               className="w-full h-64 object-cover rounded-2xl shadow-xl mb-8"
             />
           </div>
@@ -192,9 +175,9 @@ export function SinglePageHome() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <CheckCircle className="w-5 h-5 text-[#116149] mr-2" />
-                  Past Orders
+                  Past Donations
                 </CardTitle>
-                <CardDescription>Your recent club orders</CardDescription>
+                <CardDescription>Your recent club donations</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -202,21 +185,21 @@ export function SinglePageHome() {
                     <CheckCircle className="w-4 h-4 text-green-600 mr-3" />
                     <div>
                       <span className="font-medium text-gray-900">Zkittlez</span>
-                      <p className="text-sm text-gray-600">Ordered: 12 June 2025</p>
+                      <p className="text-sm text-gray-600">Donated: 12 June 2025</p>
                     </div>
                   </div>
                   <div className="flex items-center p-3 bg-green-50 rounded-lg">
                     <CheckCircle className="w-4 h-4 text-green-600 mr-3" />
                     <div>
                       <span className="font-medium text-gray-900">Banana OG</span>
-                      <p className="text-sm text-gray-600">Ordered: 6 June 2025</p>
+                      <p className="text-sm text-gray-600">Donated: 6 June 2025</p>
                     </div>
                   </div>
                   <div className="flex items-center p-3 bg-green-50 rounded-lg">
                     <CheckCircle className="w-4 h-4 text-green-600 mr-3" />
                     <div>
                       <span className="font-medium text-gray-900">Wedding Cake</span>
-                      <p className="text-sm text-gray-600">Ordered: 30 May 2025</p>
+                      <p className="text-sm text-gray-600">Donated: 30 May 2025</p>
                     </div>
                   </div>
                 </div>
@@ -345,26 +328,15 @@ export function SinglePageHome() {
       </section>
 
       {/* Events Section */}
-      <section 
-        id="events" 
-        className="py-20 relative"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <section id="events" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Upcoming Events</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <img
-                  src="https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                  alt="Club lounge interior"
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
+                <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Image Placeholder</span>
+                </div>
                 <CardTitle className="text-xl">Welcome Night - July 10th</CardTitle>
               </CardHeader>
               <CardContent>
@@ -376,12 +348,10 @@ export function SinglePageHome() {
 
             <Card className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <img
-                  src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                  alt="Festive celebration"
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-                <CardTitle className="text-xl">420 Celebration - August 20th</CardTitle>
+                <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Image Placeholder</span>
+                </div>
+                <CardTitle className="text-xl">420 Celebration - April 20th</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
@@ -392,11 +362,9 @@ export function SinglePageHome() {
 
             <Card className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <img
-                  src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
-                  alt="Cozy tasting room"
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
+                <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Image Placeholder</span>
+                </div>
                 <CardTitle className="text-xl">Autumn Tasting - September 15th</CardTitle>
               </CardHeader>
               <CardContent>
