@@ -3,14 +3,27 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { OrderLandingPage } from "@/pages/order-landing";
+import { LoginPage } from "@/pages/login";
+import { HomePage } from "@/pages/home";
+import { AdminPage } from "@/pages/admin";
+import { ProtectedRoute } from "@/components/protected-route";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <div className="min-h-screen">
       <Switch>
-        <Route path="/" component={OrderLandingPage} />
+        <Route path="/" component={LoginPage} />
+        <Route path="/home">
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/admin">
+          <ProtectedRoute>
+            <AdminPage />
+          </ProtectedRoute>
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </div>

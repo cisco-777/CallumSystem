@@ -1,0 +1,97 @@
+✅ FINAL REPLIT COMMAND – PRIVATE SYSTEM FOR MARBELLA SOCIAL CLUB (WITH MOCK LOGIN)
+
+🚨 This is the official member-only platform for Marbella Social Club (Callum’s club). This is not a demo site. It must look and feel like a real, private club system — secure, branded, discreet. Follow everything below exactly.
+
+⸻
+
+✅ 1. LOGIN-FIRST HOMEPAGE
+	•	Root route (/) should show a login/register screen only.
+	•	Fields:
+	•	Email
+	•	Password
+	•	Login Button
+	•	Register Button (if first time user)
+	•	Mock Login Credentials for Demo Access:
+	•	Email: demo@msc.com
+	•	Password: demo123
+	•	If user logs in, redirect to:
+/home ← This is the private club homepage
+	•	If user registers, after successful registration redirect to:
+https://bizichat.ai/webchat/?p=1899468&ref=:draft-1747235127465
+(This is the onboarding chatbot – shown once only on first-time registration)
+
+⸻
+
+✅ 2. PRIVATE CLUB WEBSITE – /home
+	•	This is Callum’s fully branded member homepage.
+	•	Heading:
+Welcome Back to Your Private Club Portal
+	•	Subtext:
+Order your favorite products, check updates, and manage your account — all in one place.
+	•	Features Section:
+	•	Premium Products – “Hand-picked selection of our finest options”
+	•	Private & Secure – “Discreet experience for members only”
+	•	Fast Pickup – “No queues. No delays.”
+	•	Member Support – “Direct contact with our staff when needed”
+	•	Button:
+Order Now →
+Link:  https://bizichat.ai/webchat/?p=1899468&ref=1748031551607
+
+⸻
+
+✅ 3. ADMIN PANEL – /admin
+	•	Route: /admin
+	•	For now, allow any login to access this for demo purposes (will be locked later)
+	•	Dashboard shows:
+	•	Total Members: 134
+	•	Orders This Week: 92
+	•	Top Product: Zkittlez 5g
+	•	Button: Open Bouncer Panel →
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1748302315388
+
+⸻
+
+✅ 4. SUPPORT CTA (FOOTER ON /home)
+	•	Add footer section:
+
+Text: Need help or have a question? Reach out privately.
+Button: Contact Support via WhatsApp
+Link: https://wa.me/+34607813795
+
+✅ 5. STYLING & BRANDING
+	•	Remove all Leafly/generic elements
+	•	Text logo: Marbella Social Club
+	•	Font: Inter or Montserrat
+	•	Colors: #116149 (green), white, light gray
+	•	Mobile responsive
+	•	Button hover effects
+
+✅ 6. PAGE & FLOW STRUCTURE
+
+Page: Login/Register
+Route: /
+Purpose: Entry point for all users (secured)
+
+Page: Member Homepage
+Route: /home
+Purpose: Main club site after login
+
+Page: Admin Panel
+Route: /admin
+Purpose: Employee view with member/order stats
+
+⸻
+
+✅ 7. LINK DESTINATIONS
+
+Action: Register (first time)
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1747235127465
+
+Action: “Order Now” button 
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1748031551607
+
+Action: Admin – Bouncer Panel
+Link: https://bizichat.ai/webchat/?p=1899468&ref=1748302315388
+
+Action: Support WhatsApp Button
+Link: https://wa.me/+34607813795
