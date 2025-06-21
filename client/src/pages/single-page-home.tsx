@@ -25,7 +25,7 @@ export function SinglePageHome() {
         id="home" 
         className="pt-16 pb-20 relative"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://cdn.pixabay.com/photo/2021/12/10/13/17/cannabis-lounge-6854823_1280.jpg')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -74,7 +74,7 @@ export function SinglePageHome() {
         <div 
           className="absolute inset-0 opacity-10"
           style={{
-            backgroundImage: `url('https://cdn.pixabay.com/photo/2021/10/15/15/11/interior-6719306_1280.jpg')`,
+            backgroundImage: `url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat'
@@ -180,7 +180,7 @@ export function SinglePageHome() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Member Dashboard</h2>
             <img
-              src="https://cdn.pixabay.com/photo/2022/01/05/18/26/people-6912589_1280.jpg"
+              src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80"
               alt="Happy club members"
               className="w-full h-64 object-cover rounded-2xl shadow-xl mb-8"
             />
@@ -349,7 +349,7 @@ export function SinglePageHome() {
         id="events" 
         className="py-20 relative"
         style={{
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://cdn.pixabay.com/photo/2020/11/12/07/52/lounge-5730385_1280.jpg')`,
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
