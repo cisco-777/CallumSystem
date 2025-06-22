@@ -6,14 +6,36 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { WelcomeLanding } from "@/pages/welcome-landing";
 import { AuthFlow } from "@/pages/auth-flow";
 import { Dashboard } from "@/pages/dashboard";
+import { AdminDashboard } from "@/pages/admin-dashboard";
 
-type AppState = 'landing' | 'auth' | 'dashboard';
+type AppState = 'landing' | 'auth' | 'dashboard' | 'admin';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('landing');
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Check URL for admin access
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('admin') === 'true') {
+      const adminData = localStorage.getItem('msc-admin');
+      if (adminData) {
+        setAppState('admin');
+      } else {
+        const email = prompt('Admin Email:');
+        const password = prompt('Admin Password:');
+        
+        if (email === 'admin123@gmail.com' && password === 'admin123') {
+          localStorage.setItem('msc-admin', JSON.stringify({ email, role: 'admin' }));
+          setAppState('admin');
+        } else {
+          alert('Invalid admin credentials');
+          setAppState('landing');
+        }
+      }
+      return;
+    }
+
     // Check if user is already logged in
     const savedUser = localStorage.getItem('msc-user');
     if (savedUser) {
@@ -62,6 +84,10 @@ function App() {
           
           {appState === 'dashboard' && (
             <Dashboard onLogout={handleLogout} />
+          )}
+          
+          {appState === 'admin' && (
+            <AdminDashboard />
           )}
         </div>
         <Toaster />

@@ -435,13 +435,6 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
               </Card>
             </motion.div>
           )}
-
-          {step === 'welcome' && (
-            <WelcomeMessage
-              onContinue={() => setStep('onboarding')}
-              onBack={() => setStep('email')}
-            />
-          )}
         </AnimatePresence>
       </div>
     </div>
