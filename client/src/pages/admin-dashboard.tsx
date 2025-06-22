@@ -31,8 +31,11 @@ export function AdminDashboard() {
     setTimeout(() => setShowFailsafe(false), 3000);
   };
 
-  const openBouncerChat = () => {
-    window.open('https://bizichat.ai/webchat/?p=1899468&ref=1748302315388', '_blank');
+  const scrollToBouncer = () => {
+    const bouncerSection = document.getElementById('bouncer-section');
+    if (bouncerSection) {
+      bouncerSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -46,7 +49,7 @@ export function AdminDashboard() {
           </div>
           <div className="flex space-x-4">
             <Button
-              onClick={openBouncerChat}
+              onClick={scrollToBouncer}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
@@ -173,7 +176,7 @@ export function AdminDashboard() {
         </div>
 
         {/* Embedded Bouncer Chat */}
-        <Card className="mb-8">
+        <Card id="bouncer-section" className="mb-8">
           <CardHeader>
             <CardTitle>Bouncer Communication Hub</CardTitle>
           </CardHeader>
