@@ -46,6 +46,11 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
 
   const checkEmailMutation = useMutation({
     mutationFn: async (email: string) => {
+      // If admin email, skip check and go directly to password
+      if (email === 'admin123@gmail.com') {
+        return { exists: true, isAdmin: true };
+      }
+      
       return await apiRequest('/api/auth/check-email', {
         method: 'POST',
         body: JSON.stringify({ email }),
@@ -72,6 +77,15 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
 
   const loginMutation = useMutation({
     mutationFn: async () => {
+      // Check if this is admin login
+      if (email === 'admin123@gmail.com' && password === 'admin123') {
+        return await apiRequest('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
       return await apiRequest('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
@@ -79,6 +93,13 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
       });
     },
     onSuccess: (data) => {
+      // Handle admin login
+      if (data.admin) {
+        localStorage.setItem('msc-admin', JSON.stringify(data.admin));
+        window.location.href = '/?admin=true';
+        return;
+      }
+      
       localStorage.setItem('msc-user', JSON.stringify(data.user));
       if (!data.user.isOnboarded) {
         setStep('welcome');
