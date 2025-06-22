@@ -33,7 +33,8 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
           className="max-w-2xl mx-auto"
         >
           <motion.h1 
-            className="text-5xl md:text-7xl font-light text-white mb-6 tracking-wide"
+            className="text-5xl md:text-7xl font-light text-white mb-6 tracking-wide drop-shadow-2xl"
+            style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
@@ -42,7 +43,8 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
           </motion.h1>
           
           <motion.h2 
-            className="text-2xl md:text-3xl font-extralight text-white/90 mb-4 tracking-wider"
+            className="text-2xl md:text-3xl font-extralight text-white mb-4 tracking-wider drop-shadow-lg"
+            style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.7)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}

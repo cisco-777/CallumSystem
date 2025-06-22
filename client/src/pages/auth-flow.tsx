@@ -7,13 +7,14 @@ import { ArrowLeft, Mail, Lock, User, Phone, Calendar, MapPin, Camera } from 'lu
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { WelcomeMessage } from './welcome-message';
 
 interface AuthFlowProps {
   onBack: () => void;
   onSuccess: () => void;
 }
 
-type AuthStep = 'email' | 'password' | 'register' | 'onboarding';
+type AuthStep = 'email' | 'password' | 'register' | 'welcome' | 'onboarding';
 
 export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
   const [step, setStep] = useState<AuthStep>('email');
@@ -80,7 +81,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
     onSuccess: (data) => {
       localStorage.setItem('msc-user', JSON.stringify(data.user));
       if (!data.user.isOnboarded) {
-        setStep('onboarding');
+        setStep('welcome');
       } else {
         onSuccess();
       }
@@ -104,7 +105,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
     },
     onSuccess: (data) => {
       localStorage.setItem('msc-user', JSON.stringify(data.user));
-      setStep('onboarding');
+      setStep('welcome');
     },
     onError: () => {
       toast({
@@ -210,6 +211,16 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -20 }
   };
+
+  // Handle welcome step separately due to different layout
+  if (step === 'welcome') {
+    return (
+      <WelcomeMessage
+        onContinue={() => setStep('onboarding')}
+        onBack={() => setStep('email')}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
@@ -423,6 +434,13 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
                 </CardContent>
               </Card>
             </motion.div>
+          )}
+
+          {step === 'welcome' && (
+            <WelcomeMessage
+              onContinue={() => setStep('onboarding')}
+              onBack={() => setStep('email')}
+            />
           )}
         </AnimatePresence>
       </div>
