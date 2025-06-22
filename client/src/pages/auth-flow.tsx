@@ -424,6 +424,35 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
                     </div>
                   </div>
 
+                  {/* Terms and Privacy */}
+                  <div className="space-y-3 pt-4 border-t">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="privacy-consent"
+                        checked={onboardingData.privacyConsent}
+                        onChange={(e) => setOnboardingData(prev => ({ ...prev, privacyConsent: e.target.checked }))}
+                        className="mt-1"
+                      />
+                      <label htmlFor="privacy-consent" className="text-sm text-gray-600 cursor-pointer">
+                        I consent to the processing of my personal data
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="terms-accepted"
+                        checked={onboardingData.termsAccepted}
+                        onChange={(e) => setOnboardingData(prev => ({ ...prev, termsAccepted: e.target.checked }))}
+                        className="mt-1"
+                      />
+                      <label htmlFor="terms-accepted" className="text-sm text-gray-600 cursor-pointer">
+                        I accept the terms and conditions
+                      </label>
+                    </div>
+                  </div>
+
                   <Button
                     onClick={handleOnboardingSubmit}
                     disabled={completeOnboardingMutation.isPending}
