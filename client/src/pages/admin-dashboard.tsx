@@ -32,7 +32,7 @@ export function AdminDashboard() {
   };
 
   const openBouncerChat = () => {
-    window.open('https://bizichat.com', '_blank');
+    window.open('https://bizichat.ai/webchat/?p=1899468&ref=1748302315388', '_blank');
   };
 
   return (
@@ -50,7 +50,7 @@ export function AdminDashboard() {
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              Bouncer Chat
+              Bouncer
             </Button>
             <Button
               onClick={handleFailsafe}
@@ -180,12 +180,12 @@ export function AdminDashboard() {
           <CardContent>
             <div className="bg-gray-100 rounded-lg p-6 text-center">
               <iframe
-                src="https://bizichat.com"
+                src="https://bizichat.ai/webchat/?p=1899468&ref=1748302315388"
                 width="100%"
                 height="400"
                 frameBorder="0"
                 className="rounded-lg"
-                title="Bouncer Chat Interface"
+                title="Bouncer Interface"
               />
             </div>
           </CardContent>
