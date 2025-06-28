@@ -49,7 +49,7 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
           >
-            Social Club
+            Private Members Only
           </motion.h2>
           
           <motion.p 
