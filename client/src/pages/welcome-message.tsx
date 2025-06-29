@@ -38,7 +38,7 @@ export function WelcomeMessage({ onContinue, onBack }: WelcomeMessageProps) {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="text-3xl font-bold text-slate-800 dark:text-white mb-2"
           >
-            Welcome to Social Club
+            Welcome to Marbella Social Club
           </motion.h1>
           
           <motion.p
@@ -47,7 +47,7 @@ export function WelcomeMessage({ onContinue, onBack }: WelcomeMessageProps) {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="text-xl text-slate-600 dark:text-slate-300 mb-2"
           >
-            The chillest stop ✌️
+            Marbella's chillest stop ✌️
           </motion.p>
           
           <motion.p

@@ -20,10 +20,9 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - File upload capabilities during onboarding process
 
 ## Recent Changes
-**January 28, 2025**
-- Removed all "Marbella" references from landing pages and welcome screens
-- Updated branding to generic "Social Club" throughout the application
-- Maintained elegant design while removing location-specific content
+**January 29, 2025**
+- Restored "Marbella Social Club" branding throughout the application
+- Welcome landing page displays "Marbella" (large) and "Social Club" (smaller) for proper hierarchy
 - Updated bouncer button functionality to scroll to embedded communication hub instead of external link
 - Fixed admin authentication to redirect properly to dashboard
 
