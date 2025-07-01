@@ -143,14 +143,18 @@ export function Dashboard({ onLogout }: DashboardProps) {
             >
               <Card className="hover:shadow-lg transition-shadow duration-300 cursor-pointer group">
                 <CardHeader className="pb-4">
-                  <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center group-hover:bg-gray-300 transition-colors">
-                    <span className="text-gray-500 text-sm">
-                      {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover rounded-lg" />
-                      ) : (
-                        'Image Placeholder'
-                      )}
-                    </span>
+                  <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center group-hover:bg-gray-300 transition-colors overflow-hidden">
+                    {getProductImage(product.name) ? (
+                      <img 
+                        src={getProductImage(product.name)!} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover rounded-lg" 
+                      />
+                    ) : product.imageUrl ? (
+                      <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                    ) : (
+                      <span className="text-gray-500 text-sm">Image Placeholder</span>
+                    )}
                   </div>
                   <CardTitle className="text-lg font-medium">{product.name}</CardTitle>
                   {product.category && (
