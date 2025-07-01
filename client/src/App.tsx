@@ -7,14 +7,21 @@ import { WelcomeLanding } from "@/pages/welcome-landing";
 import { AuthFlow } from "@/pages/auth-flow";
 import { Dashboard } from "@/pages/dashboard";
 import { AdminDashboard } from "@/pages/admin-dashboard";
+import { FakeAdminDemo } from "@/pages/fake-admin-demo";
 
-type AppState = 'landing' | 'auth' | 'dashboard' | 'admin';
+type AppState = 'landing' | 'auth' | 'dashboard' | 'admin' | 'fake-demo';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('landing');
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Check URL for fake admin demo
+    if (window.location.pathname === '/demo/fake-admin') {
+      setAppState('fake-demo');
+      return;
+    }
+
     // Check URL for admin access
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('admin') === 'true') {
@@ -88,6 +95,10 @@ function App() {
           
           {appState === 'admin' && (
             <AdminDashboard />
+          )}
+          
+          {appState === 'fake-demo' && (
+            <FakeAdminDemo />
           )}
         </div>
         <Toaster />

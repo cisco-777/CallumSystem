@@ -9,6 +9,12 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { Product, BasketItem } from '@shared/schema';
 
+// Import cannabis product images
+import zkittlezImg from '@assets/Zkittlez_1751388449553.png';
+import blueDreamImg from '@assets/Blue dream_1751388449549.jpg';
+import lemonHazeImg from '@assets/Lemon Haze_1751388449553.jpeg';
+import weddingCakeImg from '@assets/Wedding Cake_1751388449551.jpg';
+
 interface DashboardProps {
   onLogout: () => void;
 }
@@ -17,6 +23,17 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const [showBasket, setShowBasket] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Map product names to their corresponding images
+  const getProductImage = (productName: string) => {
+    const nameMap: Record<string, string> = {
+      'Zkittlez': zkittlezImg,
+      'Blue Dream': blueDreamImg,
+      'Lemon Haze': lemonHazeImg,
+      'Wedding Cake': weddingCakeImg,
+    };
+    return nameMap[productName] || null;
+  };
 
   const { data: products = [] } = useQuery({
     queryKey: ['/api/products']
