@@ -24,6 +24,7 @@ export const products = pgTable("products", {
   description: text("description"),
   imageUrl: text("image_url"),
   category: text("category"),
+  productCode: text("product_code").notNull().unique(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -59,6 +60,7 @@ export const insertProductSchema = createInsertSchema(products).pick({
   name: true,
   description: true,
   category: true,
+  productCode: true,
 });
 
 export const insertBasketItemSchema = createInsertSchema(basketItems).pick({

@@ -195,22 +195,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed some initial products
   app.post("/api/seed-products", async (req, res) => {
     try {
+      console.log("Seeding products...");
       const products = await storage.getProducts();
+      console.log("Current products count:", products.length);
       if (products.length === 0) {
         const seedProducts = [
-          { name: "Zkittlez", description: "Premium hybrid strain with fruity flavors and balanced effects", category: "Hybrid" },
-          { name: "Blue Dream", description: "Sativa-dominant hybrid known for its gentle cerebral effects", category: "Sativa" },
-          { name: "Lemon Haze", description: "Energizing sativa with bright citrus aroma and uplifting effects", category: "Sativa" },
-          { name: "Wedding Cake", description: "Indica-dominant hybrid with sweet vanilla flavors and relaxing effects", category: "Indica" }
+          { 
+            name: "Zkittlez", 
+            description: "Premium hybrid strain with fruity flavors and balanced effects", 
+            category: "Hybrid",
+            productCode: "ZK4312"
+          },
+          { 
+            name: "Blue Dream", 
+            description: "Sativa-dominant hybrid known for its gentle cerebral effects", 
+            category: "Sativa",
+            productCode: "BD7010"
+          },
+          { 
+            name: "Lemon Haze", 
+            description: "Energizing sativa with bright citrus aroma and uplifting effects", 
+            category: "Sativa",
+            productCode: "LH2213"
+          },
+          { 
+            name: "Wedding Cake", 
+            description: "Indica-dominant hybrid with sweet vanilla flavors and relaxing effects", 
+            category: "Indica",
+            productCode: "WC9615"
+          },
+          { 
+            name: "Moroccan Hash", 
+            description: "Traditional hand-pressed hash with earthy, spicy flavors and potent relaxing effects", 
+            category: "Indica",
+            productCode: "MH5812"
+          },
+          { 
+            name: "Dry-Shift Hash", 
+            description: "High-quality sieved hash with clean, pure effects and energizing properties", 
+            category: "Sativa",
+            productCode: "DS1410"
+          }
         ];
 
         for (const product of seedProducts) {
+          console.log("Creating product:", product);
           await storage.createProduct(product);
         }
+        console.log("Products seeded successfully");
+      } else {
+        console.log("Products already exist, skipping seeding");
       }
       res.json({ message: "Products seeded" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to seed products" });
+      console.error("Error seeding products:", error);
+      res.status(500).json({ message: "Failed to seed products", error: String(error) });
     }
   });
 

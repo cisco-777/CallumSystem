@@ -14,6 +14,8 @@ import zkittlezImg from '@assets/Zkittlez_1751388449553.png';
 import blueDreamImg from '@assets/Blue dream_1751388449549.jpg';
 import lemonHazeImg from '@assets/Lemon Haze_1751388449553.jpeg';
 import weddingCakeImg from '@assets/Wedding Cake_1751388449551.jpg';
+import moroccanHashImg from '@assets/morrocan-hash_1752966399715.jpg';
+import dryShiftHashImg from '@assets/Hash dry-shift_1752966399715.jpg';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -21,6 +23,7 @@ interface DashboardProps {
 
 export function Dashboard({ onLogout }: DashboardProps) {
   const [showBasket, setShowBasket] = useState(false);
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -31,8 +34,18 @@ export function Dashboard({ onLogout }: DashboardProps) {
       'Blue Dream': blueDreamImg,
       'Lemon Haze': lemonHazeImg,
       'Wedding Cake': weddingCakeImg,
+      'Moroccan Hash': moroccanHashImg,
+      'Dry-Shift Hash': dryShiftHashImg,
     };
     return nameMap[productName] || null;
+  };
+
+  const getQuantity = (productId: number) => quantities[productId] || 1;
+  
+  const updateQuantity = (productId: number, newQuantity: number) => {
+    if (newQuantity >= 1 && newQuantity <= 5) {
+      setQuantities(prev => ({ ...prev, [productId]: newQuantity }));
+    }
   };
 
   const { data: products = [] } = useQuery({
@@ -44,10 +57,10 @@ export function Dashboard({ onLogout }: DashboardProps) {
   });
 
   const addToBasketMutation = useMutation({
-    mutationFn: async (productId: number) => {
+    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
       return await apiRequest('/api/basket', {
         method: 'POST',
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify({ productId, quantity }),
         headers: { 'Content-Type': 'application/json' }
       });
     },
@@ -156,7 +169,10 @@ export function Dashboard({ onLogout }: DashboardProps) {
                       <span className="text-gray-500 text-sm">Image Placeholder</span>
                     )}
                   </div>
-                  <CardTitle className="text-lg font-medium">{product.name}</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-medium">{product.name}</CardTitle>
+                    <span className="text-xs text-gray-500 font-mono">#{(product as any).productCode}</span>
+                  </div>
                   {product.category && (
                     <Badge variant="secondary" className="w-fit">
                       {product.category}
@@ -167,8 +183,38 @@ export function Dashboard({ onLogout }: DashboardProps) {
                   <CardDescription className="mb-4 text-sm leading-relaxed">
                     {product.description || 'Premium selection item'}
                   </CardDescription>
+                  
+                  {/* Quantity Selector */}
+                  <div className="flex items-center justify-center mb-4 space-x-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateQuantity(product.id, getQuantity(product.id) - 1)}
+                      disabled={getQuantity(product.id) <= 1}
+                      className="w-8 h-8 p-0"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <div className="flex flex-col items-center">
+                      <span className="font-medium text-lg">{getQuantity(product.id)}g</span>
+                      <span className="text-xs text-gray-500">quantity</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateQuantity(product.id, getQuantity(product.id) + 1)}
+                      disabled={getQuantity(product.id) >= 5}
+                      className="w-8 h-8 p-0"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  
                   <Button
-                    onClick={() => addToBasketMutation.mutate(product.id)}
+                    onClick={() => addToBasketMutation.mutate({ 
+                      productId: product.id, 
+                      quantity: getQuantity(product.id) 
+                    })}
                     disabled={addToBasketMutation.isPending}
                     className="w-full bg-[#116149] hover:bg-[#0d4d3a] text-white transition-colors"
                   >
@@ -228,7 +274,8 @@ export function Dashboard({ onLogout }: DashboardProps) {
                         <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex-1">
                             <h4 className="font-medium text-sm">{item.product?.name}</h4>
-                            <p className="text-xs text-gray-500">Quantity: {item.quantity}</p>
+                            <p className="text-xs text-gray-500">Quantity: {item.quantity}g</p>
+                            <p className="text-xs text-gray-400 font-mono">#{(item.product as any)?.productCode}</p>
                           </div>
                           <Button
                             variant="ghost"

@@ -86,7 +86,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBasketItems(userId: number): Promise<BasketItem[]> {
-    return await db.select().from(basketItems).where(eq(basketItems.userId, userId));
+    const items = await db.select({
+      id: basketItems.id,
+      userId: basketItems.userId,
+      productId: basketItems.productId,
+      quantity: basketItems.quantity,
+      createdAt: basketItems.createdAt,
+      product: {
+        id: products.id,
+        name: products.name,
+        description: products.description,
+        imageUrl: products.imageUrl,
+        category: products.category,
+        productCode: products.productCode,
+        isActive: products.isActive,
+        createdAt: products.createdAt,
+      }
+    })
+    .from(basketItems)
+    .leftJoin(products, eq(basketItems.productId, products.id))
+    .where(eq(basketItems.userId, userId));
+    
+    return items as any;
   }
 
   async addToBasket(userId: number, productId: number, quantity: number = 1): Promise<BasketItem> {
