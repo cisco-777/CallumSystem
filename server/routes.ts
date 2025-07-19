@@ -230,8 +230,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order routes
   app.get("/api/orders", async (req, res) => {
     try {
-      const userId = 1; // Would get from session/token in real app
-      const orders = await storage.getUserOrders(userId);
+      // For admin interface, get all orders, for users get user orders
+      const isAdmin = req.headers['x-admin'] === 'true';
+      let orders;
+      
+      if (isAdmin) {
+        // Get all orders for admin
+        orders = await storage.getAllOrders();
+      } else {
+        const userId = 1; // Would get from session/token in real app
+        orders = await storage.getUserOrders(userId);
+      }
+      
       res.json(orders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });
@@ -248,6 +258,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(order);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  app.patch("/api/orders/:id/status", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { status } = req.body;
+      const order = await storage.updateOrderStatus(orderId, status);
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
     }
   });
 

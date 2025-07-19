@@ -13,7 +13,7 @@ import {
   type InsertOrder,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -43,6 +43,8 @@ export interface IStorage {
   getOrder(id: number): Promise<Order | undefined>;
   getOrderByPickupCode(pickupCode: string): Promise<Order | undefined>;
   getUserOrders(userId: number): Promise<Order[]>;
+  getAllOrders(): Promise<Order[]>;
+  updateOrderStatus(orderId: number, status: string): Promise<Order>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -166,7 +168,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserOrders(userId: number): Promise<Order[]> {
-    return await db.select().from(orders).where(eq(orders.userId, userId));
+    return await db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  async updateOrderStatus(orderId: number, status: string): Promise<Order> {
+    const [order] = await db
+      .update(orders)
+      .set({ status })
+      .where(eq(orders.id, orderId))
+      .returning();
+    return order;
   }
 }
 

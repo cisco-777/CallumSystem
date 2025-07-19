@@ -2,15 +2,56 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import { Users, Package, Activity, AlertTriangle, ExternalLink } from 'lucide-react';
 
 export function AdminDashboard() {
   const [showFailsafe, setShowFailsafe] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: products = [] } = useQuery({
     queryKey: ['/api/products']
   });
+
+  const { data: orders = [] } = useQuery({
+    queryKey: ['/api/orders'],
+    queryFn: async () => {
+      return await apiRequest('/api/orders', {
+        headers: { 'x-admin': 'true' }
+      });
+    }
+  });
+
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+      return await apiRequest(`/api/orders/${orderId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      toast({
+        title: "Order Updated",
+        description: "Order status has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update order status.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const updateOrderStatus = (orderId: number, status: string) => {
+    updateOrderStatusMutation.mutate({ orderId, status });
+  };
 
   const mockOrders = [
     { id: 1, user: "John D.", item: "Blue Dream", quantity: 1, status: "completed", time: "2 hours ago" },
@@ -31,10 +72,10 @@ export function AdminDashboard() {
     setTimeout(() => setShowFailsafe(false), 3000);
   };
 
-  const scrollToBouncer = () => {
-    const bouncerSection = document.getElementById('bouncer-section');
-    if (bouncerSection) {
-      bouncerSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToOrderControl = () => {
+    const orderControlSection = document.getElementById('order-control-section');
+    if (orderControlSection) {
+      orderControlSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -49,11 +90,11 @@ export function AdminDashboard() {
           </div>
           <div className="flex space-x-4">
             <Button
-              onClick={scrollToBouncer}
+              onClick={scrollToOrderControl}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              Bouncer
+              Order Control
             </Button>
             <Button
               onClick={handleFailsafe}
@@ -175,21 +216,68 @@ export function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Embedded Bouncer Chat */}
-        <Card id="bouncer-section" className="mb-8">
+        {/* Order Control Center */}
+        <Card id="order-control-section" className="mb-8">
           <CardHeader>
-            <CardTitle>Bouncer Communication Hub</CardTitle>
+            <CardTitle>Order Control Center</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="bg-gray-100 rounded-lg p-6 text-center">
-              <iframe
-                src="https://bizichat.ai/webchat/?p=1899468&ref=1748302315388"
-                width="100%"
-                height="400"
-                frameBorder="0"
-                className="rounded-lg"
-                title="Bouncer Interface"
-              />
+            <div className="space-y-4">
+              {orders.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No orders to display
+                </div>
+              ) : (
+                orders.map((order: any) => (
+                  <div key={order.id} className="border rounded-lg p-4 bg-white">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-semibold text-lg">Order #{order.id}</h3>
+                        <p className="text-sm text-gray-600">Pickup Code: <span className="font-mono font-bold text-blue-600">{order.pickupCode}</span></p>
+                        <p className="text-sm text-gray-500">Total: ${order.totalPrice}</p>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant={order.status === 'pending' ? 'secondary' : 'default'}>
+                          {order.status}
+                        </Badge>
+                        <p className="text-xs text-gray-500 mt-1">{new Date(order.createdAt).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <h4 className="font-medium text-sm mb-2">Items:</h4>
+                      {order.items.map((item: any, index: number) => {
+                        const quantity = order.quantities.find((q: any) => q.productId === item.productId)?.quantity || 1;
+                        return (
+                          <div key={index} className="flex justify-between text-sm">
+                            <span>{item.productName} ({item.category})</span>
+                            <span>{quantity}g</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={() => updateOrderStatus(order.id, 'completed')}
+                        disabled={order.status === 'completed' || order.status === 'cancelled'}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        Complete
+                      </Button>
+                      <Button
+                        onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                        disabled={order.status === 'completed' || order.status === 'cancelled'}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

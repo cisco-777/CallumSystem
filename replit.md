@@ -20,11 +20,17 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - File upload capabilities during onboarding process
 
 ## Recent Changes
-**January 29, 2025**
-- Restored "GreenMoon Social Club" branding throughout the application
-- Welcome landing page displays "GreenMoon" (large) and "Social Club" (smaller) for proper hierarchy
-- Updated bouncer button functionality to scroll to embedded communication hub instead of external link
-- Fixed admin authentication to redirect properly to dashboard
+**July 19, 2025**
+- Added 2 new hash products: "Moroccan Hash" (Indica) and "Dry-Shift Hash" (Sativa)
+- Generated 6-digit product codes for all products ending in 12, 10, 13, or 15
+- Added quantity selector (1-5 grams) for each product in catalogue
+- Updated donation flow with 4-digit pickup code generation
+- Created comprehensive orders database table with all order details
+- Replaced "Bouncer" with "Order Control" throughout admin interface
+- Renamed "Bouncer Communication Hub" to "Order Control Center"
+- Created order management interface that reads from orders database
+- Added cancel and confirm/complete buttons for order management
+- Implemented real-time order tracking and status updates
 
 ## User Preferences
 - Preference for clean, minimalistic design with cannabis-themed aesthetics
@@ -46,6 +52,16 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - Password: admin123
 - Direct access to admin dashboard with member management tools
 
-## External Integrations
-- Bouncer communication hub: https://bizichat.ai/webchat/?p=1899468&ref=1748302315388
-- Embedded iframe in admin dashboard for seamless communication
+## Database Schema
+- Users table: authentication and onboarding data
+- Products table: catalogue items with product codes
+- Orders table: pickup codes, items, quantities, total prices, timestamps, status
+- Basket items table: temporary user selections
+- Donations table: completed donation records
+
+## Order Management System
+- Random 4-digit pickup code generation for each order
+- Complete order tracking with timestamps and status management
+- Admin Order Control Center displays all orders in real-time
+- Cancel and complete order functionality
+- User receives pickup code message upon donation completion

@@ -6,8 +6,8 @@ import { Users, ShoppingCart, Star, Settings } from 'lucide-react';
 export function AdminPage() {
   const [, setLocation] = useLocation();
 
-  const handleBouncerPanel = () => {
-    window.open('https://bizichat.ai/webchat/?p=1899468&ref=1748302315388', '_blank');
+  const handleOrderControlPanel = () => {
+    setLocation('/admin-dashboard');
   };
 
   const handleLogout = () => {
@@ -79,12 +79,12 @@ export function AdminPage() {
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
-              onClick={handleBouncerPanel}
+              onClick={handleOrderControlPanel}
               size="lg"
               className="bg-[#116149] hover:bg-[#0d4d3a] text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center"
             >
               <Settings className="w-5 h-5 mr-2" />
-              Access Bouncer Panel
+              Access Order Control Center
             </Button>
           </div>
         </div>
