@@ -26,12 +26,12 @@
   --ring: 170 56% 21%; /* #116149 */
   --radius: 0.5rem;
 
-  /* Marbella Social Club theme colors */
-  --msc-green: 170 56% 21%; /* #116149 */
-  --msc-green-light: 170 56% 35%; /* #1a8c6b */
-  --msc-green-dark: 170 56% 16%; /* #0d4d3a */
-  --msc-gray-light: 0 0% 96.1%; /* #f5f5f5 */
-  --msc-gray: 0 0% 45.1%; /* #737373 */
+  /* GreenMoon Social Club theme colors */
+  --gmc-green: 170 56% 21%; /* #116149 */
+  --gmc-green-light: 170 56% 35%; /* #1a8c6b */
+  --gmc-green-dark: 170 56% 16%; /* #0d4d3a */
+  --gmc-gray-light: 0 0% 96.1%; /* #f5f5f5 */
+  --gmc-gray: 0 0% 45.1%; /* #737373 */
 }
 
 .dark {

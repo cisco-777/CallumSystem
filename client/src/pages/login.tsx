@@ -69,7 +69,7 @@ export function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-[#116149]">
-            Marbella Social Club
+            GreenMoon Social Club
           </CardTitle>
           <CardDescription>
             {isLoginMode ? 'Access your private member portal' : 'Join our exclusive community'}
