@@ -134,7 +134,6 @@ export function AdminDashboard() {
           <div className="text-6xl text-red-600 mb-4">⚠️</div>
           <h1 className="text-3xl font-bold text-red-800 mb-2">SYSTEM WIPED</h1>
           <p className="text-red-600 mb-4">All admin data has been permanently deleted.</p>
-          <p className="text-sm text-gray-600">System will automatically restore in 60 seconds...</p>
         </div>
       </div>
     );
