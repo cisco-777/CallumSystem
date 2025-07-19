@@ -1,6 +1,6 @@
-✅ FINAL REPLIT COMMAND – PRIVATE SYSTEM FOR MARBELLA SOCIAL CLUB (WITH MOCK LOGIN)
+✅ FINAL REPLIT COMMAND – PRIVATE SYSTEM FOR GREENMOON SOCIAL CLUB (WITH MOCK LOGIN)
 
-🚨 This is the official member-only platform for Marbella Social Club (Callum’s club). This is not a demo site. It must look and feel like a real, private club system — secure, branded, discreet. Follow everything below exactly.
+🚨 This is the official member-only platform for GreenMoon Social Club (Callum’s club). This is not a demo site. It must look and feel like a real, private club system — secure, branded, discreet. Follow everything below exactly.
 
 ⸻
 
@@ -60,7 +60,7 @@ Link: https://wa.me/+34607813795
 
 ✅ 5. STYLING & BRANDING
 	•	Remove all Leafly/generic elements
-	•	Text logo: Marbella Social Club
+	•	Text logo: GreenMoon Social Club
 	•	Font: Inter or Montserrat
 	•	Colors: #116149 (green), white, light gray
 	•	Mobile responsive

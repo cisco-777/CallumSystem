@@ -13,7 +13,7 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 
 ## Key Features
 - Email-first authentication flow with onboarding questionnaire
-- Welcome landing page with "Social Club" branding (Marbella references removed)
+- Welcome landing page with "Social Club" branding (GreenMoon references removed)
 - Welcome message screen with cannabis disclaimers and policies
 - Member area with catalogue-style product browsing and donation system
 - Admin dashboard with member management and bouncer communication hub
@@ -21,8 +21,8 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 
 ## Recent Changes
 **January 29, 2025**
-- Restored "Marbella Social Club" branding throughout the application
-- Welcome landing page displays "Marbella" (large) and "Social Club" (smaller) for proper hierarchy
+- Restored "GreenMoon Social Club" branding throughout the application
+- Welcome landing page displays "GreenMoon" (large) and "Social Club" (smaller) for proper hierarchy
 - Updated bouncer button functionality to scroll to embedded communication hub instead of external link
 - Fixed admin authentication to redirect properly to dashboard
 
