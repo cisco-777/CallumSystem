@@ -3,11 +3,14 @@ import {
   products,
   basketItems,
   donations,
+  orders,
   type User,
   type InsertUser,
   type Product,
   type BasketItem,
   type Donation,
+  type Order,
+  type InsertOrder,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -34,6 +37,12 @@ export interface IStorage {
   // Donation operations
   createDonation(userId: number, items: any[], totalAmount: string): Promise<Donation>;
   getUserDonations(userId: number): Promise<Donation[]>;
+  
+  // Order operations
+  createOrder(orderData: InsertOrder): Promise<Order>;
+  getOrder(id: number): Promise<Order | undefined>;
+  getOrderByPickupCode(pickupCode: string): Promise<Order | undefined>;
+  getUserOrders(userId: number): Promise<Order[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -136,6 +145,28 @@ export class DatabaseStorage implements IStorage {
 
   async getUserDonations(userId: number): Promise<Donation[]> {
     return await db.select().from(donations).where(eq(donations.userId, userId));
+  }
+
+  async createOrder(orderData: InsertOrder): Promise<Order> {
+    const [order] = await db
+      .insert(orders)
+      .values(orderData)
+      .returning();
+    return order;
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order || undefined;
+  }
+
+  async getOrderByPickupCode(pickupCode: string): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.pickupCode, pickupCode));
+    return order || undefined;
+  }
+
+  async getUserOrders(userId: number): Promise<Order[]> {
+    return await db.select().from(orders).where(eq(orders.userId, userId));
   }
 }
 

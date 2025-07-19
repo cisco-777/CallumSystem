@@ -183,12 +183,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No items in basket" });
       }
 
-      const donation = await storage.createDonation(userId, basketItems, "0");
+      // Generate random 4-digit pickup code
+      const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      // Calculate total price (for now using quantity as price)
+      const totalPrice = basketItems.reduce((sum, item) => sum + (item.quantity * 10), 0).toString();
+      
+      // Prepare order data
+      const orderData = {
+        userId,
+        pickupCode,
+        items: basketItems.map(item => ({
+          productId: item.productId,
+          productName: item.product?.name,
+          productCode: (item.product as any)?.productCode,
+          category: item.product?.category
+        })),
+        quantities: basketItems.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity
+        })),
+        totalPrice
+      };
+
+      // Create order record
+      const order = await storage.createOrder(orderData);
+      
+      // Create donation record (for backward compatibility)
+      const donation = await storage.createDonation(userId, basketItems, totalPrice);
+      
+      // Clear the basket
       await storage.clearBasket(userId);
       
-      res.json(donation);
+      res.json({ 
+        success: true, 
+        pickupCode, 
+        order,
+        message: `Your donation has been processed successfully! Please visit our counter with code ${pickupCode} to collect your items.`
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to process donation" });
+      console.error("Donation processing error:", error);
+      res.status(500).json({ message: "Failed to process donation", error: String(error) });
+    }
+  });
+
+  // Order routes
+  app.get("/api/orders", async (req, res) => {
+    try {
+      const userId = 1; // Would get from session/token in real app
+      const orders = await storage.getUserOrders(userId);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/orders/:pickupCode", async (req, res) => {
+    try {
+      const { pickupCode } = req.params;
+      const order = await storage.getOrderByPickupCode(pickupCode);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order" });
     }
   });
 

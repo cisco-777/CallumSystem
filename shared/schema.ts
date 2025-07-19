@@ -46,6 +46,17 @@ export const donations = pgTable("donations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  pickupCode: text("pickup_code").notNull().unique(),
+  items: jsonb("items").notNull(),
+  quantities: jsonb("quantities").notNull(),
+  totalPrice: text("total_price").notNull(),
+  status: text("status").default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
@@ -69,8 +80,18 @@ export const insertBasketItemSchema = createInsertSchema(basketItems).pick({
   quantity: true,
 });
 
+export const insertOrderSchema = createInsertSchema(orders).pick({
+  userId: true,
+  pickupCode: true,
+  items: true,
+  quantities: true,
+  totalPrice: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type BasketItem = typeof basketItems.$inferSelect;
 export type Donation = typeof donations.$inferSelect;
+export type Order = typeof orders.$inferSelect;

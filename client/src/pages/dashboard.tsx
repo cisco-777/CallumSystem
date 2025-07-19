@@ -91,12 +91,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
         headers: { 'Content-Type': 'application/json' }
       });
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/basket'] });
       setShowBasket(false);
       toast({
         title: "Donation Complete",
-        description: "Thank you for your contribution to the club.",
+        description: data.message || `Your donation has been processed successfully! Please visit our counter with code ${data.pickupCode} to collect your items.`,
+        duration: 8000,
       });
     }
   });
