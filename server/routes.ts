@@ -272,6 +272,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/orders/:id/confirm", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.confirmOrderAndReduceStock(orderId);
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to confirm order" });
+    }
+  });
+
   // Seed some initial products
   app.post("/api/seed-products", async (req, res) => {
     try {

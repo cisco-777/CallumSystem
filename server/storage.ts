@@ -13,7 +13,7 @@ import {
   type InsertOrder,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -45,6 +45,7 @@ export interface IStorage {
   getUserOrders(userId: number): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
   updateOrderStatus(orderId: number, status: string): Promise<Order>;
+  confirmOrderAndReduceStock(orderId: number): Promise<Order>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -182,6 +183,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(orders.id, orderId))
       .returning();
     return order;
+  }
+
+  async confirmOrderAndReduceStock(orderId: number): Promise<Order> {
+    // Get order details
+    const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
+    if (!order) throw new Error("Order not found");
+
+    // Reduce stock for each item
+    for (const quantity of order.quantities as any[]) {
+      await db
+        .update(products)
+        .set({ 
+          stockQuantity: sql`${products.stockQuantity} - ${quantity.quantity}`
+        })
+        .where(eq(products.id, quantity.productId));
+    }
+
+    // Update order status to completed
+    const [updatedOrder] = await db
+      .update(orders)
+      .set({ status: "completed" })
+      .where(eq(orders.id, orderId))
+      .returning();
+    
+    return updatedOrder;
   }
 }
 

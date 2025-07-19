@@ -9,6 +9,8 @@ import { Users, Package, Activity, AlertTriangle, ExternalLink } from 'lucide-re
 
 export function AdminDashboard() {
   const [showFailsafe, setShowFailsafe] = useState(false);
+  const [showFailsafeConfirm, setShowFailsafeConfirm] = useState(false);
+  const [isAdminWiped, setIsAdminWiped] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -49,8 +51,36 @@ export function AdminDashboard() {
     }
   });
 
+  const confirmOrderMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      return await apiRequest(`/api/orders/${orderId}/confirm`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      toast({
+        title: "Order Confirmed",
+        description: "Order completed and stock quantities updated.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to confirm order.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const updateOrderStatus = (orderId: number, status: string) => {
     updateOrderStatusMutation.mutate({ orderId, status });
+  };
+
+  const confirmOrder = (orderId: number) => {
+    confirmOrderMutation.mutate(orderId);
   };
 
   const mockOrders = [
@@ -68,8 +98,26 @@ export function AdminDashboard() {
   ];
 
   const handleFailsafe = () => {
-    setShowFailsafe(true);
-    setTimeout(() => setShowFailsafe(false), 3000);
+    setShowFailsafeConfirm(true);
+  };
+
+  const executeFailsafe = () => {
+    setShowFailsafeConfirm(false);
+    setIsAdminWiped(true);
+    toast({
+      title: "⚠️ FAILSAFE ACTIVATED",
+      description: "All admin interface data has been permanently deleted.",
+      variant: "destructive",
+    });
+    
+    // Auto-restore after 60 seconds
+    setTimeout(() => {
+      setIsAdminWiped(false);
+      toast({
+        title: "System Restored",
+        description: "Admin interface has been automatically restored.",
+      });
+    }, 60000);
   };
 
   const scrollToOrderControl = () => {
@@ -78,6 +126,19 @@ export function AdminDashboard() {
       orderControlSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
+
+  if (isAdminWiped) {
+    return (
+      <div className="min-h-screen bg-red-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl text-red-600 mb-4">⚠️</div>
+          <h1 className="text-3xl font-bold text-red-800 mb-2">SYSTEM WIPED</h1>
+          <p className="text-red-600 mb-4">All admin data has been permanently deleted.</p>
+          <p className="text-sm text-gray-600">System will automatically restore in 60 seconds...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -259,12 +320,12 @@ export function AdminDashboard() {
                     
                     <div className="flex space-x-2">
                       <Button
-                        onClick={() => updateOrderStatus(order.id, 'completed')}
+                        onClick={() => confirmOrder(order.id)}
                         disabled={order.status === 'completed' || order.status === 'cancelled'}
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white"
                       >
-                        Complete
+                        Confirm & Complete
                       </Button>
                       <Button
                         onClick={() => updateOrderStatus(order.id, 'cancelled')}
@@ -282,23 +343,64 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Product Management */}
+        {/* Dispensary Stock */}
         <Card>
           <CardHeader>
-            <CardTitle>Product Inventory</CardTitle>
+            <CardTitle>Dispensary Stock</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.isArray(products) && products.map((product: any) => (
                 <div key={product.id} className="border rounded-lg p-4">
                   <h3 className="font-semibold">{product.name}</h3>
                   <p className="text-sm text-gray-600 mt-1">{product.description}</p>
                   <Badge className="mt-2">{product.category}</Badge>
+                  <div className="mt-3 space-y-1">
+                    <p className="text-sm font-medium text-green-700">
+                      Stock: {product.stockQuantity || 0}g available
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Admin Price: ${product.adminPrice || '0'}/g
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Code: {product.productCode}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+
+        {/* FAILSAFE Confirmation Dialog */}
+        {showFailsafeConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg max-w-md mx-4">
+              <div className="text-center">
+                <div className="text-4xl text-red-600 mb-4">⚠️</div>
+                <h2 className="text-xl font-bold text-red-800 mb-2">WARNING: FAILSAFE ACTIVATION</h2>
+                <p className="text-red-600 mb-4">This will permanently delete ALL admin interface data!</p>
+                <p className="text-sm text-gray-600 mb-6">This action cannot be undone. All member data, orders, and system configurations will be erased.</p>
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={() => setShowFailsafeConfirm(false)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={executeFailsafe}
+                    variant="destructive"
+                    className="flex-1 bg-red-600 hover:bg-red-700"
+                  >
+                    EXECUTE FAILSAFE
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

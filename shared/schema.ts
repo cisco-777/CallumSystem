@@ -25,6 +25,8 @@ export const products = pgTable("products", {
   imageUrl: text("image_url"),
   category: text("category"),
   productCode: text("product_code").notNull().unique(),
+  stockQuantity: integer("stock_quantity").notNull().default(0),
+  adminPrice: text("admin_price").notNull().default("0"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

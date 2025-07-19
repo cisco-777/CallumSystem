@@ -31,6 +31,11 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - Created order management interface that reads from orders database
 - Added cancel and confirm/complete buttons for order management
 - Implemented real-time order tracking and status updates
+- Renamed "Product Inventory" to "Dispensary Stock"
+- Added stock quantity display (e.g., "Zkittlez: 200g available")
+- Added admin price view for each product
+- Implemented automatic stock reduction when admin confirms orders
+- Created FAILSAFE button with visual simulation (60-second auto-restore)
 
 ## User Preferences
 - Preference for clean, minimalistic design with cannabis-themed aesthetics
