@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -13,112 +12,56 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     if (!email || !password) {
       setError('Please fill in all fields');
-      setLoading(false);
       return;
     }
 
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('msc-authenticated', 'true');
-        localStorage.setItem('msc-user', JSON.stringify(data.user));
-        
-        // Check if user needs onboarding
-        if (!data.user.isOnboarded) {
-          setLocation('/onboarding');
-        } else {
-          setLocation('/home');
-        }
-      } else {
-        setError(data.message || 'Login failed');
-      }
-    } catch (error) {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
+    // Demo login for any valid email/password combination
+    if (validateEmail(email) && password.length >= 3) {
+      localStorage.setItem('msc-authenticated', 'true');
+      setLocation('/home');
+    } else {
+      setError('Invalid email format or password too short');
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     if (!email || !password || !confirmPassword) {
       setError('Please fill in all fields');
-      setLoading(false);
       return;
     }
 
     if (!validateEmail(email)) {
       setError('Please enter a valid email address');
-      setLoading(false);
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
-      setLoading(false);
       return;
     }
 
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('msc-authenticated', 'true');
-        localStorage.setItem('msc-user', JSON.stringify(data.user));
-        setLocation('/onboarding');
-      } else {
-        setError(data.message || 'Registration failed');
-      }
-    } catch (error) {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
     }
+
+    // Registration successful
+    localStorage.setItem('msc-authenticated', 'true');
+    setLocation('/onboarding');
   };
 
   return (
@@ -143,7 +86,6 @@ export function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
-                disabled={loading}
               />
             </div>
             
@@ -156,7 +98,6 @@ export function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
-                disabled={loading}
               />
             </div>
 
@@ -170,7 +111,6 @@ export function LoginPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm your password"
                   required
-                  disabled={loading}
                 />
               </div>
             )}
@@ -184,9 +124,8 @@ export function LoginPage() {
             <Button 
               type="submit" 
               className="w-full bg-[#116149] hover:bg-[#0d4d3a] text-white"
-              disabled={loading}
             >
-              {loading ? 'Please wait...' : (isLoginMode ? 'Login' : 'Register')}
+              {isLoginMode ? 'Login' : 'Register'}
             </Button>
           </form>
 
@@ -200,7 +139,6 @@ export function LoginPage() {
                 setConfirmPassword('');
               }}
               className="text-[#116149] hover:underline text-sm"
-              disabled={loading}
             >
               {isLoginMode 
                 ? "Don't have an account? Register here" 
@@ -208,6 +146,14 @@ export function LoginPage() {
               }
             </button>
           </div>
+
+          {isLoginMode && (
+            <div className="mt-4 p-3 bg-gray-50 rounded text-sm text-gray-600">
+              <strong>Demo Access:</strong><br />
+              Email: demo@msc.com<br />
+              Password: demo123
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

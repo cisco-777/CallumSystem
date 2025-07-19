@@ -84,17 +84,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Onboarding request received - body:", req.body);
       console.log("Onboarding request received - files:", req.files);
       
-      // Get user ID from request body (should be passed from frontend)
-      const { userId } = req.body;
-      if (!userId) {
-        return res.status(400).json({ message: "User ID is required" });
+      // For now, get the most recent user (in a real app, use session/token)
+      const users = await storage.getUsers();
+      if (users.length === 0) {
+        console.log("No users found in database");
+        return res.status(400).json({ message: "No user found" });
       }
       
-      // Verify user exists
-      const user = await storage.getUser(parseInt(userId));
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      const userId = users[users.length - 1].id; // Get the latest user
       console.log("Updating user ID:", userId);
       
       // Extract data from form data
@@ -147,12 +144,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Basket routes
   app.get("/api/basket", async (req, res) => {
     try {
-      // In a real app, get from JWT token or session
-      const { userId } = req.query;
-      if (!userId) {
-        return res.status(400).json({ message: "User ID is required" });
-      }
-      const basketItems = await storage.getBasketItems(parseInt(userId as string));
+      const userId = 1; // Would get from session/token in real app
+      const basketItems = await storage.getBasketItems(userId);
       res.json(basketItems);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch basket" });
@@ -161,11 +154,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/basket", async (req, res) => {
     try {
-      const { userId, productId, quantity = 1 } = req.body;
-      if (!userId) {
-        return res.status(400).json({ message: "User ID is required" });
-      }
-      const item = await storage.addToBasket(parseInt(userId), productId, quantity);
+      const userId = 1; // Would get from session/token in real app
+      const { productId, quantity = 1 } = req.body;
+      const item = await storage.addToBasket(userId, productId, quantity);
       res.json(item);
     } catch (error) {
       res.status(500).json({ message: "Failed to add to basket" });
@@ -185,19 +176,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Donation route
   app.post("/api/donate", async (req, res) => {
     try {
-      const { userId } = req.body;
-      if (!userId) {
-        return res.status(400).json({ message: "User ID is required" });
-      }
-      
-      const basketItems = await storage.getBasketItems(parseInt(userId));
+      const userId = 1; // Would get from session/token in real app
+      const basketItems = await storage.getBasketItems(userId);
       
       if (basketItems.length === 0) {
         return res.status(400).json({ message: "No items in basket" });
       }
 
-      const donation = await storage.createDonation(parseInt(userId), basketItems, "0");
-      await storage.clearBasket(parseInt(userId));
+      const donation = await storage.createDonation(userId, basketItems, "0");
+      await storage.clearBasket(userId);
       
       res.json(donation);
     } catch (error) {
