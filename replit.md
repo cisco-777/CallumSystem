@@ -21,15 +21,20 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 
 ## Recent Changes
 **July 20, 2025**
-- Modified existing catalogue page to include member dashboard content for demo@member.com
-- Added "Member Dashboard" section above "Available Selection" with:
-  * Welcome back message for Demo Member
-  * Recent donations summary (Wedding Cake 2g, Moroccan Hash 2g, Dry-Shift Hash 1g)
-  * Preferences showing favorite items and type preferences
-  * Personalized recommendations based on donation history
-  * Club updates with educational session notifications
+- Created highly visible member dashboard that appears when demo@member.com logs in
+- Enhanced dashboard with prominent styling (gradient background, colored borders, large text)
+- Added comprehensive donation history timeline:
+  * January 2025: Wedding Cake 2g, Moroccan Hash 1g
+  * February 2025: Dry-Shift Hash 3g, Wedding Cake 1g
+  * March 2025: Moroccan Hash 2g, Dry-Shift Hash 1g, Wedding Cake 2g
+- Included detailed analytics section:
+  * Monthly donation frequency: 3 donations per month
+  * Preferred categories: Indica 60%, Hash 40%
+  * Favorite items: Wedding Cake (most frequent), Moroccan Hash (second)
+- Added personalized recommendations: Zkittlez and Blue Dream based on history
+- Included upcoming events: Cannabis Education Session (July 25th), Member Social Hour (July 28th)
+- Added "Browse Available Selection Below" call-to-action
 - Dashboard content only displays for demo member, regular users see standard catalogue
-- Maintained all existing catalogue functionality below dashboard section
 
 **July 19, 2025**
 - Added 2 new hash products: "Moroccan Hash" (Indica) and "Dry-Shift Hash" (Sativa)

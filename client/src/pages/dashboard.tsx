@@ -154,62 +154,69 @@ export function Dashboard({ onLogout }: DashboardProps) {
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Member Dashboard Section - Only for demo member */}
         {isDemoMember && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-light text-gray-900 mb-6">Member Dashboard</h2>
-            
-            {/* Welcome Message */}
-            <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Welcome back, Demo Member!</h3>
-              <p className="text-gray-600">Thank you for your continued support of our social club.</p>
+          <div className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 border-2 border-green-200">
+            {/* Welcome Header */}
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, Demo Member!</h2>
+              <p className="text-gray-600 text-lg">Your personalized member dashboard</p>
             </div>
 
-            {/* Dashboard Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {/* Recent Donations */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Your Recent Donations</CardTitle>
-                  <CardDescription>Last 30 days</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Wedding Cake</span>
-                      <span className="text-sm font-medium">2g</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Moroccan Hash</span>
-                      <span className="text-sm font-medium">2g</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Dry-Shift Hash</span>
-                      <span className="text-sm font-medium">1g</span>
-                    </div>
-                    <div className="border-t pt-2 mt-3">
-                      <div className="flex justify-between font-medium">
-                        <span>Total this month:</span>
-                        <span>5g donated</span>
-                      </div>
+            {/* Donation History */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-xl text-green-700">Your Donation History</CardTitle>
+                <CardDescription>Complete donation timeline</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <h4 className="font-semibold text-gray-900 mb-2">March 2025</h4>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>Moroccan Hash: <span className="font-medium">2g</span></div>
+                      <div>Dry-Shift Hash: <span className="font-medium">1g</span></div>
+                      <div>Wedding Cake: <span className="font-medium">2g</span></div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="font-semibold text-gray-900 mb-2">February 2025</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>Dry-Shift Hash: <span className="font-medium">3g</span></div>
+                      <div>Wedding Cake: <span className="font-medium">1g</span></div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                    <h4 className="font-semibold text-gray-900 mb-2">January 2025</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>Wedding Cake: <span className="font-medium">2g</span></div>
+                      <div>Moroccan Hash: <span className="font-medium">1g</span></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Preferences */}
+            {/* Analytics and Recommendations Grid */}
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              {/* Analytics */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Your Preferences</CardTitle>
-                  <CardDescription>Based on donation history</CardDescription>
+                  <CardTitle className="text-xl text-green-700">Your Analytics</CardTitle>
+                  <CardDescription>Donation patterns and preferences</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-sm text-gray-600">Favorite:</span>
-                      <p className="font-medium">Wedding Cake</p>
+                  <div className="space-y-4">
+                    <div className="bg-green-50 rounded-lg p-3">
+                      <span className="text-sm text-gray-600">Monthly donation frequency:</span>
+                      <p className="font-bold text-green-700 text-lg">3 donations per month</p>
                     </div>
-                    <div>
-                      <span className="text-sm text-gray-600">Type:</span>
-                      <p className="font-medium">Indica preferred</p>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <span className="text-sm text-gray-600">Preferred categories:</span>
+                      <p className="font-bold text-blue-700">Indica 60%, Hash 40%</p>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-3">
+                      <span className="text-sm text-gray-600">Favorite items:</span>
+                      <p className="font-bold text-purple-700">Wedding Cake (most frequent)</p>
+                      <p className="font-medium text-purple-600">Moroccan Hash (second)</p>
                     </div>
                   </div>
                 </CardContent>
@@ -218,32 +225,56 @@ export function Dashboard({ onLogout }: DashboardProps) {
               {/* Recommendations */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Recommended for You</CardTitle>
-                  <CardDescription>Similar to your favorites</CardDescription>
+                  <CardTitle className="text-xl text-green-700">Recommended for You</CardTitle>
+                  <CardDescription>Based on your donation history</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div>
-                    <span className="text-sm text-gray-600">Try:</span>
-                    <p className="font-medium text-[#116149]">Zkittlez</p>
-                    <p className="text-sm text-gray-500 mt-1">Similar relaxing effects to your previous selections</p>
+                  <div className="space-y-4">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-yellow-800 mb-2">Top Recommendations:</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                          <span className="font-medium text-green-700">Zkittlez</span>
+                          <span className="text-sm text-gray-600">- Similar to Wedding Cake</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                          <span className="font-medium text-blue-700">Blue Dream</span>
+                          <span className="text-sm text-gray-600">- Balanced hybrid</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Club Updates */}
-            <Card className="mb-8">
+            {/* Upcoming Events */}
+            <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-lg">Club Updates</CardTitle>
-                <CardDescription>Latest news and events</CardDescription>
+                <CardTitle className="text-xl text-green-700">Upcoming Events</CardTitle>
+                <CardDescription>Don't miss these club activities</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Educational Session This Weekend</h4>
-                  <p className="text-blue-800 text-sm">Join us for "Cannabis Cultivation Basics" - Learn about growing techniques and plant care from our expert cultivators.</p>
+                <div className="space-y-3">
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-orange-800">Cannabis Education Session</h4>
+                    <p className="text-orange-700 text-sm">July 25th - Learn cultivation techniques and plant care</p>
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-green-800">Member Social Hour</h4>
+                    <p className="text-green-700 text-sm">July 28th - Connect with fellow members</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Browse Catalogue CTA */}
+            <div className="text-center bg-white rounded-lg p-6 border-2 border-dashed border-green-300">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Browse Available Selection Below</h3>
+              <p className="text-gray-600">Explore our curated collection and make your next donation</p>
+            </div>
           </div>
         )}
 
