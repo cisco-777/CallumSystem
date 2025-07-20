@@ -26,6 +26,16 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Check if current user is demo member
+  const isDemoMember = (() => {
+    const savedUser = localStorage.getItem('msc-user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      return user.email === 'demo@member.com';
+    }
+    return false;
+  })();
 
   // Map product names to their corresponding images
   const getProductImage = (productName: string) => {
@@ -142,6 +152,101 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
       {/* Products Grid */}
       <main className="max-w-6xl mx-auto px-6 py-8">
+        {/* Member Dashboard Section - Only for demo member */}
+        {isDemoMember && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-light text-gray-900 mb-6">Member Dashboard</h2>
+            
+            {/* Welcome Message */}
+            <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Welcome back, Demo Member!</h3>
+              <p className="text-gray-600">Thank you for your continued support of our social club.</p>
+            </div>
+
+            {/* Dashboard Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {/* Recent Donations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Your Recent Donations</CardTitle>
+                  <CardDescription>Last 30 days</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Wedding Cake</span>
+                      <span className="text-sm font-medium">2g</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Moroccan Hash</span>
+                      <span className="text-sm font-medium">2g</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Dry-Shift Hash</span>
+                      <span className="text-sm font-medium">1g</span>
+                    </div>
+                    <div className="border-t pt-2 mt-3">
+                      <div className="flex justify-between font-medium">
+                        <span>Total this month:</span>
+                        <span>5g donated</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Preferences */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Your Preferences</CardTitle>
+                  <CardDescription>Based on donation history</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm text-gray-600">Favorite:</span>
+                      <p className="font-medium">Wedding Cake</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-600">Type:</span>
+                      <p className="font-medium">Indica preferred</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recommendations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Recommended for You</CardTitle>
+                  <CardDescription>Similar to your favorites</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <span className="text-sm text-gray-600">Try:</span>
+                    <p className="font-medium text-[#116149]">Zkittlez</p>
+                    <p className="text-sm text-gray-500 mt-1">Similar relaxing effects to your previous selections</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Club Updates */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="text-lg">Club Updates</CardTitle>
+                <CardDescription>Latest news and events</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-900 mb-2">Educational Session This Weekend</h4>
+                  <p className="text-blue-800 text-sm">Join us for "Cannabis Cultivation Basics" - Learn about growing techniques and plant care from our expert cultivators.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <div className="mb-8">
           <h2 className="text-xl font-light text-gray-900 mb-2">Available Selection</h2>
           <p className="text-gray-600">Curated items for our members</p>

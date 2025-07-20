@@ -20,6 +20,17 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - File upload capabilities during onboarding process
 
 ## Recent Changes
+**July 20, 2025**
+- Modified existing catalogue page to include member dashboard content for demo@member.com
+- Added "Member Dashboard" section above "Available Selection" with:
+  * Welcome back message for Demo Member
+  * Recent donations summary (Wedding Cake 2g, Moroccan Hash 2g, Dry-Shift Hash 1g)
+  * Preferences showing favorite items and type preferences
+  * Personalized recommendations based on donation history
+  * Club updates with educational session notifications
+- Dashboard content only displays for demo member, regular users see standard catalogue
+- Maintained all existing catalogue functionality below dashboard section
+
 **July 19, 2025**
 - Added 2 new hash products: "Moroccan Hash" (Indica) and "Dry-Shift Hash" (Sativa)
 - Generated 6-digit product codes for all products ending in 12, 10, 13, or 15
