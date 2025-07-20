@@ -43,6 +43,7 @@ export const donations = pgTable("donations", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
   items: jsonb("items"),
+  quantities: jsonb("quantities"),
   totalAmount: text("total_amount"),
   status: text("status").default("pending"),
   createdAt: timestamp("created_at").defaultNow(),

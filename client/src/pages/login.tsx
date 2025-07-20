@@ -26,6 +26,13 @@ export function LoginPage() {
       return;
     }
 
+    // Check for demo member login
+    if (email === 'demo_member' && password === 'demo123') {
+      localStorage.setItem('msc-member-authenticated', 'true');
+      setLocation('/member-dashboard');
+      return;
+    }
+
     // Demo login for any valid email/password combination
     if (validateEmail(email) && password.length >= 3) {
       localStorage.setItem('msc-authenticated', 'true');
@@ -146,6 +153,14 @@ export function LoginPage() {
               }
             </button>
           </div>
+
+          {isLoginMode && (
+            <div className="mt-4 p-3 bg-blue-50 rounded text-sm text-blue-700">
+              <strong>Demo Member Access:</strong><br />
+              Username: demo_member<br />
+              Password: demo123
+            </div>
+          )}
 
           {isLoginMode && (
             <div className="mt-4 p-3 bg-gray-50 rounded text-sm text-gray-600">

@@ -8,8 +8,9 @@ import { AuthFlow } from "@/pages/auth-flow";
 import { Dashboard } from "@/pages/dashboard";
 import { AdminDashboard } from "@/pages/admin-dashboard";
 import { FakeAdminDemo } from "@/pages/fake-admin-demo";
+import { MemberDashboard } from "@/pages/member-dashboard";
 
-type AppState = 'landing' | 'auth' | 'dashboard' | 'admin' | 'fake-demo';
+type AppState = 'landing' | 'auth' | 'dashboard' | 'admin' | 'fake-demo' | 'member-dashboard';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('landing');
@@ -40,6 +41,13 @@ function App() {
           setAppState('landing');
         }
       }
+      return;
+    }
+
+    // Check if member is logged in
+    const memberAuth = localStorage.getItem('msc-member-authenticated');
+    if (memberAuth) {
+      setAppState('member-dashboard');
       return;
     }
 
@@ -99,6 +107,10 @@ function App() {
           
           {appState === 'fake-demo' && (
             <FakeAdminDemo />
+          )}
+          
+          {appState === 'member-dashboard' && (
+            <MemberDashboard />
           )}
         </div>
         <Toaster />

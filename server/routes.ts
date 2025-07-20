@@ -173,6 +173,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Member dashboard routes
+  app.get("/api/member/donations", async (req, res) => {
+    try {
+      const userId = 2; // Demo member ID - would get from session in real app
+      const donations = await storage.getUserDonations(userId);
+      res.json(donations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch donation history" });
+    }
+  });
+
   // Donation route
   app.post("/api/donate", async (req, res) => {
     try {
