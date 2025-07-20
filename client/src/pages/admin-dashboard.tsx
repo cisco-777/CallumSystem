@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Users, Package, Activity, AlertTriangle, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle } from 'lucide-react';
 
 export function AdminDashboard() {
   const [showFailsafe, setShowFailsafe] = useState(false);
@@ -127,6 +127,80 @@ export function AdminDashboard() {
     }
   };
 
+  // Analytics calculations from real data
+  const calculateAnalytics = () => {
+    if (!Array.isArray(products) || products.length === 0) {
+      return {
+        totalStockValue: 0,
+        totalStock: 0,
+        averageStock: 0,
+        lowStockItems: [],
+        potentialRevenue: 0,
+        mostProfitable: null,
+        strainBreakdown: { indica: 0, sativa: 0, hybrid: 0 }
+      };
+    }
+
+    let totalStockValue = 0;
+    let totalStock = 0;
+    let potentialRevenue = 0;
+    const lowStockItems = [];
+    let mostProfitable = null;
+    let maxProfitability = 0;
+    const strainCounts = { indica: 0, sativa: 0, hybrid: 0 };
+
+    products.forEach((product: any) => {
+      const stock = product.stockQuantity || 0;
+      const price = parseFloat(product.adminPrice) || 0;
+      const value = stock * price;
+      
+      totalStock += stock;
+      totalStockValue += value;
+      potentialRevenue += value;
+
+      // Low stock alerts
+      if (stock < 120) {
+        lowStockItems.push({
+          name: product.name,
+          stock: stock,
+          critical: stock < 100
+        });
+      }
+
+      // Most profitable calculation
+      const profitability = price * stock;
+      if (profitability > maxProfitability) {
+        maxProfitability = profitability;
+        mostProfitable = {
+          name: product.name,
+          price: price,
+          stock: stock,
+          value: profitability
+        };
+      }
+
+      // Strain breakdown
+      const category = (product.category || '').toLowerCase();
+      if (category.includes('indica')) strainCounts.indica++;
+      else if (category.includes('sativa')) strainCounts.sativa++;
+      else strainCounts.hybrid++;
+    });
+
+    const averageStock = products.length > 0 ? Math.round(totalStock / products.length) : 0;
+
+    return {
+      totalStockValue: Math.round(totalStockValue),
+      totalStock,
+      averageStock,
+      lowStockItems,
+      potentialRevenue: Math.round(potentialRevenue),
+      mostProfitable,
+      strainBreakdown: strainCounts
+    };
+  };
+
+  const analytics = calculateAnalytics();
+
   if (isAdminWiped) {
     return (
       <div className="min-h-screen bg-red-50 flex items-center justify-center">
@@ -177,52 +251,177 @@ export function AdminDashboard() {
           </div>
         )}
 
-        {/* Stats Cards */}
+        {/* Inventory Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Members</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Total Stock Value</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockUsers.length}</div>
-              <p className="text-xs text-muted-foreground">+2 from last week</p>
+              <div className="text-2xl font-bold text-green-700">€{analytics.totalStockValue}</div>
+              <p className="text-xs text-muted-foreground">Current inventory value</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Stock Status</CardTitle>
+              <Package className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockOrders.length}</div>
-              <p className="text-xs text-muted-foreground">+12% from yesterday</p>
+              <div className="text-2xl font-bold text-blue-700">{products.length}</div>
+              <p className="text-xs text-muted-foreground">
+                {analytics.lowStockItems.length > 0 ? `${analytics.lowStockItems.length} need restocking` : 'All well stocked'}
+              </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Available Products</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Average Stock</CardTitle>
+              <BarChart3 className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{Array.isArray(products) ? products.length : 0}</div>
-              <p className="text-xs text-muted-foreground">All in stock</p>
+              <div className="text-2xl font-bold text-purple-700">{analytics.averageStock}g</div>
+              <p className="text-xs text-muted-foreground">Per product average</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revenue Today</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Potential Revenue</CardTitle>
+              <TrendingUp className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">€420</div>
-              <p className="text-xs text-muted-foreground">+8% from yesterday</p>
+              <div className="text-2xl font-bold text-orange-700">€{analytics.potentialRevenue}</div>
+              <p className="text-xs text-muted-foreground">If all stock sold</p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Analytics Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Low Stock Alerts */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2 text-orange-600" />
+                Low Stock Alerts
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {analytics.lowStockItems.length > 0 ? (
+                <div className="space-y-3">
+                  {analytics.lowStockItems.map((item, index) => (
+                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
+                      item.critical ? 'bg-red-50 border border-red-200' : 'bg-orange-50 border border-orange-200'
+                    }`}>
+                      <span className="font-medium">{item.name}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm font-bold ${
+                          item.critical ? 'text-red-700' : 'text-orange-700'
+                        }`}>
+                          {item.stock}g
+                        </span>
+                        <Badge variant={item.critical ? "destructive" : "secondary"}>
+                          {item.critical ? "Critical" : "Low"}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-green-600">
+                  <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="font-medium">All products well stocked!</p>
+                  <p className="text-sm text-gray-500">No restocking needed</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Product Performance */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
+                Product Performance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {analytics.mostProfitable && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-green-800 mb-2">Most Profitable</h4>
+                    <p className="text-lg font-bold text-green-700">{analytics.mostProfitable.name}</p>
+                    <p className="text-sm text-green-600">
+                      €{analytics.mostProfitable.price}/g with {analytics.mostProfitable.stock}g in stock
+                    </p>
+                    <p className="text-xs text-green-500 mt-1">
+                      Total value: €{analytics.mostProfitable.value}
+                    </p>
+                  </div>
+                )}
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-800 mb-3">Strain Type Breakdown</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Indica:</span>
+                      <span className="font-medium text-blue-700">
+                        {Math.round((analytics.strainBreakdown.indica / products.length) * 100)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Sativa:</span>
+                      <span className="font-medium text-blue-700">
+                        {Math.round((analytics.strainBreakdown.sativa / products.length) * 100)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Hybrid:</span>
+                      <span className="font-medium text-blue-700">
+                        {Math.round((analytics.strainBreakdown.hybrid / products.length) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Revenue Analytics */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <DollarSign className="w-5 h-5 mr-2 text-green-600" />
+              Revenue Analytics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-semibold text-green-800 mb-2">Total Potential Revenue</h4>
+                <p className="text-2xl font-bold text-green-700">€{analytics.potentialRevenue}</p>
+                <p className="text-sm text-green-600 mt-1">If all current stock sold</p>
+              </div>
+              
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-800 mb-2">Average Order Value</h4>
+                <p className="text-2xl font-bold text-blue-700">€{orders.length > 0 ? Math.round(analytics.potentialRevenue / orders.length) : '0'}</p>
+                <p className="text-sm text-blue-600 mt-1">Based on completed orders</p>
+              </div>
+              
+              <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-4">
+                <h4 className="font-semibold text-purple-800 mb-2">Stock Turnover Rate</h4>
+                <p className="text-2xl font-bold text-purple-700">{analytics.averageStock > 0 ? Math.round((orders.length * 10 / analytics.averageStock) * 100) : 0}%</p>
+                <p className="text-sm text-purple-600 mt-1">Monthly estimated</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Recent Orders */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

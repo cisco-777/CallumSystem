@@ -21,20 +21,19 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 
 ## Recent Changes
 **July 20, 2025**
+- Enhanced admin dashboard with comprehensive analytics pulling from real Dispensary Stock data
+- Added four new analytics sections:
+  * Inventory Overview: Total stock value, stock status, average stock per product, potential revenue
+  * Low Stock Alerts: Products under 120g with color-coded warnings (red <100g, orange <120g)
+  * Product Performance: Most profitable product display, strain type breakdown percentages
+  * Revenue Analytics: Potential revenue, average order value, stock turnover rate calculations
+- Analytics automatically update when orders are confirmed and stock reduces
+- Calculations use real data from existing Dispensary Stock section (stock quantities × admin prices)
+- Color-coded alerts and professional styling for easy interpretation
 - Created highly visible member dashboard that appears when demo@member.com logs in
-- Enhanced dashboard with prominent styling (gradient background, colored borders, large text)
-- Added comprehensive donation history timeline:
-  * January 2025: Wedding Cake 2g, Moroccan Hash 1g
-  * February 2025: Dry-Shift Hash 3g, Wedding Cake 1g
-  * March 2025: Moroccan Hash 2g, Dry-Shift Hash 1g, Wedding Cake 2g
-- Included detailed analytics section:
-  * Monthly donation frequency: 3 donations per month
-  * Preferred categories: Indica 60%, Hash 40%
-  * Favorite items: Wedding Cake (most frequent), Moroccan Hash (second)
-- Added personalized recommendations: Zkittlez and Blue Dream based on history
-- Included upcoming events: Cannabis Education Session (July 25th), Member Social Hour (July 28th)
-- Added "Browse Available Selection Below" call-to-action
-- Dashboard content only displays for demo member, regular users see standard catalogue
+- Enhanced member dashboard with timeline layout fixes and professional catalogue transition
+- Fixed donation history timeline with visual timeline line and organized monthly sections
+- Removed ugly dashed border and created elegant catalogue transition with gradient separator
 
 **July 19, 2025**
 - Added 2 new hash products: "Moroccan Hash" (Indica) and "Dry-Shift Hash" (Sativa)
