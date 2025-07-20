@@ -27,7 +27,7 @@ export function LoginPage() {
     }
 
     // Check for demo member login
-    if (email === 'demo_member' && password === 'demo123') {
+    if (email === 'demo@member.com' && password === 'demo123') {
       localStorage.setItem('msc-member-authenticated', 'true');
       setLocation('/member-dashboard');
       return;
@@ -157,7 +157,7 @@ export function LoginPage() {
           {isLoginMode && (
             <div className="mt-4 p-3 bg-blue-50 rounded text-sm text-blue-700">
               <strong>Demo Member Access:</strong><br />
-              Username: demo_member<br />
+              Email: demo@member.com<br />
               Password: demo123
             </div>
           )}

@@ -57,6 +57,11 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - Password: admin123
 - Direct access to admin dashboard with member management tools
 
+## Demo Member Credentials
+- Email: demo@member.com
+- Password: demo123
+- Access to personalized member dashboard with donation history and analytics
+
 ## Database Schema
 - Users table: authentication and onboarding data
 - Products table: catalogue items with product codes
