@@ -154,7 +154,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Member Dashboard Section - Only for demo member */}
         {isDemoMember && (
-          <div className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 border-2 border-green-200">
+          <div className="mb-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 border-2 border-green-200 shadow-lg">
             {/* Welcome Header */}
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, Demo Member!</h2>
@@ -168,27 +168,79 @@ export function Dashboard({ onLogout }: DashboardProps) {
                 <CardDescription>Complete donation timeline</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
-                    <h4 className="font-semibold text-gray-900 mb-2">March 2025</h4>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>Moroccan Hash: <span className="font-medium">2g</span></div>
-                      <div>Dry-Shift Hash: <span className="font-medium">1g</span></div>
-                      <div>Wedding Cake: <span className="font-medium">2g</span></div>
+                <div className="relative">
+                  {/* Timeline Line */}
+                  <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-gradient-to-b from-green-400 via-blue-400 to-purple-400"></div>
+                  
+                  <div className="space-y-8">
+                    {/* March 2025 */}
+                    <div className="relative flex items-start">
+                      <div className="flex-shrink-0 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm border-4 border-white shadow-lg">
+                        MAR
+                      </div>
+                      <div className="ml-6 flex-1">
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-5">
+                          <h4 className="font-bold text-green-800 text-lg mb-3">March 2025</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                              <span className="text-gray-700 font-medium">Moroccan Hash</span>
+                              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">2g</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                              <span className="text-gray-700 font-medium">Dry-Shift Hash</span>
+                              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">1g</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                              <span className="text-gray-700 font-medium">Wedding Cake</span>
+                              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">2g</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-500">
-                    <h4 className="font-semibold text-gray-900 mb-2">February 2025</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>Dry-Shift Hash: <span className="font-medium">3g</span></div>
-                      <div>Wedding Cake: <span className="font-medium">1g</span></div>
+
+                    {/* February 2025 */}
+                    <div className="relative flex items-start">
+                      <div className="flex-shrink-0 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm border-4 border-white shadow-lg">
+                        FEB
+                      </div>
+                      <div className="ml-6 flex-1">
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                          <h4 className="font-bold text-blue-800 text-lg mb-3">February 2025</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                              <span className="text-gray-700 font-medium">Dry-Shift Hash</span>
+                              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">3g</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                              <span className="text-gray-700 font-medium">Wedding Cake</span>
+                              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">1g</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border-l-4 border-purple-500">
-                    <h4 className="font-semibold text-gray-900 mb-2">January 2025</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>Wedding Cake: <span className="font-medium">2g</span></div>
-                      <div>Moroccan Hash: <span className="font-medium">1g</span></div>
+
+                    {/* January 2025 */}
+                    <div className="relative flex items-start">
+                      <div className="flex-shrink-0 w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm border-4 border-white shadow-lg">
+                        JAN
+                      </div>
+                      <div className="ml-6 flex-1">
+                        <div className="bg-purple-50 border border-purple-200 rounded-xl p-5">
+                          <h4 className="font-bold text-purple-800 text-lg mb-3">January 2025</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                              <span className="text-gray-700 font-medium">Wedding Cake</span>
+                              <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">2g</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 px-3 bg-white rounded-lg">
+                              <span className="text-gray-700 font-medium">Moroccan Hash</span>
+                              <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">1g</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -270,15 +322,24 @@ export function Dashboard({ onLogout }: DashboardProps) {
               </CardContent>
             </Card>
 
-            {/* Browse Catalogue CTA */}
-            <div className="text-center bg-white rounded-lg p-6 border-2 border-dashed border-green-300">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Browse Available Selection Below</h3>
-              <p className="text-gray-600">Explore our curated collection and make your next donation</p>
+            {/* Smooth Transition to Catalogue */}
+            <div className="relative mt-12 mb-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-green-300 to-transparent"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <div className="bg-white px-8 py-4 rounded-2xl shadow-sm border border-green-100 text-center">
+                  <p className="text-gray-700 font-medium text-base">
+                    Ready to make your next donation? Browse our selection below:
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        <div className="mb-8">
+        {/* Seamless transition with better spacing */}
+        <div className={`${isDemoMember ? 'mt-4' : 'mt-0'} mb-8`}>
           <h2 className="text-xl font-light text-gray-900 mb-2">Available Selection</h2>
           <p className="text-gray-600">Curated items for our members</p>
         </div>
