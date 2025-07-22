@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Navigation } from '@/components/navigation';
 import { CheckCircle, Heart, Gift, User, Calendar, Users } from 'lucide-react';
-import marbellaImage from '@assets/Marbella_1750505556334.jpg';
+import barcelonaImage from '@assets/Barcelona_1753192664105.jpg';
 import loungeImage from '@assets/lounge_1750505580573.jpg';
 
 export function SinglePageHome() {
@@ -27,7 +27,7 @@ export function SinglePageHome() {
         id="home" 
         className="pt-16 pb-20 relative"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${marbellaImage}')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${barcelonaImage}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'

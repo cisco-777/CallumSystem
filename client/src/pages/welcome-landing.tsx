@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import marbellaImage from '@assets/Marbella_1750505556334.jpg';
+import barcelonaImage from '@assets/Barcelona_1753192664105.jpg';
 
 interface WelcomeLandingProps {
   onEnter: () => void;
@@ -16,7 +16,7 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
       <div 
         className="absolute inset-0 transition-transform duration-700 ease-out"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('${marbellaImage}')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('${barcelonaImage}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
