@@ -13,13 +13,19 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 
 ## Key Features
 - Email-first authentication flow with onboarding questionnaire
-- Welcome landing page with "Social Club" branding (GreenMoon references removed)
+- Welcome landing page with "La Cultura Social Club" branding
 - Welcome message screen with cannabis disclaimers and policies
 - Member area with catalogue-style product browsing and donation system
 - Admin dashboard with member management and bouncer communication hub
 - File upload capabilities during onboarding process
 
 ## Recent Changes
+**July 22, 2025**
+- Updated all branding from "GreenMoon" to "La Cultura" throughout the application
+- Changed tagline from "GreenMoon's chillest stop" to "Barcelona's chillest stop"
+- Updated CSS theme color variable names from --gmc- to --lc- prefix
+- Maintained consistent brand identity across all pages and components
+
 **July 20, 2025**
 - Enhanced admin dashboard with comprehensive analytics pulling from real Dispensary Stock data
 - Added four new analytics sections:
