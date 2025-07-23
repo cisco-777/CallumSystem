@@ -12,6 +12,16 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - External chat integration capabilities via bizichat.ai
 
 ## Recent Changes
+**July 23, 2025 - Admin Dashboard Enhancement**
+- Removed fail safe functionality completely from admin dashboard
+- Added comprehensive Customer Preferences Analytics section with strain and product type breakdowns
+- Implemented Customer Search Tool with detailed customer profiles and order history
+- Updated demo member account from "demo member" to "John Doe" in database
+- Connected John Doe's order data to admin analytics calculations
+- Added backend API endpoint for user management (/api/users with admin authentication)
+- Enhanced analytics to use real customer order data for preference calculations
+
+**Earlier Updates**
 - Updated branding from "La Cultura Social Club" to "The Bud House Social Club" (July 23, 2025)
 - Changed location reference from "Barcelona's chillest stop" to "Benalmadena's chillest spot"
 - Updated background image from Barcelona to Benalmadena port across all landing pages

@@ -1,0 +1,68 @@
+Replit Agent Commands for Admin Dashboard Updates
+Command 1: Remove Fail Safe Button
+Context: I'm updating an admin dashboard for a cannabis dispensary demo app.
+Specific Task: Remove the fail safe button and all associated logic from the admin dashboard.
+Requirements:
+
+Locate and remove the fail safe button component
+Remove all backend logic/functions related to the fail safe feature
+Clean up any database references or API endpoints for fail safe functionality
+Ensure no broken references remain after removal
+
+
+Command 2: Add Customer Preferences Analytics Section
+Context: Building on the existing admin dashboard that already has recent members and recent orders sections.
+Specific Task: Create a completely new section underneath the existing recent members and recent orders sections called "Customer Preferences Analytics".
+Requirements:
+
+Position this new section below the existing recent members and recent orders sections
+Create a new dedicated section showing overall customer analytics for:
+
+Sativa vs Indica vs Hybrid preferences (percentage breakdown)
+Cannabis vs Hash preferences (percentage breakdown)
+Most popular product categories
+
+
+Include visual charts or graphs for easy data interpretation
+Make it responsive and match existing dashboard styling
+Add appropriate section header like "Customer Preferences Overview"
+
+
+Command 3: Add Customer Search Tool
+Context: Adding search functionality to the new customer preferences section.
+Specific Task: Create a search tool for employees to look up individual customer information.
+Requirements:
+
+Add search bar with auto-complete functionality
+Search by customer name
+Display individual customer profile with:
+
+Personal preferences (sativa/indica/hybrid, cannabis/hash)
+Purchase history summary
+Preference trends over time
+
+
+Include clear, organized layout for the customer data display
+
+
+Command 4: Update Demo Account
+Context: Updating existing demo account information in the system.
+Specific Task: Change the demo member account name from "demo member" to "John Doe".
+Requirements:
+
+Update the display name to "John Doe"
+Keep existing email and password credentials unchanged
+Ensure login functionality remains the same
+Update any references to the old name in the database
+
+
+Command 5: Connect John Doe Data to Admin Analytics
+Context: The app already has member-side analytics functionality. We've added new admin dashboard analytics sections that need to display John Doe's data.
+Specific Task: Ensure John Doe's existing data appears correctly in the new admin dashboard analytics sections.
+Requirements:
+
+Connect John Doe's existing order/preference data to the new Customer Preferences Analytics section (from Command 2)
+Ensure John Doe appears as searchable in the new customer search tool (from Command 3)
+Verify that when employees search "John Doe" they can see his preferences and analytics
+Make sure the existing member-side analytics data feeds into the admin dashboard views
+Test that John Doe's data displays properly in both the overview analytics and individual search results

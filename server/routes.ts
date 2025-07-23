@@ -132,6 +132,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User routes (admin only)
+  app.get("/api/users", async (req, res) => {
+    const isAdmin = req.headers['x-admin'] === 'true';
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    
+    try {
+      const users = await storage.getUsers();
+      res.json(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
   app.post("/api/products", async (req, res) => {
     try {
       const product = await storage.createProduct(req.body);

@@ -5,12 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, AlertTriangle, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export function AdminDashboard() {
-  const [showFailsafe, setShowFailsafe] = useState(false);
-  const [showFailsafeConfirm, setShowFailsafeConfirm] = useState(false);
-  const [isAdminWiped, setIsAdminWiped] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -22,6 +21,15 @@ export function AdminDashboard() {
     queryKey: ['/api/orders'],
     queryFn: async () => {
       return await apiRequest('/api/orders', {
+        headers: { 'x-admin': 'true' }
+      });
+    }
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['/api/users'],
+    queryFn: async () => {
+      return await apiRequest('/api/users', {
         headers: { 'x-admin': 'true' }
       });
     }
@@ -90,35 +98,102 @@ export function AdminDashboard() {
     { id: 4, user: "Emma L.", item: "Zkittlez", quantity: 3, status: "processing", time: "15 mins ago" }
   ];
 
-  const mockUsers = [
-    { id: 1, name: "John Doe", email: "john@example.com", joined: "2 days ago", status: "active" },
-    { id: 2, name: "Sarah Miller", email: "sarah@example.com", joined: "1 week ago", status: "active" },
-    { id: 3, name: "Mike Rodriguez", email: "mike@example.com", joined: "3 days ago", status: "pending" },
-    { id: 4, name: "Emma Lee", email: "emma@example.com", joined: "5 hours ago", status: "active" }
-  ];
-
-  const handleFailsafe = () => {
-    setShowFailsafeConfirm(true);
-  };
-
-  const executeFailsafe = () => {
-    setShowFailsafeConfirm(false);
-    setIsAdminWiped(true);
-    toast({
-      title: "⚠️ FAILSAFE ACTIVATED",
-      description: "All admin interface data has been permanently deleted.",
-      variant: "destructive",
+  // Calculate customer preferences
+  const calculateCustomerPreferences = () => {
+    if (!Array.isArray(orders) || orders.length === 0) return null;
+    
+    let sativaCount = 0, indicaCount = 0, hybridCount = 0;
+    let cannabisCount = 0, hashCount = 0;
+    const categoryCount: { [key: string]: number } = {};
+    
+    orders.forEach((order: any) => {
+      if (order.items) {
+        order.items.forEach((item: any) => {
+          const category = (item.category || '').toLowerCase();
+          
+          // Strain preference analysis
+          if (category.includes('sativa')) sativaCount++;
+          else if (category.includes('indica')) indicaCount++;
+          else hybridCount++;
+          
+          // Cannabis vs Hash analysis
+          if (category.includes('hash')) hashCount++;
+          else cannabisCount++;
+          
+          // Category counting
+          categoryCount[item.category || 'Other'] = (categoryCount[item.category || 'Other'] || 0) + 1;
+        });
+      }
     });
     
-    // Auto-restore after 60 seconds
-    setTimeout(() => {
-      setIsAdminWiped(false);
-      toast({
-        title: "System Restored",
-        description: "Admin interface has been automatically restored.",
-      });
-    }, 60000);
+    const total = sativaCount + indicaCount + hybridCount;
+    const productTotal = cannabisCount + hashCount;
+    
+    return {
+      strainPreferences: {
+        sativa: total > 0 ? Math.round((sativaCount / total) * 100) : 0,
+        indica: total > 0 ? Math.round((indicaCount / total) * 100) : 0,
+        hybrid: total > 0 ? Math.round((hybridCount / total) * 100) : 0
+      },
+      productPreferences: {
+        cannabis: productTotal > 0 ? Math.round((cannabisCount / productTotal) * 100) : 0,
+        hash: productTotal > 0 ? Math.round((hashCount / productTotal) * 100) : 0
+      },
+      popularCategories: Object.entries(categoryCount)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([category, count]) => ({ category, count }))
+    };
   };
+  
+  const customerPrefs = calculateCustomerPreferences();
+  
+  // Customer search functionality
+  const getCustomerProfile = (userId: number) => {
+    const userOrders = orders.filter((order: any) => order.userId === userId);
+    const user = users.find((u: any) => u.id === userId);
+    
+    if (!user || userOrders.length === 0) return null;
+    
+    let sativaCount = 0, indicaCount = 0, hybridCount = 0;
+    let cannabisCount = 0, hashCount = 0;
+    
+    userOrders.forEach((order: any) => {
+      if (order.items) {
+        order.items.forEach((item: any) => {
+          const category = (item.category || '').toLowerCase();
+          if (category.includes('sativa')) sativaCount++;
+          else if (category.includes('indica')) indicaCount++;
+          else hybridCount++;
+          
+          if (category.includes('hash')) hashCount++;
+          else cannabisCount++;
+        });
+      }
+    });
+    
+    const total = sativaCount + indicaCount + hybridCount;
+    const productTotal = cannabisCount + hashCount;
+    
+    return {
+      user,
+      orderCount: userOrders.length,
+      preferences: {
+        sativa: total > 0 ? Math.round((sativaCount / total) * 100) : 0,
+        indica: total > 0 ? Math.round((indicaCount / total) * 100) : 0,
+        hybrid: total > 0 ? Math.round((hybridCount / total) * 100) : 0,
+        cannabis: productTotal > 0 ? Math.round((cannabisCount / productTotal) * 100) : 0,
+        hash: productTotal > 0 ? Math.round((hashCount / productTotal) * 100) : 0
+      },
+      recentOrders: userOrders.slice(0, 3)
+    };
+  };
+  
+  const filteredUsers = users.filter((user: any) => 
+    searchQuery === '' || 
+    `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const scrollToOrderControl = () => {
     const orderControlSection = document.getElementById('order-control-section');
@@ -144,12 +219,12 @@ export function AdminDashboard() {
     let totalStockValue = 0;
     let totalStock = 0;
     let potentialRevenue = 0;
-    const lowStockItems = [];
-    let mostProfitable = null;
+    const lowStockItems: Array<{name: string, stock: number, critical: boolean}> = [];
+    let mostProfitable: {name: string, price: number, stock: number, value: number} | null = null;
     let maxProfitability = 0;
     const strainCounts = { indica: 0, sativa: 0, hybrid: 0 };
 
-    products.forEach((product: any) => {
+    (products as any[]).forEach((product: any) => {
       const stock = product.stockQuantity || 0;
       const price = parseFloat(product.adminPrice) || 0;
       const value = stock * price;
@@ -186,7 +261,7 @@ export function AdminDashboard() {
       else strainCounts.hybrid++;
     });
 
-    const averageStock = products.length > 0 ? Math.round(totalStock / products.length) : 0;
+    const averageStock = (products as any[]).length > 0 ? Math.round(totalStock / (products as any[]).length) : 0;
 
     return {
       totalStockValue: Math.round(totalStockValue),
@@ -201,18 +276,6 @@ export function AdminDashboard() {
 
   const analytics = calculateAnalytics();
 
-  if (isAdminWiped) {
-    return (
-      <div className="min-h-screen bg-red-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl text-red-600 mb-4">⚠️</div>
-          <h1 className="text-3xl font-bold text-red-800 mb-2">SYSTEM WIPED</h1>
-          <p className="text-red-600 mb-4">All admin data has been permanently deleted.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -220,7 +283,7 @@ export function AdminDashboard() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-1">La Cultura Social Club Management</p>
+            <p className="text-gray-600 mt-1">The Bud House Social Club Management</p>
           </div>
           <div className="flex space-x-4">
             <Button
@@ -230,26 +293,8 @@ export function AdminDashboard() {
               <ExternalLink className="w-4 h-4 mr-2" />
               Order Control
             </Button>
-            <Button
-              onClick={handleFailsafe}
-              variant="destructive"
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              <AlertTriangle className="w-4 h-4 mr-2" />
-              FAILSAFE!
-            </Button>
           </div>
         </div>
-
-        {showFailsafe && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            <div className="flex items-center">
-              <AlertTriangle className="w-5 h-5 mr-2" />
-              <span className="font-semibold">FAILSAFE ACTIVATED</span>
-            </div>
-            <p className="mt-1">Emergency protocols initiated. All systems monitoring enabled.</p>
-          </div>
-        )}
 
         {/* Inventory Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -456,17 +501,17 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockUsers.map((user) => (
+                {users.slice(0, 4).map((user: any) => (
                   <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
-                      <p className="font-medium">{user.name}</p>
+                      <p className="font-medium">{user.firstName || ''} {user.lastName || ''}</p>
                       <p className="text-sm text-gray-600">{user.email}</p>
-                      <p className="text-xs text-gray-500">Joined {user.joined}</p>
+                      <p className="text-xs text-gray-500">Joined {new Date(user.createdAt).toLocaleDateString()}</p>
                     </div>
                     <Badge 
-                      variant={user.status === 'active' ? 'default' : 'secondary'}
+                      variant={user.isOnboarded ? 'default' : 'secondary'}
                     >
-                      {user.status}
+                      {user.isOnboarded ? 'Active' : 'Pending'}
                     </Badge>
                   </div>
                 ))}
@@ -474,6 +519,186 @@ export function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Customer Preferences Analytics Section */}
+        {customerPrefs && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <PieChart className="w-5 h-5 mr-2 text-blue-600" />
+                Customer Preferences Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Strain Preferences */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                    <Leaf className="w-4 h-4 mr-2" />
+                    Strain Preferences
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Sativa:</span>
+                      <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.sativa}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Indica:</span>
+                      <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.indica}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Hybrid:</span>
+                      <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.hybrid}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Type Preferences */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                    <Hash className="w-4 h-4 mr-2" />
+                    Product Type Preferences
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Cannabis:</span>
+                      <span className="font-bold text-green-700">{customerPrefs.productPreferences.cannabis}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Hash:</span>
+                      <span className="font-bold text-green-700">{customerPrefs.productPreferences.hash}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Popular Categories */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-purple-800 mb-3">Most Popular Categories</h4>
+                  <div className="space-y-2">
+                    {customerPrefs.popularCategories.map((item, index) => (
+                      <div key={index} className="flex justify-between items-center">
+                        <span className="text-sm">{item.category}:</span>
+                        <span className="font-bold text-purple-700">{item.count} orders</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Customer Search Tool */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Search className="w-5 h-5 mr-2 text-gray-600" />
+              Customer Search & Profiles
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-6">
+              <Input
+                placeholder="Search customers by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-md"
+              />
+            </div>
+            
+            {searchQuery && (
+              <div className="space-y-4">
+                {filteredUsers.slice(0, 5).map((user: any) => {
+                  const profile = getCustomerProfile(user.id);
+                  if (!profile) return null;
+                  
+                  return (
+                    <div key={user.id} className="border rounded-lg p-4 bg-white">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            {user.firstName || ''} {user.lastName || ''}
+                          </h3>
+                          <p className="text-sm text-gray-600">{user.email}</p>
+                          <p className="text-xs text-gray-500">{profile.orderCount} total orders</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Personal Preferences */}
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <h4 className="font-medium text-sm mb-2">Strain Preferences</h4>
+                          <div className="space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span>Sativa:</span>
+                              <span className="font-medium">{profile.preferences.sativa}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Indica:</span>
+                              <span className="font-medium">{profile.preferences.indica}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Hybrid:</span>
+                              <span className="font-medium">{profile.preferences.hybrid}%</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Product Preferences */}
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <h4 className="font-medium text-sm mb-2">Product Preferences</h4>
+                          <div className="space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span>Cannabis:</span>
+                              <span className="font-medium">{profile.preferences.cannabis}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Hash:</span>
+                              <span className="font-medium">{profile.preferences.hash}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Recent Orders */}
+                      <div className="mt-4">
+                        <h4 className="font-medium text-sm mb-2">Recent Orders</h4>
+                        <div className="space-y-2">
+                          {profile.recentOrders.map((order: any) => (
+                            <div key={order.id} className="text-xs bg-blue-50 rounded p-2">
+                              <div className="flex justify-between">
+                                <span>Order #{order.id}</span>
+                                <span className="text-gray-500">
+                                  {new Date(order.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <div className="text-gray-600 mt-1">
+                                {order.items.length} items - €{order.totalPrice}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {filteredUsers.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No customers found matching "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {!searchQuery && (
+              <div className="text-center py-8 text-gray-500">
+                <Search className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                <p>Start typing to search for customers</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Order Control Center */}
         <Card id="order-control-section" className="mb-8">
@@ -570,35 +795,7 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* FAILSAFE Confirmation Dialog */}
-        {showFailsafeConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg max-w-md mx-4">
-              <div className="text-center">
-                <div className="text-4xl text-red-600 mb-4">⚠️</div>
-                <h2 className="text-xl font-bold text-red-800 mb-2">WARNING: FAILSAFE ACTIVATION</h2>
-                <p className="text-red-600 mb-4">This will permanently delete ALL admin interface data!</p>
-                <p className="text-sm text-gray-600 mb-6">This action cannot be undone. All member data, orders, and system configurations will be erased.</p>
-                <div className="flex space-x-3">
-                  <Button
-                    onClick={() => setShowFailsafeConfirm(false)}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={executeFailsafe}
-                    variant="destructive"
-                    className="flex-1 bg-red-600 hover:bg-red-700"
-                  >
-                    EXECUTE FAILSAFE
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );
