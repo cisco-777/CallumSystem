@@ -341,88 +341,176 @@ export function Dashboard({ onLogout }: DashboardProps) {
         {/* Seamless transition with better spacing */}
         <div className={`${isDemoMember ? 'mt-4' : 'mt-0'} mb-8`}>
           <h2 className="text-xl font-light text-gray-900 mb-2">Available Selection</h2>
-          <p className="text-gray-600">Curated items for our members</p>
+          <p className="text-gray-600">Curated items organized by category</p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product: Product) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="hover:shadow-lg transition-shadow duration-300 cursor-pointer group">
-                <CardHeader className="pb-4">
-                  <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center group-hover:bg-gray-300 transition-colors overflow-hidden">
-                    {getProductImage(product.name) ? (
-                      <img 
-                        src={getProductImage(product.name)!} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover rounded-lg" 
-                      />
-                    ) : product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover rounded-lg" />
-                    ) : (
-                      <span className="text-gray-500 text-sm">Image Placeholder</span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-medium">{product.name}</CardTitle>
-                    <span className="text-xs text-gray-500 font-mono">#{(product as any).productCode}</span>
-                  </div>
-                  {product.category && (
-                    <Badge variant="secondary" className="w-fit">
-                      {product.category}
-                    </Badge>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="mb-4 text-sm leading-relaxed">
-                    {product.description || 'Premium selection item'}
-                  </CardDescription>
-                  
-                  {/* Quantity Selector */}
-                  <div className="flex items-center justify-center mb-4 space-x-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => updateQuantity(product.id, getQuantity(product.id) - 1)}
-                      disabled={getQuantity(product.id) <= 1}
-                      className="w-8 h-8 p-0"
+        {/* Categorized Product Display */}
+        {(() => {
+          // Organize products by category
+          const sativaProducts = products.filter((p: Product) => p.category === 'Sativa');
+          const hybridProducts = products.filter((p: Product) => p.category === 'Hybrid');
+          const hashProducts = products.filter((p: Product) => 
+            p.name?.toLowerCase().includes('hash') || p.category?.toLowerCase().includes('hash')
+          );
+          const cannabisProducts = products.filter((p: Product) => p.category === 'Indica');
+
+          const categories = [
+            {
+              title: 'Sativa',
+              description: 'Energizing and uplifting effects',
+              products: sativaProducts,
+              color: 'green'
+            },
+            {
+              title: 'Hybrid',
+              description: 'Balanced effects combining the best of both',
+              products: hybridProducts,
+              color: 'purple'
+            },
+            {
+              title: 'Hash',
+              description: 'Traditional concentrates with potent effects',
+              products: hashProducts,
+              color: 'amber'
+            },
+            {
+              title: 'Cannabis',
+              description: 'Relaxing and calming indica strains',
+              products: cannabisProducts,
+              color: 'blue'
+            }
+          ];
+
+          return categories.map((category, categoryIndex) => {
+            if (category.products.length === 0) return null;
+
+            const colorClasses = {
+              green: {
+                header: 'bg-green-50 border-green-200',
+                title: 'text-green-800',
+                description: 'text-green-600'
+              },
+              purple: {
+                header: 'bg-purple-50 border-purple-200',
+                title: 'text-purple-800',
+                description: 'text-purple-600'
+              },
+              amber: {
+                header: 'bg-amber-50 border-amber-200',
+                title: 'text-amber-800',
+                description: 'text-amber-600'
+              },
+              blue: {
+                header: 'bg-blue-50 border-blue-200',
+                title: 'text-blue-800',
+                description: 'text-blue-600'
+              }
+            };
+
+            const colors = colorClasses[category.color as keyof typeof colorClasses];
+
+            return (
+              <motion.div
+                key={category.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: categoryIndex * 0.1 }}
+                className="mb-12"
+              >
+                {/* Category Header */}
+                <div className={`${colors.header} border rounded-xl p-6 mb-6`}>
+                  <h3 className={`text-2xl font-bold ${colors.title} mb-2`}>
+                    {category.title}
+                  </h3>
+                  <p className={`${colors.description} text-sm`}>
+                    {category.description}
+                  </p>
+                </div>
+
+                {/* Products Grid for this category */}
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {category.products.map((product: Product) => (
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
                     >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <div className="flex flex-col items-center">
-                      <span className="font-medium text-lg">{getQuantity(product.id)}g</span>
-                      <span className="text-xs text-gray-500">quantity</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => updateQuantity(product.id, getQuantity(product.id) + 1)}
-                      disabled={getQuantity(product.id) >= 5}
-                      className="w-8 h-8 p-0"
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                  
-                  <Button
-                    onClick={() => addToBasketMutation.mutate({ 
-                      productId: product.id, 
-                      quantity: getQuantity(product.id) 
-                    })}
-                    disabled={addToBasketMutation.isPending}
-                    className="w-full bg-[#116149] hover:bg-[#0d4d3a] text-white transition-colors"
-                  >
-                    Add to Selection
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                      <Card className="hover:shadow-lg transition-shadow duration-300 cursor-pointer group">
+                        <CardHeader className="pb-4">
+                          <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center group-hover:bg-gray-300 transition-colors overflow-hidden">
+                            {getProductImage(product.name) ? (
+                              <img 
+                                src={getProductImage(product.name)!} 
+                                alt={product.name} 
+                                className="w-full h-full object-cover rounded-lg" 
+                              />
+                            ) : product.imageUrl ? (
+                              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                            ) : (
+                              <span className="text-gray-500 text-sm">Image Placeholder</span>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg font-medium">{product.name}</CardTitle>
+                            <span className="text-xs text-gray-500 font-mono">#{(product as any).productCode}</span>
+                          </div>
+                          {product.category && (
+                            <Badge variant="secondary" className="w-fit">
+                              {product.category}
+                            </Badge>
+                          )}
+                        </CardHeader>
+                        <CardContent>
+                          <CardDescription className="mb-4 text-sm leading-relaxed">
+                            {product.description || 'Premium selection item'}
+                          </CardDescription>
+                          
+                          {/* Quantity Selector */}
+                          <div className="flex items-center justify-center mb-4 space-x-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateQuantity(product.id, getQuantity(product.id) - 1)}
+                              disabled={getQuantity(product.id) <= 1}
+                              className="w-8 h-8 p-0"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </Button>
+                            <div className="flex flex-col items-center">
+                              <span className="font-medium text-lg">{getQuantity(product.id)}g</span>
+                              <span className="text-xs text-gray-500">quantity</span>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateQuantity(product.id, getQuantity(product.id) + 1)}
+                              disabled={getQuantity(product.id) >= 5}
+                              className="w-8 h-8 p-0"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          
+                          <Button
+                            onClick={() => addToBasketMutation.mutate({ 
+                              productId: product.id, 
+                              quantity: getQuantity(product.id) 
+                            })}
+                            disabled={addToBasketMutation.isPending}
+                            className="w-full bg-[#116149] hover:bg-[#0d4d3a] text-white transition-colors"
+                          >
+                            Add to Selection
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            );
+          });
+        })()}
 
         {products.length === 0 && (
           <div className="text-center py-12">

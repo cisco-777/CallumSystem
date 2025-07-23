@@ -12,6 +12,17 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - External chat integration capabilities via bizichat.ai
 
 ## Recent Changes
+**July 23, 2025 - Categorized Member Inventory**
+- Organized member catalogue into 4 distinct category sections
+- Added clear section headers with color-coded styling:
+  * Sativa (green) - Energizing and uplifting effects
+  * Hybrid (purple) - Balanced effects combining the best of both
+  * Hash (amber) - Traditional concentrates with potent effects
+  * Cannabis (blue) - Relaxing and calming indica strains
+- Maintained all existing functionality (add to cart, quantity selectors, product details)
+- Enhanced visual organization with smooth animations and transitions
+- Responsive design works perfectly on mobile and desktop
+
 **July 23, 2025 - Database Integration Complete**
 - Successfully integrated PostgreSQL database using Neon
 - Migrated from in-memory storage to persistent database storage
