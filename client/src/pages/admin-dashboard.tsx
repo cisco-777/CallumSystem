@@ -148,52 +148,90 @@ export function AdminDashboard() {
   
   const customerPrefs = calculateCustomerPreferences();
   
-  // Customer search functionality
+  // Enhanced customer search functionality
   const getCustomerProfile = (userId: number) => {
     const userOrders = orders.filter((order: any) => order.userId === userId);
     const user = users.find((u: any) => u.id === userId);
     
-    if (!user || userOrders.length === 0) return null;
+    if (!user) return null;
     
-    let sativaCount = 0, indicaCount = 0, hybridCount = 0;
-    let cannabisCount = 0, hashCount = 0;
+    // Calculate spending summary
+    const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.totalPrice || '0'), 0);
+    const averageOrderValue = userOrders.length > 0 ? Math.round(totalSpent / userOrders.length) : 0;
     
-    userOrders.forEach((order: any) => {
-      if (order.items) {
-        order.items.forEach((item: any) => {
-          const category = (item.category || '').toLowerCase();
-          if (category.includes('sativa')) sativaCount++;
-          else if (category.includes('indica')) indicaCount++;
-          else hybridCount++;
-          
-          if (category.includes('hash')) hashCount++;
-          else cannabisCount++;
-        });
+    // Only calculate preferences if user has orders
+    let preferences = {
+      sativa: 0,
+      indica: 0, 
+      hybrid: 0,
+      cannabis: 0,
+      hash: 0
+    };
+    
+    if (userOrders.length > 0) {
+      let sativaCount = 0, indicaCount = 0, hybridCount = 0;
+      let cannabisCount = 0, hashCount = 0;
+      let totalItems = 0;
+      
+      userOrders.forEach((order: any) => {
+        if (order.items && Array.isArray(order.items)) {
+          order.items.forEach((item: any) => {
+            const category = (item.category || '').toLowerCase();
+            totalItems++;
+            
+            // Strain preferences
+            if (category.includes('sativa')) sativaCount++;
+            else if (category.includes('indica')) indicaCount++;
+            else hybridCount++;
+            
+            // Product type preferences
+            if (category.includes('hash')) hashCount++;
+            else cannabisCount++;
+          });
+        }
+      });
+      
+      if (totalItems > 0) {
+        preferences = {
+          sativa: Math.round((sativaCount / totalItems) * 100),
+          indica: Math.round((indicaCount / totalItems) * 100),
+          hybrid: Math.round((hybridCount / totalItems) * 100),
+          cannabis: Math.round((cannabisCount / totalItems) * 100),
+          hash: Math.round((hashCount / totalItems) * 100)
+        };
       }
-    });
-    
-    const total = sativaCount + indicaCount + hybridCount;
-    const productTotal = cannabisCount + hashCount;
+    }
     
     return {
       user,
       orderCount: userOrders.length,
-      preferences: {
-        sativa: total > 0 ? Math.round((sativaCount / total) * 100) : 0,
-        indica: total > 0 ? Math.round((indicaCount / total) * 100) : 0,
-        hybrid: total > 0 ? Math.round((hybridCount / total) * 100) : 0,
-        cannabis: productTotal > 0 ? Math.round((cannabisCount / productTotal) * 100) : 0,
-        hash: productTotal > 0 ? Math.round((hashCount / productTotal) * 100) : 0
-      },
-      recentOrders: userOrders.slice(0, 3)
+      totalSpent,
+      averageOrderValue,
+      preferences,
+      recentOrders: userOrders.slice(0, 5).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     };
   };
   
-  const filteredUsers = users.filter((user: any) => 
-    searchQuery === '' || 
-    `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (user.email || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Enhanced filtering with better search logic
+  const filteredUsers = users.filter((user: any) => {
+    if (!searchQuery.trim()) return false;
+    
+    const query = searchQuery.toLowerCase().trim();
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
+    const email = (user.email || '').toLowerCase();
+    const firstName = (user.firstName || '').toLowerCase();
+    const lastName = (user.lastName || '').toLowerCase();
+    
+    return fullName.includes(query) || 
+           email.includes(query) || 
+           firstName.includes(query) || 
+           lastName.includes(query);
+  }).filter(user => {
+    // Only show users who have at least made one order or have complete profile info
+    const hasOrders = orders.some((order: any) => order.userId === user.id);
+    const hasCompleteProfile = user.firstName && user.lastName;
+    return hasOrders || hasCompleteProfile;
+  });
 
   const scrollToOrderControl = () => {
     const orderControlSection = document.getElementById('order-control-section');
@@ -598,103 +636,229 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <Input
-                placeholder="Search customers by name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="max-w-md"
-              />
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search customers by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                    }
+                  }}
+                  className="pl-10 pr-4"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             </div>
             
             {searchQuery && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {filteredUsers.slice(0, 5).map((user: any) => {
                   const profile = getCustomerProfile(user.id);
                   if (!profile) return null;
                   
                   return (
-                    <div key={user.id} className="border rounded-lg p-4 bg-white">
-                      <div className="flex justify-between items-start mb-4">
+                    <div key={user.id} className="border-2 border-blue-200 rounded-lg p-6 bg-white shadow-sm">
+                      {/* Customer Header */}
+                      <div className="flex justify-between items-start mb-6">
                         <div>
-                          <h3 className="font-semibold text-lg">
-                            {user.firstName || ''} {user.lastName || ''}
+                          <h3 className="font-bold text-xl text-blue-800">
+                            {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Anonymous User'}
                           </h3>
-                          <p className="text-sm text-gray-600">{user.email}</p>
-                          <p className="text-xs text-gray-500">{profile.orderCount} total orders</p>
+                          <p className="text-sm text-gray-600 mt-1">{user.email}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Member since {new Date(user.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="bg-blue-100 px-3 py-1 rounded-full">
+                            <span className="text-sm font-semibold text-blue-800">
+                              {profile.orderCount} Orders
+                            </span>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Personal Preferences */}
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <h4 className="font-medium text-sm mb-2">Strain Preferences</h4>
-                          <div className="space-y-1 text-xs">
-                            <div className="flex justify-between">
-                              <span>Sativa:</span>
-                              <span className="font-medium">{profile.preferences.sativa}%</span>
+                      {/* Spending Summary */}
+                      {profile.orderCount > 0 && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                          <h4 className="font-semibold text-green-800 mb-2">💰 Spending Summary</h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-600">Total Spent:</span>
+                              <span className="font-bold text-green-700 ml-2">€{profile.totalSpent}</span>
                             </div>
-                            <div className="flex justify-between">
-                              <span>Indica:</span>
-                              <span className="font-medium">{profile.preferences.indica}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Hybrid:</span>
-                              <span className="font-medium">{profile.preferences.hybrid}%</span>
+                            <div>
+                              <span className="text-gray-600">Average Order:</span>
+                              <span className="font-bold text-green-700 ml-2">€{profile.averageOrderValue}</span>
                             </div>
                           </div>
                         </div>
-                        
-                        {/* Product Preferences */}
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <h4 className="font-medium text-sm mb-2">Product Preferences</h4>
-                          <div className="space-y-1 text-xs">
-                            <div className="flex justify-between">
-                              <span>Cannabis:</span>
-                              <span className="font-medium">{profile.preferences.cannabis}%</span>
+                      )}
+                      
+                      {profile.orderCount > 0 ? (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Strain Preferences */}
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                              <Leaf className="w-4 h-4 mr-2" />
+                              Strain Preferences
+                            </h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm">Sativa:</span>
+                                <div className="flex items-center">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div 
+                                      className="bg-blue-600 h-2 rounded-full" 
+                                      style={{width: `${profile.preferences.sativa}%`}}
+                                    ></div>
+                                  </div>
+                                  <span className="font-bold text-blue-700 text-sm">{profile.preferences.sativa}%</span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm">Indica:</span>
+                                <div className="flex items-center">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div 
+                                      className="bg-blue-600 h-2 rounded-full" 
+                                      style={{width: `${profile.preferences.indica}%`}}
+                                    ></div>
+                                  </div>
+                                  <span className="font-bold text-blue-700 text-sm">{profile.preferences.indica}%</span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm">Hybrid:</span>
+                                <div className="flex items-center">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div 
+                                      className="bg-blue-600 h-2 rounded-full" 
+                                      style={{width: `${profile.preferences.hybrid}%`}}
+                                    ></div>
+                                  </div>
+                                  <span className="font-bold text-blue-700 text-sm">{profile.preferences.hybrid}%</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex justify-between">
-                              <span>Hash:</span>
-                              <span className="font-medium">{profile.preferences.hash}%</span>
+                          </div>
+
+                          {/* Product Type Preferences */}
+                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 className="font-semibold text-purple-800 mb-3 flex items-center">
+                              <Hash className="w-4 h-4 mr-2" />
+                              Product Type Preferences
+                            </h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm">Cannabis:</span>
+                                <div className="flex items-center">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div 
+                                      className="bg-purple-600 h-2 rounded-full" 
+                                      style={{width: `${profile.preferences.cannabis}%`}}
+                                    ></div>
+                                  </div>
+                                  <span className="font-bold text-purple-700 text-sm">{profile.preferences.cannabis}%</span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm">Hash:</span>
+                                <div className="flex items-center">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div 
+                                      className="bg-purple-600 h-2 rounded-full" 
+                                      style={{width: `${profile.preferences.hash}%`}}
+                                    ></div>
+                                  </div>
+                                  <span className="font-bold text-purple-700 text-sm">{profile.preferences.hash}%</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                          <p className="text-gray-600">This customer hasn't placed any orders yet.</p>
+                        </div>
+                      )}
                       
                       {/* Recent Orders */}
-                      <div className="mt-4">
-                        <h4 className="font-medium text-sm mb-2">Recent Orders</h4>
-                        <div className="space-y-2">
-                          {profile.recentOrders.map((order: any) => (
-                            <div key={order.id} className="text-xs bg-blue-50 rounded p-2">
-                              <div className="flex justify-between">
-                                <span>Order #{order.id}</span>
-                                <span className="text-gray-500">
-                                  {new Date(order.createdAt).toLocaleDateString()}
-                                </span>
+                      {profile.recentOrders && profile.recentOrders.length > 0 && (
+                        <div className="mt-6">
+                          <h4 className="font-semibold text-gray-800 mb-3">Recent Order History</h4>
+                          <div className="space-y-3">
+                            {profile.recentOrders.map((order: any) => (
+                              <div key={order.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <span className="font-semibold text-sm">Order #{order.id}</span>
+                                    <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                      {order.status}
+                                    </span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="font-bold text-green-700">€{order.totalPrice}</div>
+                                    <div className="text-xs text-gray-500">
+                                      {new Date(order.createdAt).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  <span className="font-medium">Items:</span>
+                                  {order.items && order.items.map((item: any, idx: number) => (
+                                    <span key={idx} className="ml-1">
+                                      {item.productName}
+                                      {idx < order.items.length - 1 ? ', ' : ''}
+                                    </span>
+                                  ))}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Pickup Code: <span className="font-mono font-bold text-blue-600">{order.pickupCode}</span>
+                                </div>
                               </div>
-                              <div className="text-gray-600 mt-1">
-                                {order.items.length} items - €{order.totalPrice}
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   );
                 })}
                 
                 {filteredUsers.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    No customers found matching "{searchQuery}"
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🔍</div>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">No customers found</h3>
+                    <p className="text-gray-500">
+                      No customers match "{searchQuery}". Try searching by name or email.
+                    </p>
                   </div>
                 )}
               </div>
             )}
             
             {!searchQuery && (
-              <div className="text-center py-8 text-gray-500">
-                <Search className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                <p>Start typing to search for customers</p>
+              <div className="text-center py-12">
+                <Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Customer Search Tool</h3>
+                <p className="text-gray-500 mb-4">
+                  Search for customers by name or email to view their detailed profiles
+                </p>
+                <div className="text-sm text-gray-400">
+                  <p>• View customer preferences and order history</p>
+                  <p>• Analyze spending patterns and product preferences</p>
+                  <p>• Track customer activity and engagement</p>
+                </div>
               </div>
             )}
           </CardContent>
