@@ -308,13 +308,19 @@ export function AdminDashboard() {
       totalStockValue += value;
       potentialRevenue += value;
 
-      // Low stock alerts
-      if (stock < 120) {
-        lowStockItems.push({
-          name: product.name,
-          stock: stock,
-          critical: stock < 100
-        });
+      // Low stock alerts with proper thresholds
+      if (stock <= 100) {
+        const isCritical = stock >= 50 && stock <= 70; // Critical range: 50-70g
+        const isUrgent = stock >= 95 && stock <= 100;   // Urgent range: 95-100g
+        
+        if (isCritical || isUrgent) {
+          lowStockItems.push({
+            name: product.name,
+            stock: stock,
+            critical: isCritical, // Critical for 50-70g, Urgent for 95-100g
+            urgent: isUrgent
+          });
+        }
       }
 
       // Most profitable calculation
@@ -433,19 +439,21 @@ export function AdminDashboard() {
             <CardContent>
               {analytics.lowStockItems.length > 0 ? (
                 <div className="space-y-3">
-                  {analytics.lowStockItems.map((item, index) => (
+                  {analytics.lowStockItems.map((item: any, index) => (
                     <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
-                      item.critical ? 'bg-red-50 border border-red-200' : 'bg-orange-50 border border-orange-200'
+                      item.critical ? 'bg-red-50 border border-red-200' : 
+                      item.urgent ? 'bg-yellow-50 border border-yellow-200' : 'bg-orange-50 border border-orange-200'
                     }`}>
                       <span className="font-medium">{item.name}</span>
                       <div className="flex items-center space-x-2">
                         <span className={`text-sm font-bold ${
-                          item.critical ? 'text-red-700' : 'text-orange-700'
+                          item.critical ? 'text-red-700' : 
+                          item.urgent ? 'text-yellow-700' : 'text-orange-700'
                         }`}>
                           {item.stock}g
                         </span>
-                        <Badge variant={item.critical ? "destructive" : "secondary"}>
-                          {item.critical ? "Critical" : "Low"}
+                        <Badge variant={item.critical ? "destructive" : item.urgent ? "outline" : "secondary"}>
+                          {item.critical ? "Critical" : item.urgent ? "Urgent" : "Low"}
                         </Badge>
                       </div>
                     </div>

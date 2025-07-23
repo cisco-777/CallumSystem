@@ -12,6 +12,18 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - External chat integration capabilities via bizichat.ai
 
 ## Recent Changes
+**July 23, 2025 - Stock Level Updates and Alert Threshold Fixes**
+- Updated stock levels to realistic demonstration values:
+  * Zkittlez: 65g (Critical level)
+  * Blue Dream: 52g (Critical level) 
+  * Lemon Haze: 97g (Urgent level)
+  * Wedding Cake, Moroccan Hash, Dry-Shift Hash: Normal levels (150g+)
+- Fixed alert thresholds to match realistic inventory management:
+  * Critical alerts: 50-70g range (red background, "Critical" badge)
+  * Urgent alerts: 95-100g range (yellow background, "Urgent" badge)
+- Synchronized Low Stock Alerts and Dispensary Stock sections with same data
+- Both analytics and stock display now use updated realistic values
+
 **July 23, 2025 - Order Archiving System**
 - Modified "Delete All Orders" functionality to preserve analytics data
 - Added `archivedFromAdmin` field to orders schema for selective visibility
