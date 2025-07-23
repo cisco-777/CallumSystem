@@ -1,0 +1,36 @@
+# Replit Agent Command - Fix Hash Categorization & Add Dropdown Menu
+
+## Command: Reorganize Hash Products and Add Category Dropdown
+**Context:** The member catalogue currently has hash products only in the Hash section, but hash sativa should also appear in Sativa and hash indica should also appear in Indica sections. The page is also too long with all sections displayed.
+
+**Specific Task:** Fix hash product categorization and replace long scrolling sections with a dropdown menu system.
+
+**Requirements:**
+
+### Part 1: Fix Hash Product Categorization
+- Hash Sativa products should appear in BOTH the Hash section AND the Sativa section
+- Hash Indica products should appear in BOTH the Hash section AND the Indica section  
+- Keep all hash products in the main Hash section as well
+- Ensure products maintain all their existing functionality (add to cart, details, etc.)
+
+### Part 2: Replace Sections with Dropdown Menu
+- Remove the long scrolling layout with all sections visible
+- Add a category dropdown menu at the top of the catalogue
+- Dropdown options should be:
+  - "All Products" (shows everything)
+  - "Sativa" (shows sativa cannabis + hash sativa)
+  - "Indica" (shows indica cannabis + hash indica) 
+  - "Hybrid" (shows hybrid products)
+  - "Hash" (shows all hash products)
+  - "Cannabis" (shows all cannabis products)
+- Only display products from the selected category
+- Default to "All Products" when page loads
+- Make dropdown responsive and match existing design
+
+### Part 3: Clean Up Cannabis Section Display
+- Remove the strain name listings from the Cannabis section header/description
+- Remove text like "Premium flower strains - Zkittlez, Blue Dream, Lemon Haze, Wedding Cake"
+- Keep the section clean with just "Cannabis" as the title
+- Individual product cards can still show strain names, just remove them from the section description
+
+**Constraints:** Keep all existing product data and functionality - only change how products are categorized and displayed.

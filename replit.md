@@ -12,18 +12,18 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - External chat integration capabilities via bizichat.ai
 
 ## Recent Changes
-**July 23, 2025 - Categorized Member Inventory**
-- Organized member catalogue into 4 distinct category sections
-- Added clear section headers with color-coded styling:
-  * Sativa (green) - Energizing and uplifting effects (Sativa flower strains only)
-  * Hybrid (purple) - Balanced effects combining the best of both (Hybrid flower strains only)
-  * Hash (amber) - Traditional concentrates with potent effects (Moroccan Hash, Dry-Shift Hash)
-  * Cannabis (blue) - Premium flower strains (Zkittlez, Blue Dream, Lemon Haze, Wedding Cake)
-- Cannabis section contains all flower products regardless of strain type
-- Hash section contains only concentrate products
+**July 23, 2025 - Dropdown Category Filter System**
+- Replaced long scrolling sections with compact dropdown menu system
+- Added category dropdown with options: All Products, Sativa, Indica, Hybrid, Hash, Cannabis
+- Fixed hash product categorization logic:
+  * Hash Sativa products appear in both Hash and Sativa filters
+  * Hash Indica products appear in both Hash and Indica filters
+  * Cannabis filter shows all flower products (no hash)
+  * Hash filter shows all hash products regardless of strain type
+- Improved page layout - no more endless scrolling through categories
+- Responsive dropdown design matches existing UI styling
+- Default view shows "All Products" on page load
 - Maintained all existing functionality (add to cart, quantity selectors, product details)
-- Enhanced visual organization with smooth animations and transitions
-- Responsive design works perfectly on mobile and desktop
 
 **July 23, 2025 - Database Integration Complete**
 - Successfully integrated PostgreSQL database using Neon
