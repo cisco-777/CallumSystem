@@ -46,6 +46,7 @@ export interface IStorage {
   getAllOrders(): Promise<Order[]>;
   updateOrderStatus(orderId: number, status: string): Promise<Order>;
   confirmOrderAndReduceStock(orderId: number): Promise<Order>;
+  deleteAllOrders(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -208,6 +209,10 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedOrder;
+  }
+
+  async deleteAllOrders(): Promise<void> {
+    await db.delete(orders);
   }
 }
 

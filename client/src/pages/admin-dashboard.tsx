@@ -83,12 +83,41 @@ export function AdminDashboard() {
     }
   });
 
+  const deleteAllOrdersMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('/api/orders/all', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      toast({
+        title: "All Orders Deleted",
+        description: "All existing orders have been cleared from the system.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete all orders.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const updateOrderStatus = (orderId: number, status: string) => {
     updateOrderStatusMutation.mutate({ orderId, status });
   };
 
   const confirmOrder = (orderId: number) => {
     confirmOrderMutation.mutate(orderId);
+  };
+
+  const deleteAllOrders = () => {
+    if (window.confirm("Are you sure you want to delete ALL existing orders? This action cannot be undone.")) {
+      deleteAllOrdersMutation.mutate();
+    }
   };
 
   const mockOrders = [
@@ -867,7 +896,20 @@ export function AdminDashboard() {
         {/* Order Control Center */}
         <Card id="order-control-section" className="mb-8">
           <CardHeader>
-            <CardTitle>Order Control Center</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>Order Control Center</CardTitle>
+              {orders.length > 0 && (
+                <Button
+                  onClick={deleteAllOrders}
+                  disabled={deleteAllOrdersMutation.isPending}
+                  size="sm"
+                  variant="destructive"
+                  className="ml-4"
+                >
+                  {deleteAllOrdersMutation.isPending ? 'Deleting...' : 'Delete All Orders'}
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

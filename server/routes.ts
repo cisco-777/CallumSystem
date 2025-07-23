@@ -313,6 +313,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/orders/all", async (req, res) => {
+    try {
+      await storage.deleteAllOrders();
+      res.json({ message: "All orders deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete all orders" });
+    }
+  });
+
   // Seed some initial products
   app.post("/api/seed-products", async (req, res) => {
     try {
