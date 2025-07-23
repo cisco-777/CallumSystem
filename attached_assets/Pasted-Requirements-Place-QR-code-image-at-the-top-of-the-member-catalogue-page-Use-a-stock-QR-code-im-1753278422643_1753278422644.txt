@@ -1,0 +1,34 @@
+Requirements:
+
+Place QR code image at the top of the member catalogue page
+Use a stock QR code image for now (placeholder for future unique codes)
+Position it prominently but not interfering with existing layout
+Add appropriate styling to make it look professional
+Ensure John Doe (demo account) also displays the QR code on his catalogue
+Make it responsive for both mobile and desktop views
+Add a small label like "Member QR Code" or "Your QR Code" above or below the image
+Constraints: Only add the QR code display to the member catalogue - do not modify admin dashboard or other functionality. Use placeholder/stock QR code image for now.
+
+Replit Agent Command - Add QR Scanner & Update Completion Message
+Command: Add QR Scanner Button and Update Order Completion Flow
+Context: I need to add QR scanning functionality for staff and update the user experience when completing orders.
+Specific Task: Add a QR scanner button to admin dashboard and change the order completion message for users.
+Requirements:
+Part 1: Add QR Scanner Button to Admin Dashboard
+
+Add a prominent "Scan QR Code" button to the admin dashboard
+Position it in a logical location (near other admin tools/actions)
+Style it to match existing admin dashboard buttons
+Make it clearly visible and accessible for staff
+Button should be non-functional for now (no logic behind it)
+Add appropriate icon (camera or QR code icon if available)
+
+Part 2: Update Order Completion Message
+
+Find where users currently receive the 4-digit code message after clicking "complete donation"
+Replace the current message with new text that directs them to the counter
+New message should say something like: "Order completed! Please proceed to the counter and show your QR code to our staff member for collection."
+Make the message clear, professional, and user-friendly
+Ensure the message fits well within the existing UI design
+
+Constraints: Only add the button and update the message - no backend functionality needed for the scanner yet.

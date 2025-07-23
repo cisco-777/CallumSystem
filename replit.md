@@ -12,6 +12,16 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - External chat integration capabilities via bizichat.ai
 
 ## Recent Changes
+**July 23, 2025 - QR Code Integration and Order Flow Updates**
+- Added QR code display to member catalogue page for all users
+- QR code prominently positioned at top of catalogue with professional styling
+- Updated order completion message: "Please proceed to the counter and show your QR code to our staff member for collection"
+- Added "Scan QR Code" button to admin dashboard header with QR code icon
+- QR scanner button positioned logically with other admin tools
+- Removed pickup code reference from completion flow in favor of QR code process
+- Both demo member (John Doe) and regular members see the QR code display
+- Responsive design ensures QR code works on mobile and desktop
+
 **July 23, 2025 - Stock Level Updates and Alert Threshold Fixes**
 - Updated stock levels to realistic demonstration values:
   * Zkittlez: 65g (Critical level)

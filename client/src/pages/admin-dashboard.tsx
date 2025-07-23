@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export function AdminDashboard() {
@@ -367,6 +367,13 @@ export function AdminDashboard() {
             <p className="text-gray-600 mt-1">The Bud House Social Club Management</p>
           </div>
           <div className="flex space-x-4">
+            <Button
+              onClick={() => toast({ title: "QR Scanner", description: "QR code scanning functionality will be available soon." })}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <QrCode className="w-4 h-4 mr-2" />
+              Scan QR Code
+            </Button>
             <Button
               onClick={scrollToOrderControl}
               className="bg-blue-600 hover:bg-blue-700 text-white"
