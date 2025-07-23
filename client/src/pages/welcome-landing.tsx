@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import barcelonaImage from '@assets/Barcelona_1753192664105.jpg';
+import benalmadenaImage from '@assets/Benalmadena port_1753265960255.jpg';
 
 interface WelcomeLandingProps {
   onEnter: () => void;
@@ -16,7 +16,7 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
       <div 
         className="absolute inset-0 transition-transform duration-700 ease-out"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('${barcelonaImage}')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('${benalmadenaImage}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -39,7 +39,7 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            La Cultura
+            The Bud House
           </motion.h1>
           
           <motion.h2 

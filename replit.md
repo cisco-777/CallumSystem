@@ -11,9 +11,15 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - Modular component architecture with shadcn/ui components
 - External chat integration capabilities via bizichat.ai
 
+## Recent Changes
+- Updated branding from "La Cultura Social Club" to "The Bud House Social Club" (July 23, 2025)
+- Changed location reference from "Barcelona's chillest stop" to "Benalmadena's chillest spot"
+- Updated background image from Barcelona to Benalmadena port across all landing pages
+- Updated CSS theme color variable names from "lc-" prefix to "tbh-" prefix
+
 ## Key Features
 - Email-first authentication flow with onboarding questionnaire
-- Welcome landing page with "La Cultura Social Club" branding
+- Welcome landing page with "The Bud House Social Club" branding
 - Welcome message screen with cannabis disclaimers and policies
 - Member area with catalogue-style product browsing and donation system
 - Admin dashboard with member management and bouncer communication hub
@@ -21,9 +27,9 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 
 ## Recent Changes
 **July 22, 2025**
-- Updated all branding from "GreenMoon" to "La Cultura" throughout the application
-- Changed tagline from "GreenMoon's chillest stop" to "Barcelona's chillest stop"
-- Updated CSS theme color variable names from --gmc- to --lc- prefix
+- Updated all branding from "GreenMoon" to "La Cultura" throughout the application (later updated to "The Bud House")
+- Changed tagline from "GreenMoon's chillest stop" to "Barcelona's chillest stop" (later updated to "Benalmadena's chillest spot")
+- Updated CSS theme color variable names from --gmc- to --lc- prefix (later updated to --tbh- prefix)
 - Maintained consistent brand identity across all pages and components
 
 **July 20, 2025**

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Navigation } from '@/components/navigation';
 import { CheckCircle, Heart, Gift, User, Calendar, Users } from 'lucide-react';
-import barcelonaImage from '@assets/Barcelona_1753192664105.jpg';
+import benalmadenaImage from '@assets/Benalmadena port_1753265960255.jpg';
 import loungeImage from '@assets/lounge_1750505580573.jpg';
 
 export function SinglePageHome() {
@@ -27,7 +27,7 @@ export function SinglePageHome() {
         id="home" 
         className="pt-16 pb-20 relative"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${barcelonaImage}')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${benalmadenaImage}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -36,7 +36,7 @@ export function SinglePageHome() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-white">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Welcome To La Cultura Social Club
+              Welcome To The Bud House Social Club
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
               Order your favorite products, check updates, and manage your account — all in one place.

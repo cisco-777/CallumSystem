@@ -37,7 +37,7 @@ export function Navigation() {
             onClick={() => scrollToSection('home')}
             className="flex items-center cursor-pointer"
           >
-            <span className="font-bold text-xl text-[#116149]">La Cultura Social Club</span>
+            <span className="font-bold text-xl text-[#116149]">The Bud House Social Club</span>
           </button>
           
           {/* Desktop Navigation */}
