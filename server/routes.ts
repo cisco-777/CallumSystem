@@ -213,8 +213,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate random 4-digit pickup code
       const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
       
-      // Calculate total price using pickup code logic (last 2 digits)
-      const totalPrice = pickupCode.slice(-2);
+      // Calculate total price using product reference codes (last 2 digits)
+      const totalPrice = basketItems.reduce((sum, item) => {
+        const productCode = (item.product as any)?.productCode || '';
+        const price = parseInt(productCode.slice(-2)) || 10;
+        return sum + (item.quantity * price);
+      }, 0).toString();
       
       // Prepare order data
       const orderData = {

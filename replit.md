@@ -13,10 +13,11 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 
 ## Recent Changes
 **July 23, 2025 - Fixed Critical Pricing Logic**
-- Updated ALL orders to use pickup code pricing logic (last 2 digits of pickup code = total price)
+- Corrected ALL orders to use product reference code pricing logic (last 2 digits of product codes)
 - Fixed product names in orders to show actual product names instead of strain types
-- Applied pickup code pricing to all existing orders: 4721→€21, 8394→€94, 5619→€19, 2847→€47, 7352→€52, 9164→€64, 3758→€58, 3234→€34
-- Updated donation route to automatically calculate future order prices using pickup code logic
+- Applied product reference pricing: ZK4312→€12, BD7010→€10, LH2213→€13, WC9615→€15, MH5812→€12, DS1410→€10
+- Updated all existing orders with correct product-based pricing calculations
+- Updated donation route to calculate prices using product reference codes, not pickup codes
 - Ensured pricing only visible to admin, never to members/users
 - Fixed Order Control Center to display proper product names and calculated prices
 
