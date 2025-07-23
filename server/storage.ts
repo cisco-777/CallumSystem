@@ -44,6 +44,7 @@ export interface IStorage {
   getOrderByPickupCode(pickupCode: string): Promise<Order | undefined>;
   getUserOrders(userId: number): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
+  getAllOrdersForAnalytics(): Promise<Order[]>;
   updateOrderStatus(orderId: number, status: string): Promise<Order>;
   confirmOrderAndReduceStock(orderId: number): Promise<Order>;
   deleteAllOrders(): Promise<void>;
@@ -174,6 +175,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllOrders(): Promise<Order[]> {
+    return await db.select().from(orders).where(eq(orders.archivedFromAdmin, false)).orderBy(desc(orders.createdAt));
+  }
+
+  async getAllOrdersForAnalytics(): Promise<Order[]> {
+    // Return all orders including archived ones for analytics calculations
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
 
@@ -212,7 +218,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteAllOrders(): Promise<void> {
-    await db.delete(orders);
+    // Archive orders from admin view instead of deleting (preserves analytics data)
+    await db.update(orders).set({ archivedFromAdmin: true });
   }
 }
 

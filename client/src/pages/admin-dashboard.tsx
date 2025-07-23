@@ -35,6 +35,14 @@ export function AdminDashboard() {
     }
   });
 
+  // Separate query for analytics that includes all orders (including archived)
+  const { data: analyticsOrders = [] } = useQuery({
+    queryKey: ['/api/orders/analytics'],
+    queryFn: async () => {
+      return await apiRequest('/api/orders/analytics');
+    }
+  });
+
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
       return await apiRequest(`/api/orders/${orderId}/status`, {
@@ -93,8 +101,8 @@ export function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       toast({
-        title: "All Orders Deleted",
-        description: "All existing orders have been cleared from the system.",
+        title: "Orders Cleared",
+        description: "All orders removed from Order Control Center. Customer analytics preserved.",
       });
     },
     onError: () => {
@@ -115,7 +123,7 @@ export function AdminDashboard() {
   };
 
   const deleteAllOrders = () => {
-    if (window.confirm("Are you sure you want to delete ALL existing orders? This action cannot be undone.")) {
+    if (window.confirm("Are you sure you want to remove ALL orders from the Order Control Center? Orders will be archived but customer history and analytics will be preserved.")) {
       deleteAllOrdersMutation.mutate();
     }
   };
@@ -129,13 +137,13 @@ export function AdminDashboard() {
 
   // Calculate customer preferences
   const calculateCustomerPreferences = () => {
-    if (!Array.isArray(orders) || orders.length === 0) return null;
+    if (!Array.isArray(analyticsOrders) || analyticsOrders.length === 0) return null;
     
     let sativaCount = 0, indicaCount = 0, hybridCount = 0;
     let cannabisCount = 0, hashCount = 0;
     const categoryCount: { [key: string]: number } = {};
     
-    orders.forEach((order: any) => {
+    analyticsOrders.forEach((order: any) => {
       if (order.items) {
         order.items.forEach((item: any) => {
           const category = (item.category || '').toLowerCase();
@@ -169,7 +177,7 @@ export function AdminDashboard() {
         hash: productTotal > 0 ? Math.round((hashCount / productTotal) * 100) : 0
       },
       popularCategories: Object.entries(categoryCount)
-        .sort(([,a], [,b]) => b - a)
+        .sort(([,a], [,b]) => (b as number) - (a as number))
         .slice(0, 3)
         .map(([category, count]) => ({ category, count }))
     };
@@ -179,13 +187,13 @@ export function AdminDashboard() {
   
   // Enhanced customer search functionality
   const getCustomerProfile = (userId: number) => {
-    const userOrders = orders.filter((order: any) => order.userId === userId);
+    const userOrders = analyticsOrders.filter((order: any) => order.userId === userId);
     const user = users.find((u: any) => u.id === userId);
     
     if (!user) return null;
     
     // Calculate spending summary
-    const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.totalPrice || '0'), 0);
+    const totalSpent = userOrders.reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || '0'), 0);
     const averageOrderValue = userOrders.length > 0 ? Math.round(totalSpent / userOrders.length) : 0;
     
     // Only calculate preferences if user has orders
@@ -906,7 +914,7 @@ export function AdminDashboard() {
                   variant="destructive"
                   className="ml-4"
                 >
-                  {deleteAllOrdersMutation.isPending ? 'Deleting...' : 'Delete All Orders'}
+                  {deleteAllOrdersMutation.isPending ? 'Archiving...' : 'Clear All Orders'}
                 </Button>
               )}
             </div>

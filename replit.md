@@ -12,6 +12,15 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 - External chat integration capabilities via bizichat.ai
 
 ## Recent Changes
+**July 23, 2025 - Order Archiving System**
+- Modified "Delete All Orders" functionality to preserve analytics data
+- Added `archivedFromAdmin` field to orders schema for selective visibility
+- Order Control Center now shows only active orders (archivedFromAdmin=false)
+- Customer analytics, preferences, and search profiles use all orders including archived
+- Changed UI from "Delete All Orders" to "Clear All Orders" with accurate messaging
+- Preserved all customer spending summaries, order history, and admin dashboard analytics
+- Added separate `/api/orders/analytics` endpoint for comprehensive order data access
+
 **July 23, 2025 - Fixed Critical Pricing Logic**
 - Corrected ALL orders to use product reference code pricing logic (last 2 digits of product codes)
 - Fixed product names in orders to show actual product names instead of strain types

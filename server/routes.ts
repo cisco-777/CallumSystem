@@ -259,6 +259,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Order routes
+  app.get("/api/orders/analytics", async (req, res) => {
+    try {
+      // Get all orders including archived for analytics calculations
+      const orders = await storage.getAllOrdersForAnalytics();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics data" });
+    }
+  });
+
   app.get("/api/orders", async (req, res) => {
     try {
       // For admin interface, get all orders, for users get user orders

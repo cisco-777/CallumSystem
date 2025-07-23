@@ -57,6 +57,7 @@ export const orders = pgTable("orders", {
   quantities: jsonb("quantities").notNull(),
   totalPrice: text("total_price").notNull(),
   status: text("status").default("pending"),
+  archivedFromAdmin: boolean("archived_from_admin").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
