@@ -15,10 +15,12 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
 **July 23, 2025 - Categorized Member Inventory**
 - Organized member catalogue into 4 distinct category sections
 - Added clear section headers with color-coded styling:
-  * Sativa (green) - Energizing and uplifting effects
-  * Hybrid (purple) - Balanced effects combining the best of both
-  * Hash (amber) - Traditional concentrates with potent effects
-  * Cannabis (blue) - Relaxing and calming indica strains
+  * Sativa (green) - Energizing and uplifting effects (Sativa flower strains only)
+  * Hybrid (purple) - Balanced effects combining the best of both (Hybrid flower strains only)
+  * Hash (amber) - Traditional concentrates with potent effects (Moroccan Hash, Dry-Shift Hash)
+  * Cannabis (blue) - Premium flower strains (Zkittlez, Blue Dream, Lemon Haze, Wedding Cake)
+- Cannabis section contains all flower products regardless of strain type
+- Hash section contains only concentrate products
 - Maintained all existing functionality (add to cart, quantity selectors, product details)
 - Enhanced visual organization with smooth animations and transitions
 - Responsive design works perfectly on mobile and desktop

@@ -347,12 +347,15 @@ export function Dashboard({ onLogout }: DashboardProps) {
         {/* Categorized Product Display */}
         {(() => {
           // Organize products by category
-          const sativaProducts = products.filter((p: Product) => p.category === 'Sativa');
-          const hybridProducts = products.filter((p: Product) => p.category === 'Hybrid');
+          const sativaProducts = products.filter((p: Product) => p.category === 'Sativa' && !p.name?.toLowerCase().includes('hash'));
+          const hybridProducts = products.filter((p: Product) => p.category === 'Hybrid' && !p.name?.toLowerCase().includes('hash'));
           const hashProducts = products.filter((p: Product) => 
-            p.name?.toLowerCase().includes('hash') || p.category?.toLowerCase().includes('hash')
+            p.name?.toLowerCase().includes('hash')
           );
-          const cannabisProducts = products.filter((p: Product) => p.category === 'Indica');
+          const cannabisProducts = products.filter((p: Product) => 
+            !p.name?.toLowerCase().includes('hash') && 
+            (p.category === 'Indica' || p.category === 'Sativa' || p.category === 'Hybrid')
+          );
 
           const categories = [
             {
@@ -375,7 +378,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
             },
             {
               title: 'Cannabis',
-              description: 'Relaxing and calming indica strains',
+              description: 'Premium flower strains - Zkittlez, Blue Dream, Lemon Haze, Wedding Cake',
               products: cannabisProducts,
               color: 'blue'
             }
