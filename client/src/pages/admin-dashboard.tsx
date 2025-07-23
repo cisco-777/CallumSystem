@@ -818,7 +818,7 @@ export function AdminDashboard() {
                                   <span className="font-medium">Items:</span>
                                   {order.items && order.items.map((item: any, idx: number) => (
                                     <span key={idx} className="ml-1">
-                                      {item.productName}
+                                      {item.name}
                                       {idx < order.items.length - 1 ? ', ' : ''}
                                     </span>
                                   ))}
@@ -898,7 +898,7 @@ export function AdminDashboard() {
                         const quantity = order.quantities.find((q: any) => q.productId === item.productId)?.quantity || 1;
                         return (
                           <div key={index} className="flex justify-between text-sm">
-                            <span>{item.productName} ({item.category})</span>
+                            <span>{item.name}</span>
                             <span>{quantity}g</span>
                           </div>
                         );
