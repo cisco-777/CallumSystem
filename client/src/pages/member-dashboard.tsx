@@ -105,7 +105,7 @@ export function MemberDashboard() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Member Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome back, Demo Member</p>
+            <p className="text-gray-600 mt-1">Welcome back, John Doe</p>
           </div>
           <Button
             onClick={handleLogout}
