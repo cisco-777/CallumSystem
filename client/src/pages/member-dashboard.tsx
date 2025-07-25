@@ -5,8 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { Calendar, TrendingUp, Heart, Bell, LogOut, BarChart3 } from 'lucide-react';
-import { RightNavigation } from '@/components/right-navigation';
-import { useToast } from '@/hooks/use-toast';
 
 interface DonationRecord {
   id: number;
@@ -26,46 +24,6 @@ interface DonationRecord {
 
 export function MemberDashboard() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-
-  // Get current user for navigation
-  const currentUser = (() => {
-    const savedUser = localStorage.getItem('msc-user');
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      return user.email === 'demo@member.com' ? 'John Doe' : user.email;
-    }
-    return 'Member';
-  })();
-
-  // Handle navigation for member dashboard
-  const handleMemberNavigate = (section: string) => {
-    switch (section) {
-      case 'dashboard':
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        break;
-      case 'analytics':
-        document.getElementById('member-analytics')?.scrollIntoView({ behavior: 'smooth' });
-        break;
-      case 'donations':
-        document.getElementById('donation-history')?.scrollIntoView({ behavior: 'smooth' });
-        break;
-      case 'profile':
-        toast({
-          title: "Profile",
-          description: "Profile management coming soon.",
-        });
-        break;
-      default:
-        break;
-    }
-  };
-
-  // Handle member logout
-  const handleMemberLogout = () => {
-    localStorage.removeItem('msc-user');
-    setLocation('/login');
-  };
 
   const { data: donationHistory = [] } = useQuery<DonationRecord[]>({
     queryKey: ['/api/member/donations']
@@ -142,13 +100,6 @@ export function MemberDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 mobile-p-3">
-      {/* Right Navigation */}
-      <RightNavigation 
-        type="member" 
-        onLogout={handleMemberLogout}
-        currentUser={currentUser}
-        onNavigate={handleMemberNavigate}
-      />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
@@ -218,7 +169,7 @@ export function MemberDashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8" id="donation-history">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Donation History */}
           <Card>
             <CardHeader>
