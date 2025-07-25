@@ -25,6 +25,8 @@ A comprehensive cannabis-themed social platform featuring an engaging member man
   * Login page
   * Admin panel
 - Updated CSS theme color variable names from --tbh- prefix to --marbella- prefix
+- Fixed member catalogue welcome message from "Demo Member" to "John Doe" for demo@member.com
+- Fixed remaining "La Cultura Social Club" reference to "Marbella Social Club" in member catalogue header
 - Maintained all functionality while completely rebranding the platform
 
 **July 23, 2025 - QR Code Integration and Order Flow Updates**

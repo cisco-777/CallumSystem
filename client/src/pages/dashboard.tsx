@@ -203,7 +203,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-light text-gray-900">La Cultura Social Club</h1>
+            <h1 className="text-2xl font-light text-gray-900">Marbella Social Club</h1>
             <p className="text-sm text-gray-500">Member Catalogue</p>
           </div>
           
@@ -240,7 +240,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
           <div className="mb-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 border-2 border-green-200 shadow-lg">
             {/* Welcome Header */}
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, Demo Member!</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, John Doe!</h2>
               <p className="text-gray-600 text-lg">Your personalized member dashboard</p>
             </div>
 
