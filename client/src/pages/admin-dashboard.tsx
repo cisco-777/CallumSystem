@@ -414,7 +414,7 @@ export function AdminDashboard() {
             <h1 className="mobile-h1 font-bold text-gray-900">Admin Dashboard</h1>
             <p className="mobile-text-sm text-gray-600 mt-1">Marbella Social Club Management</p>
           </div>
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <AlertDialog open={showFailsafeDialog} onOpenChange={setShowFailsafeDialog}>
               <AlertDialogTrigger asChild>
                 <Button className="bg-red-600 hover:bg-red-700 text-white font-bold mobile-btn-md mobile-touch-target w-full sm:w-auto">
@@ -459,13 +459,6 @@ export function AdminDashboard() {
             >
               <QrCode className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">Scan QR Code</span>
-            </Button>
-            <Button
-              onClick={() => toast({ title: "Navigation", description: "Use the navigation panel to scroll to different sections." })}
-              className="bg-blue-600 hover:bg-blue-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              <span className="mobile-text-sm">Quick Nav</span>
             </Button>
           </div>
         </div>
