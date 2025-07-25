@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { Calendar, TrendingUp, Heart, Bell, LogOut, BarChart3 } from 'lucide-react';
+import { RightNavigation } from '@/components/right-navigation';
 
 interface DonationRecord {
   id: number;
@@ -100,7 +101,12 @@ export function MemberDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 mobile-p-3">
-      <div className="max-w-7xl mx-auto">
+      {/* Right Navigation */}
+      <RightNavigation 
+        type="member" 
+        onLogout={handleLogout} 
+      />
+      <div className="max-w-7xl mx-auto main-content-with-nav">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>

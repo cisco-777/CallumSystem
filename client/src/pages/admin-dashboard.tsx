@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert } from 'lucide-react';
+import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -403,7 +404,15 @@ export function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 mobile-p-3">
-      <div className="max-w-7xl mx-auto">
+      {/* Right Navigation */}
+      <RightNavigation 
+        type="admin" 
+        onLogout={() => {
+          localStorage.removeItem('msc-admin-authenticated');
+          window.location.href = '/admin-login';
+        }} 
+      />
+      <div className="max-w-7xl mx-auto main-content-with-nav">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>

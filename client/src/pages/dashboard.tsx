@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { Product, BasketItem } from '@shared/schema';
+import { RightNavigation } from '@/components/right-navigation';
 
 // Import cannabis product images
 import zkittlezImg from '@assets/Zkittlez_1751388449553.png';
@@ -199,6 +200,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Right Navigation */}
+      <RightNavigation 
+        type="member" 
+        onLogout={onLogout} 
+        onShowBasket={() => setShowBasket(true)} 
+        basketCount={basketCount} 
+      />
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-6xl mx-auto mobile-p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
@@ -235,7 +243,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
       </header>
 
       {/* Products Grid */}
-      <main className="max-w-6xl mx-auto mobile-p-3 py-6 sm:py-8">
+      <main className="max-w-6xl mx-auto mobile-p-3 py-6 sm:py-8 main-content-with-nav">
         {/* Member Dashboard Section - Only for demo member */}
         {isDemoMember && (
           <div className="mb-8 sm:mb-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl mobile-p-4 border-2 border-green-200 shadow-lg">
