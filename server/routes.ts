@@ -215,9 +215,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Calculate total price using product reference codes (last 2 digits)
       const totalPrice = basketItems.reduce((sum, item) => {
-        const productCode = (item.product as any)?.productCode || '';
+        const productCode = (item as any).product?.productCode || '';
         const price = parseInt(productCode.slice(-2)) || 10;
-        return sum + (item.quantity * price);
+        return sum + ((item.quantity || 1) * price);
       }, 0).toString();
       
       // Prepare order data
@@ -225,14 +225,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         pickupCode,
         items: basketItems.map(item => ({
-          name: item.product?.name,
-          category: item.product?.category,
+          name: (item as any).product?.name,
+          category: (item as any).product?.category,
           productId: item.productId,
-          productCode: (item.product as any)?.productCode
+          productCode: (item as any).product?.productCode
         })),
         quantities: basketItems.map(item => ({
           productId: item.productId,
-          quantity: item.quantity
+          quantity: item.quantity || 1
         })),
         totalPrice
       };
