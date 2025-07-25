@@ -396,8 +396,6 @@ export function AdminDashboard() {
             </div>
             <p className="text-sm">All admin interface data has been permanently deleted.</p>
           </div>
-          
-          <p className="text-gray-600 text-sm mt-8">System will restore automatically...</p>
         </div>
       </div>
     );
