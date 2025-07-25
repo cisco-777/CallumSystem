@@ -402,20 +402,20 @@ export function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 mobile-p-3">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-1">Marbella Social Club Management</p>
+            <h1 className="mobile-h1 font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="mobile-text-sm text-gray-600 mt-1">Marbella Social Club Management</p>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-4">
             <AlertDialog open={showFailsafeDialog} onOpenChange={setShowFailsafeDialog}>
               <AlertDialogTrigger asChild>
-                <Button className="bg-red-600 hover:bg-red-700 text-white font-bold">
+                <Button className="bg-red-600 hover:bg-red-700 text-white font-bold mobile-btn-md mobile-touch-target w-full sm:w-auto">
                   <TriangleAlert className="w-4 h-4 mr-2" />
-                  FAILSAFE!
+                  <span className="mobile-text-sm">FAILSAFE!</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className="max-w-md">
@@ -451,42 +451,42 @@ export function AdminDashboard() {
             
             <Button
               onClick={() => toast({ title: "QR Scanner", description: "QR code scanning functionality will be available soon." })}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
             >
               <QrCode className="w-4 h-4 mr-2" />
-              Scan QR Code
+              <span className="mobile-text-sm">Scan QR Code</span>
             </Button>
             <Button
               onClick={scrollToOrderControl}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              Order Control
+              <span className="mobile-text-sm">Order Control</span>
             </Button>
           </div>
         </div>
 
         {/* Inventory Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="mobile-admin-grid mb-6 sm:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Stock Value</CardTitle>
+              <CardTitle className="mobile-text-xs font-medium">Total Stock Value</CardTitle>
               <DollarSign className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-700">€{analytics.totalStockValue}</div>
-              <p className="text-xs text-muted-foreground">Current inventory value</p>
+              <div className="mobile-text-lg font-bold text-green-700">€{analytics.totalStockValue}</div>
+              <p className="mobile-text-xs text-muted-foreground">Current inventory value</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Stock Status</CardTitle>
+              <CardTitle className="mobile-text-xs font-medium">Stock Status</CardTitle>
               <Package className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-700">{products.length}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="mobile-text-lg font-bold text-blue-700">{products.length}</div>
+              <p className="mobile-text-xs text-muted-foreground">
                 {analytics.lowStockItems.length > 0 ? `${analytics.lowStockItems.length} need restocking` : 'All well stocked'}
               </p>
             </CardContent>
@@ -494,54 +494,54 @@ export function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Average Stock</CardTitle>
+              <CardTitle className="mobile-text-xs font-medium">Average Stock</CardTitle>
               <BarChart3 className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-700">{analytics.averageStock}g</div>
-              <p className="text-xs text-muted-foreground">Per product average</p>
+              <div className="mobile-text-lg font-bold text-purple-700">{analytics.averageStock}g</div>
+              <p className="mobile-text-xs text-muted-foreground">Per product average</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Potential Revenue</CardTitle>
+              <CardTitle className="mobile-text-xs font-medium">Potential Revenue</CardTitle>
               <TrendingUp className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-700">€{analytics.potentialRevenue}</div>
-              <p className="text-xs text-muted-foreground">If all stock sold</p>
+              <div className="mobile-text-lg font-bold text-orange-700">€{analytics.potentialRevenue}</div>
+              <p className="mobile-text-xs text-muted-foreground">If all stock sold</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Analytics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Low Stock Alerts */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <AlertCircle className="w-5 h-5 mr-2 text-orange-600" />
+              <CardTitle className="flex items-center mobile-text-base">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-600" />
                 Low Stock Alerts
               </CardTitle>
             </CardHeader>
             <CardContent>
               {analytics.lowStockItems.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {analytics.lowStockItems.map((item: any, index) => (
-                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
+                    <div key={index} className={`flex items-center justify-between mobile-p-2 rounded-lg ${
                       item.critical ? 'bg-red-50 border border-red-200' : 
                       item.urgent ? 'bg-yellow-50 border border-yellow-200' : 'bg-orange-50 border border-orange-200'
                     }`}>
-                      <span className="font-medium">{item.name}</span>
-                      <div className="flex items-center space-x-2">
-                        <span className={`text-sm font-bold ${
+                      <span className="mobile-text-sm font-medium">{item.name}</span>
+                      <div className="flex items-center space-x-1 sm:space-x-2">
+                        <span className={`mobile-text-xs font-bold ${
                           item.critical ? 'text-red-700' : 
                           item.urgent ? 'text-yellow-700' : 'text-orange-700'
                         }`}>
                           {item.stock}g
                         </span>
-                        <Badge variant={item.critical ? "destructive" : item.urgent ? "outline" : "secondary"}>
+                        <Badge variant={item.critical ? "destructive" : item.urgent ? "outline" : "secondary"} className="mobile-text-xs">
                           {item.critical ? "Critical" : item.urgent ? "Urgent" : "Low"}
                         </Badge>
                       </div>
@@ -549,10 +549,10 @@ export function AdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-green-600">
-                  <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p className="font-medium">All products well stocked!</p>
-                  <p className="text-sm text-gray-500">No restocking needed</p>
+                <div className="text-center py-6 sm:py-8 text-green-600">
+                  <Package className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                  <p className="mobile-text-sm font-medium">All products well stocked!</p>
+                  <p className="mobile-text-xs text-gray-500">No restocking needed</p>
                 </div>
               )}
             </CardContent>
@@ -561,44 +561,44 @@ export function AdminDashboard() {
           {/* Product Performance */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
+              <CardTitle className="flex items-center mobile-text-base">
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
                 Product Performance
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {analytics.mostProfitable && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-green-800 mb-2">Most Profitable</h4>
-                    <p className="text-lg font-bold text-green-700">{analytics.mostProfitable.name}</p>
-                    <p className="text-sm text-green-600">
+                  <div className="bg-green-50 border border-green-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Most Profitable</h4>
+                    <p className="mobile-text-base font-bold text-green-700">{analytics.mostProfitable.name}</p>
+                    <p className="mobile-text-xs text-green-600">
                       €{analytics.mostProfitable.price}/g with {analytics.mostProfitable.stock}g in stock
                     </p>
-                    <p className="text-xs text-green-500 mt-1">
+                    <p className="mobile-text-xs text-green-500 mt-1">
                       Total value: €{analytics.mostProfitable.value}
                     </p>
                   </div>
                 )}
                 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-blue-800 mb-3">Strain Type Breakdown</h4>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg mobile-p-3">
+                  <h4 className="mobile-text-sm font-semibold text-blue-800 mb-3">Strain Type Breakdown</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm">Indica:</span>
-                      <span className="font-medium text-blue-700">
+                      <span className="mobile-text-xs">Indica:</span>
+                      <span className="mobile-text-xs font-medium text-blue-700">
                         {Math.round((analytics.strainBreakdown.indica / products.length) * 100)}%
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm">Sativa:</span>
-                      <span className="font-medium text-blue-700">
+                      <span className="mobile-text-xs">Sativa:</span>
+                      <span className="mobile-text-xs font-medium text-blue-700">
                         {Math.round((analytics.strainBreakdown.sativa / products.length) * 100)}%
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm">Hybrid:</span>
-                      <span className="font-medium text-blue-700">
+                      <span className="mobile-text-xs">Hybrid:</span>
+                      <span className="mobile-text-xs font-medium text-blue-700">
                         {Math.round((analytics.strainBreakdown.hybrid / products.length) * 100)}%
                       </span>
                     </div>
@@ -610,31 +610,31 @@ export function AdminDashboard() {
         </div>
 
         {/* Revenue Analytics */}
-        <Card className="mb-8">
+        <Card className="mb-6 sm:mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <DollarSign className="w-5 h-5 mr-2 text-green-600" />
+            <CardTitle className="flex items-center mobile-text-base">
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
               Revenue Analytics
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
-                <h4 className="font-semibold text-green-800 mb-2">Total Potential Revenue</h4>
-                <p className="text-2xl font-bold text-green-700">€{analytics.potentialRevenue}</p>
-                <p className="text-sm text-green-600 mt-1">If all current stock sold</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg mobile-p-3">
+                <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Total Potential Revenue</h4>
+                <p className="mobile-text-lg font-bold text-green-700">€{analytics.potentialRevenue}</p>
+                <p className="mobile-text-xs text-green-600 mt-1">If all current stock sold</p>
               </div>
               
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-800 mb-2">Average Order Value</h4>
-                <p className="text-2xl font-bold text-blue-700">€{orders.length > 0 ? Math.round(analytics.potentialRevenue / orders.length) : '0'}</p>
-                <p className="text-sm text-blue-600 mt-1">Based on completed orders</p>
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg mobile-p-3">
+                <h4 className="mobile-text-sm font-semibold text-blue-800 mb-2">Average Order Value</h4>
+                <p className="mobile-text-lg font-bold text-blue-700">€{orders.length > 0 ? Math.round(analytics.potentialRevenue / orders.length) : '0'}</p>
+                <p className="mobile-text-xs text-blue-600 mt-1">Based on completed orders</p>
               </div>
               
-              <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-4">
-                <h4 className="font-semibold text-purple-800 mb-2">Stock Turnover Rate</h4>
-                <p className="text-2xl font-bold text-purple-700">{analytics.averageStock > 0 ? Math.round((orders.length * 10 / analytics.averageStock) * 100) : 0}%</p>
-                <p className="text-sm text-purple-600 mt-1">Monthly estimated</p>
+              <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg mobile-p-3">
+                <h4 className="mobile-text-sm font-semibold text-purple-800 mb-2">Stock Turnover Rate</h4>
+                <p className="mobile-text-lg font-bold text-purple-700">{analytics.averageStock > 0 ? Math.round((orders.length * 10 / analytics.averageStock) * 100) : 0}%</p>
+                <p className="mobile-text-xs text-purple-600 mt-1">Monthly estimated</p>
               </div>
             </div>
           </CardContent>

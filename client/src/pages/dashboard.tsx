@@ -201,21 +201,22 @@ export function Dashboard({ onLogout }: DashboardProps) {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto mobile-p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div>
-            <h1 className="text-2xl font-light text-gray-900">Marbella Social Club</h1>
-            <p className="text-sm text-gray-500">Member Catalogue</p>
+            <h1 className="mobile-h2 font-light text-gray-900">Marbella Social Club</h1>
+            <p className="mobile-text-sm text-gray-500">Member Catalogue</p>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
             <Button
               variant="ghost"
               onClick={() => setShowBasket(true)}
-              className="relative"
+              className="relative mobile-btn-md mobile-touch-target"
             >
               <ShoppingBag className="w-5 h-5" />
+              <span className="mobile-text-sm ml-2 sm:hidden">View Basket</span>
               {basketCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-[#116149] text-white min-w-[20px] h-5 text-xs">
+                <Badge className="absolute -top-2 -right-2 bg-[#116149] text-white min-w-[20px] h-5 mobile-text-xs">
                   {basketCount}
                 </Badge>
               )}
@@ -224,36 +225,36 @@ export function Dashboard({ onLogout }: DashboardProps) {
             <Button
               variant="ghost"
               onClick={onLogout}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-gray-600 hover:text-gray-900 mobile-btn-md mobile-touch-target"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Exit
+              <span className="mobile-text-sm">Exit</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Products Grid */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto mobile-p-3 py-6 sm:py-8">
         {/* Member Dashboard Section - Only for demo member */}
         {isDemoMember && (
-          <div className="mb-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 border-2 border-green-200 shadow-lg">
+          <div className="mb-8 sm:mb-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl mobile-p-4 border-2 border-green-200 shadow-lg">
             {/* Welcome Header */}
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, John Doe!</h2>
-              <p className="text-gray-600 text-lg">Your personalized member dashboard</p>
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="mobile-h2 font-bold text-gray-900 mb-2">Welcome back, John Doe!</h2>
+              <p className="mobile-text-base text-gray-600">Your personalized member dashboard</p>
             </div>
 
             {/* Donation History */}
-            <Card className="mb-6">
+            <Card className="mb-4 sm:mb-6">
               <CardHeader>
-                <CardTitle className="text-xl text-green-700">Your Donation History</CardTitle>
-                <CardDescription>Complete donation timeline</CardDescription>
+                <CardTitle className="mobile-text-base text-green-700">Your Donation History</CardTitle>
+                <CardDescription className="mobile-text-sm">Complete donation timeline</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="relative">
                   {/* Timeline Line */}
-                  <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-gradient-to-b from-green-400 via-blue-400 to-purple-400"></div>
+                  <div className="absolute left-4 sm:left-6 top-4 bottom-4 w-0.5 bg-gradient-to-b from-green-400 via-blue-400 to-purple-400"></div>
                   
                   <div className="space-y-8">
                     {/* March 2025 */}
@@ -422,39 +423,39 @@ export function Dashboard({ onLogout }: DashboardProps) {
         )}
 
         {/* QR Code Section */}
-        <div className="mb-8 text-center">
-          <div className="inline-block bg-white rounded-xl shadow-lg border-2 border-green-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Your Member QR Code</h3>
+        <div className="mb-6 sm:mb-8 text-center">
+          <div className="inline-block bg-white rounded-xl shadow-lg border-2 border-green-200 mobile-p-4">
+            <h3 className="mobile-text-base font-semibold text-gray-800 mb-3">Your Member QR Code</h3>
             <div className="mb-3">
               <div className="inline-block border-2 border-gray-200 rounded-lg p-2">
                 <QRCodeSVG />
               </div>
             </div>
-            <p className="text-sm text-gray-600">Present this code at the counter for collection</p>
+            <p className="mobile-text-sm text-gray-600">Present this code at the counter for collection</p>
           </div>
         </div>
 
         {/* Category Selection and Products Display */}
-        <div className={`${isDemoMember ? 'mt-4' : 'mt-0'} mb-8`}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className={`${isDemoMember ? 'mt-4' : 'mt-0'} mb-6 sm:mb-8`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
             <div>
-              <h2 className="text-xl font-light text-gray-900 mb-2">Available Selection</h2>
-              <p className="text-gray-600">Choose a category to filter products</p>
+              <h2 className="mobile-text-lg font-light text-gray-900 mb-2">Available Selection</h2>
+              <p className="mobile-text-sm text-gray-600">Choose a category to filter products</p>
             </div>
             
             {/* Category Dropdown */}
-            <div className="min-w-[200px]">
+            <div className="w-full sm:min-w-[200px] sm:w-auto">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select category" />
+                <SelectTrigger className="w-full mobile-btn-md mobile-touch-target">
+                  <SelectValue placeholder="Select category" className="mobile-text-sm" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Products</SelectItem>
-                  <SelectItem value="sativa">Sativa</SelectItem>
-                  <SelectItem value="indica">Indica</SelectItem>
-                  <SelectItem value="hybrid">Hybrid</SelectItem>
-                  <SelectItem value="hash">Hash</SelectItem>
-                  <SelectItem value="cannabis">Cannabis</SelectItem>
+                  <SelectItem value="all" className="mobile-text-sm">All Products</SelectItem>
+                  <SelectItem value="sativa" className="mobile-text-sm">Sativa</SelectItem>
+                  <SelectItem value="indica" className="mobile-text-sm">Indica</SelectItem>
+                  <SelectItem value="hybrid" className="mobile-text-sm">Hybrid</SelectItem>
+                  <SelectItem value="hash" className="mobile-text-sm">Hash</SelectItem>
+                  <SelectItem value="cannabis" className="mobile-text-sm">Cannabis</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -496,7 +497,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
             const filteredProducts = getFilteredProducts();
 
             return (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="mobile-card-grid">
                 {filteredProducts.map((product: Product) => (
                   <motion.div
                     key={product.id}
@@ -505,8 +506,8 @@ export function Dashboard({ onLogout }: DashboardProps) {
                     transition={{ duration: 0.3 }}
                   >
                     <Card className="hover:shadow-lg transition-shadow duration-300 cursor-pointer group">
-                      <CardHeader className="pb-4">
-                        <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center group-hover:bg-gray-300 transition-colors overflow-hidden">
+                      <CardHeader className="pb-3 sm:pb-4">
+                        <div className="w-full h-32 sm:h-48 bg-gray-200 rounded-lg mb-3 sm:mb-4 flex items-center justify-center group-hover:bg-gray-300 transition-colors overflow-hidden">
                           {getProductImage(product.name) ? (
                             <img 
                               src={getProductImage(product.name)!} 
@@ -516,45 +517,45 @@ export function Dashboard({ onLogout }: DashboardProps) {
                           ) : product.imageUrl ? (
                             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover rounded-lg" />
                           ) : (
-                            <span className="text-gray-500 text-sm">Image Placeholder</span>
+                            <span className="mobile-text-sm text-gray-500">Image Placeholder</span>
                           )}
                         </div>
                         <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg font-medium">{product.name}</CardTitle>
-                          <span className="text-xs text-gray-500 font-mono">#{(product as any).productCode}</span>
+                          <CardTitle className="mobile-text-base font-medium">{product.name}</CardTitle>
+                          <span className="mobile-text-xs text-gray-500 font-mono">#{(product as any).productCode}</span>
                         </div>
                         {product.category && (
-                          <Badge variant="secondary" className="w-fit">
+                          <Badge variant="secondary" className="w-fit mobile-text-xs">
                             {product.category}
                           </Badge>
                         )}
                       </CardHeader>
                       <CardContent>
-                        <CardDescription className="mb-4 text-sm leading-relaxed">
+                        <CardDescription className="mb-3 sm:mb-4 mobile-text-sm leading-relaxed">
                           {product.description || 'Premium selection item'}
                         </CardDescription>
                         
                         {/* Quantity Selector */}
-                        <div className="flex items-center justify-center mb-4 space-x-3">
+                        <div className="flex items-center justify-center mb-3 sm:mb-4 space-x-3">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => updateQuantity(product.id, getQuantity(product.id) - 1)}
                             disabled={getQuantity(product.id) <= 1}
-                            className="w-8 h-8 p-0"
+                            className="mobile-touch-target w-8 h-8 sm:w-8 sm:h-8 p-0"
                           >
                             <Minus className="w-3 h-3" />
                           </Button>
                           <div className="flex flex-col items-center">
-                            <span className="font-medium text-lg">{getQuantity(product.id)}g</span>
-                            <span className="text-xs text-gray-500">quantity</span>
+                            <span className="mobile-text-base font-medium">{getQuantity(product.id)}g</span>
+                            <span className="mobile-text-xs text-gray-500">quantity</span>
                           </div>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => updateQuantity(product.id, getQuantity(product.id) + 1)}
                             disabled={getQuantity(product.id) >= 5}
-                            className="w-8 h-8 p-0"
+                            className="mobile-touch-target w-8 h-8 sm:w-8 sm:h-8 p-0"
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
@@ -566,9 +567,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
                             quantity: getQuantity(product.id) 
                           })}
                           disabled={addToBasketMutation.isPending}
-                          className="w-full bg-[#116149] hover:bg-[#0d4d3a] text-white transition-colors"
+                          className="w-full bg-[#116149] hover:bg-[#0d4d3a] text-white transition-colors mobile-btn-md mobile-touch-target"
                         >
-                          Add to Selection
+                          <span className="mobile-text-sm">Add to Selection</span>
                         </Button>
                       </CardContent>
                     </Card>
@@ -602,38 +603,40 @@ export function Dashboard({ onLogout }: DashboardProps) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50 overflow-y-auto"
+              className="fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-xl z-50 overflow-y-auto"
             >
-              <div className="p-6 border-b sticky top-0 bg-white">
+              <div className="mobile-p-3 border-b sticky top-0 bg-white">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Your Selection</h3>
+                  <h3 className="mobile-text-base font-medium">Your Selection</h3>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowBasket(false)}
+                    className="mobile-touch-target"
                   >
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="mobile-p-3">
                 {basketItems.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No items selected</p>
+                  <p className="mobile-text-sm text-gray-500 text-center py-6 sm:py-8">No items selected</p>
                 ) : (
                   <>
-                    <div className="space-y-4 mb-6">
+                    <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
                       {basketItems.map((item: BasketItem & { product: Product }) => (
-                        <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={item.id} className="flex items-center justify-between mobile-p-2 bg-gray-50 rounded-lg">
                           <div className="flex-1">
-                            <h4 className="font-medium text-sm">{item.product?.name}</h4>
-                            <p className="text-xs text-gray-500">Quantity: {item.quantity}g</p>
-                            <p className="text-xs text-gray-400 font-mono">#{(item.product as any)?.productCode}</p>
+                            <h4 className="mobile-text-sm font-medium">{item.product?.name}</h4>
+                            <p className="mobile-text-xs text-gray-500">Quantity: {item.quantity}g</p>
+                            <p className="mobile-text-xs text-gray-400 font-mono">#{(item.product as any)?.productCode}</p>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => removeFromBasketMutation.mutate(item.id)}
+                            className="mobile-touch-target"
                           >
                             <X className="w-3 h-3" />
                           </Button>
@@ -644,9 +647,11 @@ export function Dashboard({ onLogout }: DashboardProps) {
                     <Button
                       onClick={() => completeDonationMutation.mutate()}
                       disabled={completeDonationMutation.isPending}
-                      className="w-full bg-[#116149] hover:bg-[#0d4d3a] text-white"
+                      className="w-full bg-[#116149] hover:bg-[#0d4d3a] text-white mobile-btn-md mobile-touch-target"
                     >
-                      {completeDonationMutation.isPending ? 'Processing...' : 'Complete Donation'}
+                      <span className="mobile-text-sm">
+                        {completeDonationMutation.isPending ? 'Processing...' : 'Complete Donation'}
+                      </span>
                     </Button>
                   </>
                 )}
