@@ -292,12 +292,7 @@ export function AdminDashboard() {
     return hasOrders || hasCompleteProfile;
   });
 
-  const scrollToOrderControl = () => {
-    const orderControlSection = document.getElementById('order-control-section');
-    if (orderControlSection) {
-      orderControlSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+
 
   // Analytics calculations from real data
   const calculateAnalytics = () => {
@@ -466,17 +461,17 @@ export function AdminDashboard() {
               <span className="mobile-text-sm">Scan QR Code</span>
             </Button>
             <Button
-              onClick={scrollToOrderControl}
+              onClick={() => toast({ title: "Navigation", description: "Use the navigation panel to scroll to different sections." })}
               className="bg-blue-600 hover:bg-blue-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              <span className="mobile-text-sm">Order Control</span>
+              <span className="mobile-text-sm">Quick Nav</span>
             </Button>
           </div>
         </div>
 
         {/* Inventory Overview Cards */}
-        <div className="mobile-admin-grid mb-6 sm:mb-8">
+        <div id="overview" className="mobile-admin-grid mb-6 sm:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="mobile-text-xs font-medium">Total Stock Value</CardTitle>
@@ -619,7 +614,7 @@ export function AdminDashboard() {
         </div>
 
         {/* Revenue Analytics */}
-        <Card className="mb-6 sm:mb-8">
+        <Card id="revenue-analytics" className="mb-6 sm:mb-8">
           <CardHeader>
             <CardTitle className="flex items-center mobile-text-base">
               <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
@@ -650,7 +645,7 @@ export function AdminDashboard() {
         </Card>
 
         {/* Recent Orders */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div id="activity" className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader>
               <CardTitle>Recent Orders</CardTitle>
@@ -703,7 +698,7 @@ export function AdminDashboard() {
 
         {/* Customer Preferences Analytics Section */}
         {customerPrefs && (
-          <Card className="mb-8">
+          <Card id="customer-preferences" className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <PieChart className="w-5 h-5 mr-2 text-blue-600" />
@@ -1008,7 +1003,7 @@ export function AdminDashboard() {
         </Card>
 
         {/* Order Control Center */}
-        <Card id="order-control-section" className="mb-8">
+        <Card id="order-control" className="mb-8">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Order Control Center</CardTitle>
@@ -1087,7 +1082,7 @@ export function AdminDashboard() {
         </Card>
 
         {/* Dispensary Stock */}
-        <Card>
+        <Card id="dispensary-stock">
           <CardHeader>
             <CardTitle>Dispensary Stock</CardTitle>
           </CardHeader>

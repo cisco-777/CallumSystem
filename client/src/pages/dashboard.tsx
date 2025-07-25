@@ -244,9 +244,11 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
       {/* Products Grid */}
       <main className="max-w-6xl mx-auto mobile-p-3 py-6 sm:py-8 main-content-with-nav">
-        {/* Member Dashboard Section - Only for demo member */}
-        {isDemoMember && (
-          <div className="mb-8 sm:mb-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl mobile-p-4 border-2 border-green-200 shadow-lg">
+        {/* Overview Section - Always present but different content for demo/regular members */}
+        <div id="overview" className={`mb-8 sm:mb-12 ${isDemoMember ? 'bg-gradient-to-r from-green-50 to-blue-50 rounded-xl mobile-p-4 border-2 border-green-200 shadow-lg' : ''}`}>
+          {/* Member Dashboard Section - Only for demo member */}
+          {isDemoMember && (
+            <>
             {/* Welcome Header */}
             <div className="text-center mb-6 sm:mb-8">
               <h2 className="mobile-h2 font-bold text-gray-900 mb-2">Welcome back, John Doe!</h2>
@@ -427,11 +429,12 @@ export function Dashboard({ onLogout }: DashboardProps) {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
 
         {/* QR Code Section */}
-        <div className="mb-6 sm:mb-8 text-center">
+        <div id="qr-code" className="mb-6 sm:mb-8 text-center">
           <div className="inline-block bg-white rounded-xl shadow-lg border-2 border-green-200 mobile-p-4">
             <h3 className="mobile-text-base font-semibold text-gray-800 mb-3">Your Member QR Code</h3>
             <div className="mb-3">
@@ -444,7 +447,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
         </div>
 
         {/* Category Selection and Products Display */}
-        <div className={`${isDemoMember ? 'mt-4' : 'mt-0'} mb-6 sm:mb-8`}>
+        <div id="product-selection" className={`${isDemoMember ? 'mt-4' : 'mt-0'} mb-6 sm:mb-8`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
             <div>
               <h2 className="mobile-text-lg font-light text-gray-900 mb-2">Available Selection</h2>

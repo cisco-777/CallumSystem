@@ -14,7 +14,10 @@ import {
   Package,
   QrCode,
   Calendar,
-  Bell
+  Bell,
+  TrendingUp,
+  Activity,
+  Box
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -29,33 +32,36 @@ export function RightNavigation({ type, onLogout, onShowBasket, basketCount = 0 
   const [isOpen, setIsOpen] = useState(false);
 
   const memberNavItems = [
-    { icon: Home, label: 'Dashboard', href: '/member-dashboard' },
-    { icon: ShoppingBag, label: 'Catalogue', href: '/dashboard' },
-    { icon: QrCode, label: 'QR Code', action: 'qr' },
-    { icon: Calendar, label: 'Events', action: 'events' },
-    { icon: User, label: 'Profile', action: 'profile' },
+    { icon: Home, label: 'Overview', scrollTo: 'overview' },
+    { icon: QrCode, label: 'QR Code', scrollTo: 'qr-code' },
+    { icon: ShoppingBag, label: 'Product Selection', scrollTo: 'product-selection' },
     { icon: LogOut, label: 'Logout', action: 'logout' }
   ];
 
   const adminNavItems = [
-    { icon: BarChart3, label: 'Dashboard', href: '/admin-dashboard' },
-    { icon: Users, label: 'Members', action: 'members' },
-    { icon: Package, label: 'Inventory', action: 'inventory' },
-    { icon: QrCode, label: 'QR Scanner', action: 'qr-scanner' },
-    { icon: Bell, label: 'Alerts', action: 'alerts' },
-    { icon: Settings, label: 'Settings', action: 'settings' },
+    { icon: BarChart3, label: 'Overview', scrollTo: 'overview' },
+    { icon: TrendingUp, label: 'Revenue Analytics', scrollTo: 'revenue-analytics' },
+    { icon: Activity, label: 'Activity', scrollTo: 'activity' },
+    { icon: Users, label: 'Customer Preferences', scrollTo: 'customer-preferences' },
+    { icon: Package, label: 'Order Control', scrollTo: 'order-control' },
+    { icon: Box, label: 'Dispensary Stock', scrollTo: 'dispensary-stock' },
     { icon: LogOut, label: 'Logout', action: 'logout' }
   ];
 
   const navItems = type === 'member' ? memberNavItems : adminNavItems;
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const handleItemClick = (item: any) => {
     if (item.action === 'logout' && onLogout) {
       onLogout();
-    } else if (item.action === 'qr' && onShowBasket) {
-      onShowBasket();
-    } else if (item.href) {
-      window.location.href = item.href;
+    } else if (item.scrollTo) {
+      scrollToSection(item.scrollTo);
     }
     setIsOpen(false);
   };
