@@ -5,11 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSystemWiped, setIsSystemWiped] = useState(false);
+  const [showFailsafeDialog, setShowFailsafeDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -126,6 +129,24 @@ export function AdminDashboard() {
     if (window.confirm("Are you sure you want to remove ALL orders from the Order Control Center? Orders will be archived but customer history and analytics will be preserved.")) {
       deleteAllOrdersMutation.mutate();
     }
+  };
+
+  const executeFailsafe = () => {
+    setShowFailsafeDialog(false);
+    setIsSystemWiped(true);
+    
+    // Show red notification
+    toast({
+      title: "⚠️ FAILSAFE ACTIVATED",
+      description: "All admin interface data has been permanently deleted.",
+      variant: "destructive",
+      duration: 10000,
+    });
+    
+    // Auto-restore after 60 seconds
+    setTimeout(() => {
+      setIsSystemWiped(false);
+    }, 60000);
   };
 
   const mockOrders = [
@@ -357,6 +378,31 @@ export function AdminDashboard() {
 
   const analytics = calculateAnalytics();
 
+  // System Wiped Screen
+  if (isSystemWiped) {
+    return (
+      <div className="min-h-screen bg-red-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mb-8">
+            <TriangleAlert className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold text-red-800 mb-4">SYSTEM WIPED</h1>
+            <p className="text-red-600 text-lg">All admin data has been permanently deleted.</p>
+          </div>
+          
+          <div className="bg-red-500 text-white p-4 rounded-lg max-w-md mx-auto">
+            <div className="flex items-center mb-2">
+              <TriangleAlert className="w-5 h-5 mr-2" />
+              <span className="font-bold">FAILSAFE ACTIVATED</span>
+            </div>
+            <p className="text-sm">All admin interface data has been permanently deleted.</p>
+          </div>
+          
+          <p className="text-gray-600 text-sm mt-8">System will restore automatically...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -367,6 +413,44 @@ export function AdminDashboard() {
             <p className="text-gray-600 mt-1">Marbella Social Club Management</p>
           </div>
           <div className="flex space-x-4">
+            <AlertDialog open={showFailsafeDialog} onOpenChange={setShowFailsafeDialog}>
+              <AlertDialogTrigger asChild>
+                <Button className="bg-red-600 hover:bg-red-700 text-white font-bold">
+                  <TriangleAlert className="w-4 h-4 mr-2" />
+                  FAILSAFE!
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-md">
+                <AlertDialogHeader className="text-center">
+                  <div className="mx-auto mb-4">
+                    <TriangleAlert className="w-12 h-12 text-orange-500 mx-auto" />
+                  </div>
+                  <AlertDialogTitle className="text-red-800 text-xl font-bold">
+                    WARNING: FAILSAFE ACTIVATION
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-3">
+                    <p className="text-red-600 font-medium">
+                      This will permanently delete ALL admin interface data!
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      This action cannot be undone. All member data, orders, and system configurations will be erased.
+                    </p>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                  <AlertDialogCancel className="sm:w-auto">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={executeFailsafe}
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold sm:w-auto"
+                  >
+                    EXECUTE FAILSAFE
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            
             <Button
               onClick={() => toast({ title: "QR Scanner", description: "QR code scanning functionality will be available soon." })}
               className="bg-green-600 hover:bg-green-700 text-white"
