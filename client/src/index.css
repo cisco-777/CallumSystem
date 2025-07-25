@@ -125,27 +125,27 @@
   }
 
   /* Mobile-specific text sizing (25% smaller on mobile) */
-  .mobile-text-xs { @apply text-xs sm:text-sm; }
-  .mobile-text-sm { @apply text-xs sm:text-base; }
-  .mobile-text-base { @apply text-sm sm:text-lg; }
-  .mobile-text-lg { @apply text-base sm:text-xl; }
-  .mobile-text-xl { @apply text-lg sm:text-2xl; }
-  .mobile-text-2xl { @apply text-xl sm:text-3xl; }
-  .mobile-text-3xl { @apply text-2xl sm:text-4xl; }
-  .mobile-text-4xl { @apply text-3xl sm:text-5xl; }
+  .mobile-text-xs { @apply text-[9px] sm:text-xs; }
+  .mobile-text-sm { @apply text-[10px] sm:text-sm; }
+  .mobile-text-base { @apply text-[12px] sm:text-base; }
+  .mobile-text-lg { @apply text-[13.5px] sm:text-lg; }
+  .mobile-text-xl { @apply text-[15px] sm:text-xl; }
+  .mobile-text-2xl { @apply text-[18px] sm:text-2xl; }
+  .mobile-text-3xl { @apply text-[21px] sm:text-3xl; }
+  .mobile-text-4xl { @apply text-[24px] sm:text-4xl; }
 
-  /* Mobile-specific heading sizes */
-  .mobile-h1 { @apply text-2xl sm:text-4xl; }
-  .mobile-h2 { @apply text-xl sm:text-3xl; }
-  .mobile-h3 { @apply text-lg sm:text-2xl; }
-  .mobile-h4 { @apply text-base sm:text-xl; }
-  .mobile-h5 { @apply text-sm sm:text-lg; }
-  .mobile-h6 { @apply text-sm sm:text-base; }
+  /* Mobile-specific heading sizes (25% smaller) */
+  .mobile-h1 { @apply text-[18px] sm:text-3xl font-bold; }
+  .mobile-h2 { @apply text-[15px] sm:text-2xl font-bold; }
+  .mobile-h3 { @apply text-[13.5px] sm:text-xl font-bold; }
+  .mobile-h4 { @apply text-[12px] sm:text-lg font-bold; }
+  .mobile-h5 { @apply text-[10.5px] sm:text-base font-bold; }
+  .mobile-h6 { @apply text-[10px] sm:text-sm font-bold; }
 
-  /* Mobile button sizes */
-  .mobile-btn-sm { @apply text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-2; }
-  .mobile-btn-md { @apply text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-2; }
-  .mobile-btn-lg { @apply text-base sm:text-lg px-4 py-3 sm:px-6 sm:py-3; }
+  /* Mobile button sizes (25% smaller text) */
+  .mobile-btn-sm { @apply text-[9px] sm:text-xs px-2 py-1 sm:px-3 sm:py-2; }
+  .mobile-btn-md { @apply text-[10px] sm:text-sm px-3 py-2 sm:px-4 sm:py-2; }
+  .mobile-btn-lg { @apply text-[12px] sm:text-base px-4 py-3 sm:px-6 sm:py-3; }
 
   /* Mobile touch targets */
   .mobile-touch-target { @apply min-h-[44px] min-w-[44px]; }

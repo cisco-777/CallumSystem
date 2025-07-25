@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { RightNavigation } from '@/components/right-navigation';
 
 export function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,6 +16,38 @@ export function AdminDashboard() {
   const [showFailsafeDialog, setShowFailsafeDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Handle admin navigation
+  const handleAdminNavigate = (section: string) => {
+    switch (section) {
+      case 'dashboard':
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        break;
+      case 'users':
+        document.getElementById('customer-search')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+      case 'inventory':
+        document.getElementById('dispensary-stock')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+      case 'orders':
+        document.getElementById('order-control')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+      case 'settings':
+        toast({
+          title: "Settings",
+          description: "Admin settings coming soon.",
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Handle admin logout
+  const handleAdminLogout = () => {
+    localStorage.removeItem('msc-admin-authenticated');
+    window.location.href = '/admin-login';
+  };
 
   const { data: products = [] } = useQuery({
     queryKey: ['/api/products']
@@ -403,6 +436,13 @@ export function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 mobile-p-3">
+      {/* Right Navigation */}
+      <RightNavigation 
+        type="admin" 
+        onLogout={handleAdminLogout}
+        currentUser="admin123@gmail.com"
+        onNavigate={handleAdminNavigate}
+      />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
@@ -761,7 +801,7 @@ export function AdminDashboard() {
         )}
 
         {/* Customer Search Tool */}
-        <Card className="mb-8">
+        <Card className="mb-8" id="customer-search">
           <CardHeader>
             <CardTitle className="flex items-center">
               <Search className="w-5 h-5 mr-2 text-gray-600" />
@@ -999,7 +1039,7 @@ export function AdminDashboard() {
         </Card>
 
         {/* Order Control Center */}
-        <Card id="order-control-section" className="mb-8">
+        <Card id="order-control" className="mb-8">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Order Control Center</CardTitle>
@@ -1078,7 +1118,7 @@ export function AdminDashboard() {
         </Card>
 
         {/* Dispensary Stock */}
-        <Card>
+        <Card id="dispensary-stock">
           <CardHeader>
             <CardTitle>Dispensary Stock</CardTitle>
           </CardHeader>

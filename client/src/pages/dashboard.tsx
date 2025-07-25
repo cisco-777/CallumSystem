@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { Product, BasketItem } from '@shared/schema';
+import { RightNavigation } from '@/components/right-navigation';
 
 // Import cannabis product images
 import zkittlezImg from '@assets/Zkittlez_1751388449553.png';
@@ -109,6 +110,41 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Get current user for navigation
+  const currentUser = (() => {
+    const savedUser = localStorage.getItem('msc-user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      return user.email === 'demo@member.com' ? 'John Doe' : user.email;
+    }
+    return 'Member';
+  })();
+
+  // Handle navigation
+  const handleNavigate = (section: string) => {
+    switch (section) {
+      case 'dashboard':
+        // Already on dashboard, scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        break;
+      case 'profile':
+        toast({
+          title: "Profile",
+          description: "Profile management coming soon.",
+        });
+        break;
+      case 'history':
+      case 'orders':
+        toast({
+          title: "Order History",
+          description: "Order history feature coming soon.",
+        });
+        break;
+      default:
+        break;
+    }
+  };
   
   // Check if current user is demo member
   const isDemoMember = (() => {
@@ -141,11 +177,11 @@ export function Dashboard({ onLogout }: DashboardProps) {
     }
   };
 
-  const { data: products = [] } = useQuery({
+  const { data: products = [] } = useQuery<Product[]>({
     queryKey: ['/api/products']
   });
 
-  const { data: basketItems = [] } = useQuery({
+  const { data: basketItems = [] } = useQuery<(BasketItem & { product: Product })[]>({
     queryKey: ['/api/basket']
   });
 
@@ -199,6 +235,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Right Navigation */}
+      <RightNavigation 
+        type="member" 
+        onLogout={onLogout}
+        currentUser={currentUser}
+        onNavigate={handleNavigate}
+      />
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-6xl mx-auto mobile-p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">

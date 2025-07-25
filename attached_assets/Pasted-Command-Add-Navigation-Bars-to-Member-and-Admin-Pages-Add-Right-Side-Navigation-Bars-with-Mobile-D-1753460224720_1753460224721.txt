@@ -1,0 +1,71 @@
+Command - Add Navigation Bars to Member and Admin Pages
+Add Right-Side Navigation Bars with Mobile/Desktop Responsiveness
+Context: Need to add navigation bars to both member catalogue and admin dashboard for better user experience and navigation.
+Specific Task: Implement navigation bars positioned on the right side for both member and admin interfaces.
+REQUIREMENTS:
+Member Catalogue Navigation Bar:
+
+Add navigation bar on the right side of the member catalogue page
+Include relevant member navigation options such as:
+
+Profile/Account settings
+Order history
+Logout option
+Any other relevant member functions
+
+
+
+Admin Dashboard Navigation Bar:
+
+Add navigation bar on the right side of the admin dashboard
+Include relevant admin navigation options such as:
+
+Dashboard overview
+User management
+Settings
+Logout option
+Any other relevant admin functions
+
+
+
+Desktop Implementation:
+
+Position navigation bar as a fixed or floating right sidebar
+Ensure it doesn't interfere with main content
+Make it clearly visible and accessible
+Use appropriate styling to match existing design
+
+Mobile Implementation:
+
+On mobile devices, convert the right navigation to a mobile-friendly format:
+
+Either a hamburger menu that slides in from the right
+Or a bottom navigation bar
+Or a collapsible top navigation dropdown
+
+
+Ensure touch-friendly button sizes
+Maintain easy access to all navigation options
+Consider screen space limitations on mobile
+
+Responsive Design:
+
+Automatically adapt navigation layout based on screen size
+Ensure smooth transitions between desktop and mobile layouts
+Maintain functionality across all device sizes
+Test navigation usability on both desktop and mobile
+
+Styling Requirements:
+
+Match existing app design and color scheme
+Ensure proper contrast and readability
+Use consistent styling between member and admin navigation bars
+Include hover effects and active states where appropriate
+
+Implement navigation bars for BOTH member catalogue and admin dashboard with proper mobile/desktop responsiveness.
+Apply to All Current Users:
+
+Update navigation for ALL currently registered members (including John Doe and any other existing accounts)
+Ensure all current members see the new navigation when they log in
+Apply navigation changes to all existing user sessions and accounts
+Make sure the navigation appears for every registered member, not just new signups
