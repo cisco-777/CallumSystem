@@ -170,25 +170,49 @@
   /* Mobile overflow handling */
   .mobile-scroll { @apply overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300; }
 
-  /* Universal Dashboard Centering - Accounts for right navigation bar width */
+  /* CSS Grid Layout for Perfect Dashboard Centering */
+  .dashboard-grid-layout {
+    /* Mobile: Standard layout */
+    @apply block;
+    
+    /* Desktop: Three-column grid layout */
+    @media (min-width: 1024px) {
+      display: grid;
+      grid-template-columns: 5rem 1fr 5rem; /* Left spacer | Main content | Right nav space */
+      width: 100vw;
+      height: 100vh;
+    }
+  }
+  
+  .dashboard-left-spacer {
+    /* Hidden on mobile, balances right nav on desktop */
+    @apply hidden lg:block;
+  }
+  
+  .dashboard-main-content {
+    /* Contains all main content - perfectly centered between spacers */
+    @apply w-full;
+    grid-column: 2; /* Place in center column */
+  }
+  
+  .dashboard-nav-spacer {
+    /* Reserved space for right navigation */
+    @apply hidden lg:block;
+  }
+  
+  /* Update main content styling for grid layout */
   .main-content-with-nav {
     /* Mobile: Standard padding */
     @apply px-4;
     
-    /* Desktop: Mathematical centering in available space */
+    /* Desktop: Full width within grid column */
     @media (min-width: 1024px) {
-      /* Navigation bar total width: 48px (w-12) + 16px (p-2 total) + 16px (right-4) = 80px = 5rem */
-      --nav-bar-width: 5rem;
-      --available-width: calc(100vw - var(--nav-bar-width));
-      
-      /* Center content in available viewport space */
       width: 100%;
       max-width: 72rem;
-      /* Calculate true center: (available-width - content-width) / 2 */
-      margin-left: calc((var(--available-width) - min(72rem, var(--available-width))) / 2);
-      margin-right: var(--nav-bar-width);
-      padding-left: 0;
-      padding-right: 0;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 2rem;
+      padding-right: 2rem;
     }
   }
 

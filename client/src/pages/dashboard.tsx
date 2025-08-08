@@ -199,14 +199,19 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const basketCount = basketItems.length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Right Navigation */}
-      <RightNavigation 
-        type="member" 
-        onLogout={onLogout} 
-        onShowBasket={() => setShowBasket(true)} 
-        basketCount={basketCount} 
-      />
+    <div className="min-h-screen bg-gray-50 dashboard-grid-layout">
+      {/* Left Spacer - Balances right navigation */}
+      <div className="dashboard-left-spacer"></div>
+      
+      {/* Main Content Area */}
+      <div className="dashboard-main-content">
+        {/* Right Navigation */}
+        <RightNavigation 
+          type="member" 
+          onLogout={onLogout} 
+          onShowBasket={() => setShowBasket(true)} 
+          basketCount={basketCount} 
+        />
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-6xl mx-auto mobile-p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
@@ -671,6 +676,10 @@ export function Dashboard({ onLogout }: DashboardProps) {
           </>
         )}
       </AnimatePresence>
+      </div>
+      
+      {/* Right Navigation Space */}
+      <div className="dashboard-nav-spacer"></div>
     </div>
   );
 }
