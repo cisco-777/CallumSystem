@@ -171,7 +171,7 @@
   .mobile-scroll { @apply overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300; }
 
   /* Right Navigation Margin - Add space for fixed navigation on desktop and center content */
-  .main-content-with-nav { @apply lg:mr-20 lg:ml-20; }
+  .main-content-with-nav { @apply lg:mr-20 lg:ml-10; }
 
   .border-msc-green {
     border-color: hsl(var(--msc-green));
