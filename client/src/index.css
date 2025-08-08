@@ -170,8 +170,14 @@
   /* Mobile overflow handling */
   .mobile-scroll { @apply overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300; }
 
-  /* Right Navigation Margin - Add space for fixed navigation on desktop and center content */
-  .main-content-with-nav { @apply lg:mr-20 lg:ml-20; }
+  /* Right Navigation Margin - Center content in available viewport space */
+  .main-content-with-nav { 
+    @apply lg:pr-20; /* Space for right navigation */
+    margin-left: auto;
+    margin-right: auto;
+    /* Center content in remaining space after accounting for right nav */
+    transform: translateX(-2.5rem); /* Shift left by half the right nav width */
+  }
 
   .border-msc-green {
     border-color: hsl(var(--msc-green));
