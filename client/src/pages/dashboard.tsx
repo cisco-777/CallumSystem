@@ -204,7 +204,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40 w-full">
         <div className="max-w-none mx-0 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div>
-            <h1 className="mobile-h2 font-light text-gray-900">La Cultura Social Club</h1>
+            <h1 className="mobile-h2 font-light text-gray-900">Demo Social Club</h1>
             <p className="mobile-text-sm text-gray-500">Member Catalogue</p>
           </div>
           

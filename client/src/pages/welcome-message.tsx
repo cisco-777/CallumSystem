@@ -38,7 +38,7 @@ export function WelcomeMessage({ onContinue, onBack }: WelcomeMessageProps) {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="text-3xl font-bold text-slate-800 dark:text-white mb-2"
           >
-            Welcome to La Cultura Social Club
+            Welcome to Demo Social Club
           </motion.h1>
           
           <motion.p
