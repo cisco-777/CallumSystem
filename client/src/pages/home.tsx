@@ -19,7 +19,7 @@ export function HomePage() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Welcome To Demo Social Club
+            Welcome To La Cultura Social Club
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Order your favorite products, check updates, and manage your account — all in one place.
