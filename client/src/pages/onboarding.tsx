@@ -18,7 +18,7 @@ export function OnboardingPage() {
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-[#116149] mb-2">
-            Welcome to La Cultura Social Club
+            Welcome to Demo Social Club
           </CardTitle>
           <CardDescription className="text-lg">
             Please complete onboarding to access your member portal.

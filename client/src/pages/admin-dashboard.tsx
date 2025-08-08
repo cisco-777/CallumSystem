@@ -135,7 +135,7 @@ export function AdminDashboard() {
   const executeFailsafe = () => {
     setShowFailsafeDialog(false);
     setIsSystemWiped(true);
-    
+
     // Show red notification
     toast({
       title: "⚠️ FAILSAFE ACTIVATED",
@@ -143,7 +143,7 @@ export function AdminDashboard() {
       variant: "destructive",
       duration: 10000,
     });
-    
+
     // Auto-restore after 60 seconds
     setTimeout(() => {
       setIsSystemWiped(false);
@@ -160,34 +160,34 @@ export function AdminDashboard() {
   // Calculate customer preferences
   const calculateCustomerPreferences = () => {
     if (!Array.isArray(analyticsOrders) || analyticsOrders.length === 0) return null;
-    
+
     let sativaCount = 0, indicaCount = 0, hybridCount = 0;
     let cannabisCount = 0, hashCount = 0;
     const categoryCount: { [key: string]: number } = {};
-    
+
     analyticsOrders.forEach((order: any) => {
       if (order.items) {
         order.items.forEach((item: any) => {
           const category = (item.category || '').toLowerCase();
-          
+
           // Strain preference analysis
           if (category.includes('sativa')) sativaCount++;
           else if (category.includes('indica')) indicaCount++;
           else hybridCount++;
-          
+
           // Cannabis vs Hash analysis
           if (category.includes('hash')) hashCount++;
           else cannabisCount++;
-          
+
           // Category counting
           categoryCount[item.category || 'Other'] = (categoryCount[item.category || 'Other'] || 0) + 1;
         });
       }
     });
-    
+
     const total = sativaCount + indicaCount + hybridCount;
     const productTotal = cannabisCount + hashCount;
-    
+
     return {
       strainPreferences: {
         sativa: total > 0 ? Math.round((sativaCount / total) * 100) : 0,
@@ -204,20 +204,20 @@ export function AdminDashboard() {
         .map(([category, count]) => ({ category, count }))
     };
   };
-  
+
   const customerPrefs = calculateCustomerPreferences();
-  
+
   // Enhanced customer search functionality
   const getCustomerProfile = (userId: number) => {
     const userOrders = analyticsOrders.filter((order: any) => order.userId === userId);
     const user = users.find((u: any) => u.id === userId);
-    
+
     if (!user) return null;
-    
+
     // Calculate spending summary
     const totalSpent = userOrders.reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || '0'), 0);
     const averageOrderValue = userOrders.length > 0 ? Math.round(totalSpent / userOrders.length) : 0;
-    
+
     // Only calculate preferences if user has orders
     let preferences = {
       sativa: 0,
@@ -226,30 +226,30 @@ export function AdminDashboard() {
       cannabis: 0,
       hash: 0
     };
-    
+
     if (userOrders.length > 0) {
       let sativaCount = 0, indicaCount = 0, hybridCount = 0;
       let cannabisCount = 0, hashCount = 0;
       let totalItems = 0;
-      
+
       userOrders.forEach((order: any) => {
         if (order.items && Array.isArray(order.items)) {
           order.items.forEach((item: any) => {
             const category = (item.category || '').toLowerCase();
             totalItems++;
-            
+
             // Strain preferences
             if (category.includes('sativa')) sativaCount++;
             else if (category.includes('indica')) indicaCount++;
             else hybridCount++;
-            
+
             // Product type preferences
             if (category.includes('hash')) hashCount++;
             else cannabisCount++;
           });
         }
       });
-      
+
       if (totalItems > 0) {
         preferences = {
           sativa: Math.round((sativaCount / totalItems) * 100),
@@ -260,7 +260,7 @@ export function AdminDashboard() {
         };
       }
     }
-    
+
     return {
       user,
       orderCount: userOrders.length,
@@ -270,17 +270,17 @@ export function AdminDashboard() {
       recentOrders: userOrders.slice(0, 5).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     };
   };
-  
+
   // Enhanced filtering with better search logic
   const filteredUsers = users.filter((user: any) => {
     if (!searchQuery.trim()) return false;
-    
+
     const query = searchQuery.toLowerCase().trim();
     const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
     const email = (user.email || '').toLowerCase();
     const firstName = (user.firstName || '').toLowerCase();
     const lastName = (user.lastName || '').toLowerCase();
-    
+
     return fullName.includes(query) || 
            email.includes(query) || 
            firstName.includes(query) || 
@@ -320,7 +320,7 @@ export function AdminDashboard() {
       const stock = product.stockQuantity || 0;
       const price = parseFloat(product.adminPrice) || 0;
       const value = stock * price;
-      
+
       totalStock += stock;
       totalStockValue += value;
       potentialRevenue += value;
@@ -329,7 +329,7 @@ export function AdminDashboard() {
       if (stock <= 100) {
         const isCritical = stock >= 50 && stock <= 70; // Critical range: 50-70g
         const isUrgent = stock >= 95 && stock <= 100;   // Urgent range: 95-100g
-        
+
         if (isCritical || isUrgent) {
           lowStockItems.push({
             name: product.name,
@@ -382,9 +382,9 @@ export function AdminDashboard() {
           <div className="mb-8">
             <TriangleAlert className="w-16 h-16 text-orange-500 mx-auto mb-4" />
             <h1 className="text-4xl font-bold text-red-800 mb-4">SYSTEM WIPED</h1>
-            <p className="text-red-600 text-lg">All admin data has been permanently deleted.</p>
+            <p className="text-red-600 text-lg">All admin interface data has been permanently deleted.</p>
           </div>
-          
+
           <div className="bg-red-500 text-white p-4 rounded-lg max-w-md mx-auto">
             <div className="flex items-center mb-2">
               <TriangleAlert className="w-5 h-5 mr-2" />
@@ -452,7 +452,7 @@ export function AdminDashboard() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            
+
             <Button
               onClick={() => toast({ title: "QR Scanner", description: "QR code scanning functionality will be available soon." })}
               className="bg-green-600 hover:bg-green-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
@@ -577,7 +577,7 @@ export function AdminDashboard() {
                     </p>
                   </div>
                 )}
-                
+
                 <div className="bg-blue-50 border border-blue-200 rounded-lg mobile-p-3">
                   <h4 className="mobile-text-sm font-semibold text-blue-800 mb-3">Strain Type Breakdown</h4>
                   <div className="space-y-2">
@@ -609,7 +609,7 @@ export function AdminDashboard() {
         {/* Revenue Analytics */}
         <Card id="revenue-analytics" className="mb-6 sm:mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center mobile-text-base">
+            <CardTitle className="flex items-center">
               <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
               Revenue Analytics
             </CardTitle>
@@ -621,13 +621,13 @@ export function AdminDashboard() {
                 <p className="mobile-text-lg font-bold text-green-700">€{analytics.potentialRevenue}</p>
                 <p className="mobile-text-xs text-green-600 mt-1">If all current stock sold</p>
               </div>
-              
+
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg mobile-p-3">
                 <h4 className="mobile-text-sm font-semibold text-blue-800 mb-2">Average Order Value</h4>
                 <p className="mobile-text-lg font-bold text-blue-700">€{orders.length > 0 ? Math.round(analytics.potentialRevenue / orders.length) : '0'}</p>
                 <p className="mobile-text-xs text-blue-600 mt-1">Based on completed orders</p>
               </div>
-              
+
               <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg mobile-p-3">
                 <h4 className="mobile-text-sm font-semibold text-purple-800 mb-2">Stock Turnover Rate</h4>
                 <p className="mobile-text-lg font-bold text-purple-700">{analytics.averageStock > 0 ? Math.round((orders.length * 10 / analytics.averageStock) * 100) : 0}%</p>
@@ -790,13 +790,13 @@ export function AdminDashboard() {
                 )}
               </div>
             </div>
-            
+
             {searchQuery && (
               <div className="space-y-6">
                 {filteredUsers.slice(0, 5).map((user: any) => {
                   const profile = getCustomerProfile(user.id);
                   if (!profile) return null;
-                  
+
                   return (
                     <div key={user.id} className="border-2 border-blue-200 rounded-lg p-6 bg-white shadow-sm">
                       {/* Customer Header */}
@@ -818,7 +818,7 @@ export function AdminDashboard() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Spending Summary */}
                       {profile.orderCount > 0 && (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
@@ -835,7 +835,7 @@ export function AdminDashboard() {
                           </div>
                         </div>
                       )}
-                      
+
                       {profile.orderCount > 0 ? (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           {/* Strain Preferences */}
@@ -923,7 +923,7 @@ export function AdminDashboard() {
                           <p className="text-gray-600">This customer hasn't placed any orders yet.</p>
                         </div>
                       )}
-                      
+
                       {/* Recent Orders */}
                       {profile.recentOrders && profile.recentOrders.length > 0 && (
                         <div className="mt-6">
@@ -965,7 +965,7 @@ export function AdminDashboard() {
                     </div>
                   );
                 })}
-                
+
                 {filteredUsers.length === 0 && (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🔍</div>
@@ -977,7 +977,7 @@ export function AdminDashboard() {
                 )}
               </div>
             )}
-            
+
             {!searchQuery && (
               <div className="text-center py-12">
                 <Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />
@@ -1035,7 +1035,7 @@ export function AdminDashboard() {
                         <p className="text-xs text-gray-500 mt-1">{new Date(order.createdAt).toLocaleString()}</p>
                       </div>
                     </div>
-                    
+
                     <div className="mb-3">
                       <h4 className="font-medium text-sm mb-2">Items:</h4>
                       {order.items.map((item: any, index: number) => {
@@ -1048,7 +1048,7 @@ export function AdminDashboard() {
                         );
                       })}
                     </div>
-                    
+
                     <div className="flex space-x-2">
                       <Button
                         onClick={() => confirmOrder(order.id)}
