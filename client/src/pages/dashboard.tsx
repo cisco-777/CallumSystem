@@ -199,22 +199,10 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const basketCount = basketItems.length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dashboard-grid-layout">
-      {/* Left Spacer - Balances right navigation */}
-      <div className="dashboard-left-spacer"></div>
-      
-      {/* Main Content Area */}
-      <div className="dashboard-main-content">
-        {/* Right Navigation */}
-        <RightNavigation 
-          type="member" 
-          onLogout={onLogout} 
-          onShowBasket={() => setShowBasket(true)} 
-          basketCount={basketCount} 
-        />
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto mobile-p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+    <div className="min-h-screen bg-gray-50">
+      {/* Full Width Header - Outside grid layout */}
+      <header className="bg-white shadow-sm border-b sticky top-0 z-40 w-full">
+        <div className="max-w-none mx-0 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div>
             <h1 className="mobile-h2 font-light text-gray-900">La Cultura Social Club</h1>
             <p className="mobile-text-sm text-gray-500">Member Catalogue</p>
@@ -247,8 +235,23 @@ export function Dashboard({ onLogout }: DashboardProps) {
         </div>
       </header>
 
-      {/* Products Grid */}
-      <main className="max-w-6xl mx-auto mobile-p-3 py-6 sm:py-8 main-content-with-nav">
+      {/* Dashboard Grid Layout - Only for main content */}
+      <div className="dashboard-grid-layout">
+        {/* Left Spacer - Balances right navigation */}
+        <div className="dashboard-left-spacer"></div>
+        
+        {/* Main Content Area */}
+        <div className="dashboard-main-content">
+          {/* Right Navigation */}
+          <RightNavigation 
+            type="member" 
+            onLogout={onLogout} 
+            onShowBasket={() => setShowBasket(true)} 
+            basketCount={basketCount} 
+          />
+
+          {/* Products Grid */}
+          <main className="max-w-6xl mx-auto mobile-p-3 py-6 sm:py-8 main-content-with-nav">
         {/* Overview Section - Always present but different content for demo/regular members */}
         <div id="overview" className={`mb-8 sm:mb-12 ${isDemoMember ? 'bg-gradient-to-r from-green-50 to-blue-50 rounded-xl mobile-p-4 border-2 border-green-200 shadow-lg' : ''}`}>
           {/* Member Dashboard Section - Only for demo member */}
@@ -601,10 +604,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
             <p className="text-gray-500">No items available at the moment.</p>
           </div>
         )}
-      </main>
 
-      {/* Basket Sidebar */}
-      <AnimatePresence>
+        {/* Basket Sidebar */}
+        <AnimatePresence>
         {showBasket && (
           <>
             <motion.div
@@ -675,11 +677,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+        </AnimatePresence>
+          </main>
+        </div>
+        
+        {/* Right Navigation Space */}
+        <div className="dashboard-nav-spacer"></div>
       </div>
-      
-      {/* Right Navigation Space */}
-      <div className="dashboard-nav-spacer"></div>
     </div>
   );
 }
