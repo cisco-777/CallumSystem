@@ -225,7 +225,6 @@ export function AdminDashboard() {
   const handleUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
     if (result.successful && result.successful.length > 0) {
       const uploadURL = result.successful[0].uploadURL;
-      setUploadedImageUrl(uploadURL);
       
       try {
         // Set the ACL policy for the uploaded image to make it publicly accessible
@@ -235,12 +234,14 @@ export function AdminDashboard() {
           headers: { 'Content-Type': 'application/json' }
         });
         
-        const publicImageUrl = `/public-objects/${response.imagePath.split('/').pop()}`;
-        setUploadedImageUrl(publicImageUrl);
-        setImagePreview(publicImageUrl);
+        // Use the correct path for serving the uploaded image
+        // The imagePath from response is like "/objects/uploads/abc123"
+        const imageServeUrl = response.imagePath;
+        setUploadedImageUrl(imageServeUrl);
+        setImagePreview(imageServeUrl);
         
-        // Update form field with the public URL
-        productForm.setValue('imageUrl', publicImageUrl);
+        // Update form field with the serve URL
+        productForm.setValue('imageUrl', imageServeUrl);
         
         toast({
           title: "Image Uploaded",
@@ -248,6 +249,11 @@ export function AdminDashboard() {
         });
       } catch (error) {
         console.error('Failed to set image ACL:', error);
+        // Fall back to using the upload URL directly for preview
+        setUploadedImageUrl(uploadURL || '');
+        setImagePreview(uploadURL || '');
+        productForm.setValue('imageUrl', uploadURL || '');
+        
         toast({
           title: "Upload Warning",
           description: "Image uploaded but may not be publicly accessible.",
@@ -758,16 +764,21 @@ export function AdminDashboard() {
                               
                               {imagePreview && (
                                 <div className="mt-4">
-                                  <div className="border rounded-lg p-2 bg-gray-50">
+                                  <p className="text-sm text-gray-600 mb-2 font-medium">Image Preview:</p>
+                                  <div className="border rounded-lg p-4 bg-gray-50 flex justify-center">
                                     <img 
                                       src={imagePreview} 
                                       alt="Product preview" 
-                                      className="max-w-xs max-h-40 object-contain rounded"
-                                      onError={() => {
-                                        setImagePreview('');
+                                      className="max-w-full max-h-64 w-auto h-auto object-contain rounded shadow-sm border border-gray-200"
+                                      onLoad={() => {
+                                        console.log('Image loaded successfully:', imagePreview);
+                                      }}
+                                      onError={(e) => {
+                                        console.error('Image failed to load:', imagePreview, e);
+                                        // Don't clear the preview immediately, let user see the issue
                                         toast({
-                                          title: "Image Error",
-                                          description: "Failed to load image preview.",
+                                          title: "Image Preview Error",
+                                          description: "Unable to load image preview. The image may still be uploading or processing.",
                                           variant: "destructive"
                                         });
                                       }}
