@@ -5,17 +5,45 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { insertProductSchema, type InsertProduct } from '@shared/schema';
+import { z } from 'zod';
+
+const productFormSchema = insertProductSchema.extend({
+  category: z.enum(['Sativa', 'Indica', 'Hybrid']),
+  productType: z.enum(['Cannabis', 'Hash']),
+  productCode: z.string().min(6).max(6).regex(/^[A-Z]{2}\d{4}$/, 'Product code must be 2 letters followed by 4 numbers (e.g., ZK4312)')
+});
+
+type ProductFormData = z.infer<typeof productFormSchema>;
 
 export function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSystemWiped, setIsSystemWiped] = useState(false);
   const [showFailsafeDialog, setShowFailsafeDialog] = useState(false);
+  const [showProductForm, setShowProductForm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const productForm = useForm<ProductFormData>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      category: 'Sativa',
+      productType: 'Cannabis',
+      imageUrl: '',
+      productCode: ''
+    }
+  });
 
   const { data: products = [] } = useQuery({
     queryKey: ['/api/products']
@@ -118,6 +146,35 @@ export function AdminDashboard() {
     }
   });
 
+  const createProductMutation = useMutation({
+    mutationFn: async (productData: ProductFormData) => {
+      // Remove productType from the data as it's not in the database schema
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { productType, ...dbProductData } = productData;
+      return await apiRequest('/api/products', {
+        method: 'POST',
+        body: JSON.stringify(dbProductData),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      toast({
+        title: "Product Created",
+        description: "New product added to catalog successfully.",
+      });
+      productForm.reset();
+      setShowProductForm(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create product.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const updateOrderStatus = (orderId: number, status: string) => {
     updateOrderStatusMutation.mutate({ orderId, status });
   };
@@ -130,6 +187,10 @@ export function AdminDashboard() {
     if (window.confirm("Are you sure you want to remove ALL orders from the Order Control Center? Orders will be archived but customer history and analytics will be preserved.")) {
       deleteAllOrdersMutation.mutate();
     }
+  };
+
+  const onSubmitProduct = (data: ProductFormData) => {
+    createProductMutation.mutate(data);
   };
 
   const executeFailsafe = () => {
@@ -511,6 +572,178 @@ export function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Product Catalog Management */}
+        <Card className="mb-6 sm:mb-8">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="flex items-center mobile-text-base">
+                <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-[#116149]" />
+                Product Catalog Management
+              </CardTitle>
+              <Button
+                onClick={() => setShowProductForm(!showProductForm)}
+                className="bg-[#116149] hover:bg-[#0d4d3a] text-white mobile-btn-md mobile-touch-target"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {showProductForm ? 'Cancel' : 'Add Product'}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {showProductForm ? (
+              <Form {...productForm}>
+                <form onSubmit={productForm.handleSubmit(onSubmitProduct)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={productForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Blue Dream" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={productForm.control}
+                      name="productCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Code (6 digits) *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="e.g., BD7010" 
+                              {...field} 
+                              onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                              maxLength={6}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={productForm.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category *</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Sativa">Sativa</SelectItem>
+                              <SelectItem value="Indica">Indica</SelectItem>
+                              <SelectItem value="Hybrid">Hybrid</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={productForm.control}
+                      name="productType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Type *</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Cannabis">Cannabis</SelectItem>
+                              <SelectItem value="Hash">Hash</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={productForm.control}
+                      name="imageUrl"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                          <FormLabel>Product Image URL</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://example.com/image.jpg" 
+                              {...field}
+                              value={field.value || ''}
+                              type="url"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={productForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Describe the product's characteristics, effects, and flavors..."
+                            className="min-h-[100px]"
+                            {...field}
+                            value={field.value || ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowProductForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createProductMutation.isPending}
+                      className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
+                    >
+                      {createProductMutation.isPending ? 'Creating...' : 'Create Product'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            ) : (
+              <div className="text-center py-8">
+                <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Product Catalog Management</h3>
+                <p className="text-gray-500 mb-4">
+                  Add new products to the customer-facing catalog that will be visible in the product selection area
+                </p>
+                <p className="text-sm text-gray-400">
+                  Products added here will automatically appear in the customer catalog with filtering by category
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Analytics Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">

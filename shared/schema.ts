@@ -76,7 +76,10 @@ export const insertProductSchema = createInsertSchema(products).pick({
   description: true,
   category: true,
   productCode: true,
+  imageUrl: true,
 });
+
+export type InsertProduct = z.infer<typeof insertProductSchema>;
 
 export const insertBasketItemSchema = createInsertSchema(basketItems).pick({
   userId: true,

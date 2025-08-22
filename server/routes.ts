@@ -150,9 +150,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/products", async (req, res) => {
     try {
-      const product = await storage.createProduct(req.body);
+      const { productCode, ...productData } = req.body;
+      
+      // Check if product code already exists
+      const existingProducts = await storage.getProducts();
+      const existingProduct = existingProducts.find((p: any) => p.productCode === productCode);
+      
+      if (existingProduct) {
+        return res.status(400).json({ message: "Product code already exists. Please use a unique 6-digit code." });
+      }
+      
+      const product = await storage.createProduct({ productCode, ...productData });
       res.json(product);
     } catch (error) {
+      console.error("Create product error:", error);
       res.status(500).json({ message: "Failed to create product" });
     }
   });
