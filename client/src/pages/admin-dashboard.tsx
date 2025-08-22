@@ -16,6 +16,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertProductSchema, type InsertProduct } from '@shared/schema';
 import { z } from 'zod';
+import { ObjectUploader } from '@/components/ObjectUploader';
+import type { UploadResult } from '@uppy/core';
 
 const productFormSchema = insertProductSchema.extend({
   category: z.enum(['Sativa', 'Indica', 'Hybrid']),
@@ -30,6 +32,8 @@ export function AdminDashboard() {
   const [isSystemWiped, setIsSystemWiped] = useState(false);
   const [showFailsafeDialog, setShowFailsafeDialog] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -190,7 +194,67 @@ export function AdminDashboard() {
   };
 
   const onSubmitProduct = (data: ProductFormData) => {
-    createProductMutation.mutate(data);
+    // Use uploaded image URL if available, otherwise use the form imageUrl
+    const finalData = {
+      ...data,
+      imageUrl: uploadedImageUrl || data.imageUrl || ''
+    };
+    createProductMutation.mutate(finalData);
+  };
+
+  const handleGetUploadParameters = async () => {
+    try {
+      const response = await apiRequest('/api/objects/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return {
+        method: 'PUT' as const,
+        url: response.uploadURL
+      };
+    } catch (error) {
+      toast({
+        title: "Upload Error",
+        description: "Failed to get upload URL. Please try again.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const handleUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadURL = result.successful[0].uploadURL;
+      setUploadedImageUrl(uploadURL);
+      
+      try {
+        // Set the ACL policy for the uploaded image to make it publicly accessible
+        const response = await apiRequest('/api/product-images', {
+          method: 'PUT',
+          body: JSON.stringify({ imageURL: uploadURL }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const publicImageUrl = `/public-objects/${response.imagePath.split('/').pop()}`;
+        setUploadedImageUrl(publicImageUrl);
+        setImagePreview(publicImageUrl);
+        
+        // Update form field with the public URL
+        productForm.setValue('imageUrl', publicImageUrl);
+        
+        toast({
+          title: "Image Uploaded",
+          description: "Product image uploaded successfully!"
+        });
+      } catch (error) {
+        console.error('Failed to set image ACL:', error);
+        toast({
+          title: "Upload Warning",
+          description: "Image uploaded but may not be publicly accessible.",
+          variant: "destructive"
+        });
+      }
+    }
   };
 
   const executeFailsafe = () => {
@@ -678,14 +742,55 @@ export function AdminDashboard() {
                       name="imageUrl"
                       render={({ field }) => (
                         <FormItem className="md:col-span-2">
-                          <FormLabel>Product Image URL</FormLabel>
+                          <FormLabel>Product Image</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="https://example.com/image.jpg" 
-                              {...field}
-                              value={field.value || ''}
-                              type="url"
-                            />
+                            <div className="space-y-4">
+                              <ObjectUploader
+                                maxNumberOfFiles={1}
+                                maxFileSize={10485760}
+                                onGetUploadParameters={handleGetUploadParameters}
+                                onComplete={handleUploadComplete}
+                                buttonClassName="bg-blue-600 hover:bg-blue-700 text-white"
+                                allowedFileTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']}
+                              >
+                                📷 Upload Product Image
+                              </ObjectUploader>
+                              
+                              {imagePreview && (
+                                <div className="mt-4">
+                                  <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
+                                  <div className="border rounded-lg p-2 bg-gray-50">
+                                    <img 
+                                      src={imagePreview} 
+                                      alt="Product preview" 
+                                      className="max-w-xs max-h-40 object-contain rounded"
+                                      onError={() => {
+                                        setImagePreview('');
+                                        toast({
+                                          title: "Image Error",
+                                          description: "Failed to load image preview.",
+                                          variant: "destructive"
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <Input 
+                                {...field}
+                                value={field.value || uploadedImageUrl || ''}
+                                placeholder="Or enter image URL manually" 
+                                type="url"
+                                className="text-sm"
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  if (e.target.value && e.target.value !== uploadedImageUrl) {
+                                    setImagePreview(e.target.value);
+                                  }
+                                }}
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
