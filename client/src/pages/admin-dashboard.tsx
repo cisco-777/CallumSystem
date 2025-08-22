@@ -758,7 +758,6 @@ export function AdminDashboard() {
                               
                               {imagePreview && (
                                 <div className="mt-4">
-                                  <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
                                   <div className="border rounded-lg p-2 bg-gray-50">
                                     <img 
                                       src={imagePreview} 
@@ -777,18 +776,10 @@ export function AdminDashboard() {
                                 </div>
                               )}
                               
-                              <Input 
+                              <input 
+                                type="hidden"
                                 {...field}
                                 value={field.value || uploadedImageUrl || ''}
-                                placeholder="Or enter image URL manually" 
-                                type="url"
-                                className="text-sm"
-                                onChange={(e) => {
-                                  field.onChange(e);
-                                  if (e.target.value && e.target.value !== uploadedImageUrl) {
-                                    setImagePreview(e.target.value);
-                                  }
-                                }}
                               />
                             </div>
                           </FormControl>
