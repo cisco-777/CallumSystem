@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2 } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -53,6 +53,8 @@ export function AdminDashboard() {
   const [isImageUploading, setIsImageUploading] = useState<boolean>(false);
   const [showStockForm, setShowStockForm] = useState(false);
   const [editingStock, setEditingStock] = useState<any>(null);
+  const [deletingProduct, setDeletingProduct] = useState<any>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -232,6 +234,44 @@ export function AdminDashboard() {
     }
   });
 
+  const deleteStockMutation = useMutation({
+    mutationFn: async (productId: number) => {
+      return await apiRequest(`/api/products/${productId}`, {
+        method: 'DELETE',
+        headers: { 'x-admin': 'true' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders/analytics'] });
+      setShowDeleteDialog(false);
+      setDeletingProduct(null);
+      toast({
+        title: "Product Deleted",
+        description: "Product has been successfully removed from both stock management and customer catalog.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete product. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleDeleteProduct = (product: any) => {
+    setDeletingProduct(product);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteProduct = () => {
+    if (deletingProduct) {
+      deleteStockMutation.mutate(deletingProduct.id);
+    }
+  };
+
   const updateOrderStatus = (orderId: number, status: string) => {
     updateOrderStatusMutation.mutate({ orderId, status });
   };
@@ -352,7 +392,7 @@ export function AdminDashboard() {
         // Update the image preview and form
         setUploadedImageUrl(imageServeUrl);
         setImagePreview(imageServeUrl);
-        productForm.setValue('imageUrl', imageServeUrl);
+        stockForm.setValue('imageUrl', imageServeUrl);
         
         // Stop the loading state AFTER setting the preview
         setIsImageUploading(false);
@@ -368,7 +408,7 @@ export function AdminDashboard() {
         // Fall back to using the upload URL directly for preview
         setUploadedImageUrl(uploadURL || '');
         setImagePreview(uploadURL || '');
-        productForm.setValue('imageUrl', uploadURL || '');
+        stockForm.setValue('imageUrl', uploadURL || '');
         
         // Stop the loading state even on error
         setIsImageUploading(false);
@@ -1702,17 +1742,30 @@ export function AdminDashboard() {
                 const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
                 return (
                   <div key={product.id} className="border rounded-lg p-4 relative">
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditStock(product);
-                      }}
-                      size="sm"
-                      variant="ghost"
-                      className="absolute top-2 right-2 p-1 h-8 w-8"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    <div className="absolute top-2 right-2 flex space-x-1">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditStock(product);
+                        }}
+                        size="sm"
+                        variant="ghost"
+                        className="p-1 h-8 w-8"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteProduct(product);
+                        }}
+                        size="sm"
+                        variant="ghost"
+                        className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <h3 className="font-semibold pr-10">{product.name}</h3>
                     <Badge className="mt-2">{product.category}</Badge>
                     
@@ -1761,6 +1814,40 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Product</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{deletingProduct?.name}"? This will permanently remove the product from both:
+                <br /><br />
+                • <strong>Internal Stock Management</strong> - All stock data and pricing information
+                <br />
+                • <strong>Customer Catalog</strong> - Product will no longer appear to customers
+                <br /><br />
+                This action cannot be undone. Orders containing this product will be preserved for historical records.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setDeletingProduct(null);
+                }}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteProduct}
+                disabled={deleteStockMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {deleteStockMutation.isPending ? 'Deleting...' : 'Delete Product'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
       </div>
     </div>

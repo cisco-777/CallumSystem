@@ -281,6 +281,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete product route
+  app.delete('/api/products/:id', async (req, res) => {
+    const { id } = req.params;
+    const isAdmin = req.headers['x-admin'] === 'true';
+    
+    if (!isAdmin) {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    try {
+      await storage.deleteProduct(parseInt(id));
+      res.json({ message: 'Product deleted successfully' });
+    } catch (error) {
+      console.error('Delete product error:', error);
+      res.status(500).json({ message: 'Failed to delete product' });
+    }
+  });
+
   // Basket routes
   app.get("/api/basket", async (req, res) => {
     try {

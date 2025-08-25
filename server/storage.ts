@@ -29,6 +29,7 @@ export interface IStorage {
   createProduct(product: any): Promise<Product>;
   updateProductStock(id: number, stockData: any): Promise<Product>;
   createStockEntry(stockData: any): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
   
   // Basket operations
   getBasketItems(userId: number): Promise<BasketItem[]>;
