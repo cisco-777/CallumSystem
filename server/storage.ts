@@ -251,6 +251,14 @@ export class DatabaseStorage implements IStorage {
     // Archive orders from admin view instead of deleting (preserves analytics data)
     await db.update(orders).set({ archivedFromAdmin: true });
   }
+
+  async deleteProduct(id: number): Promise<void> {
+    // First remove all basket items for this product
+    await db.delete(basketItems).where(eq(basketItems.productId, id));
+    
+    // Then delete the product itself
+    await db.delete(products).where(eq(products.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();
