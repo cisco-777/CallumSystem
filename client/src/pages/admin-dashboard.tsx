@@ -296,7 +296,6 @@ export function AdminDashboard() {
   };
 
   const handleEditStock = (product: any) => {
-    console.log('handleEditStock called with product:', product);
     setEditingStock(product);
     stockForm.reset({
       name: product.name,
@@ -313,7 +312,6 @@ export function AdminDashboard() {
   };
 
   const handleCreateStock = () => {
-    console.log('handleCreateStock called');
     setEditingStock(null);
     stockForm.reset({
       name: '',
@@ -1017,9 +1015,17 @@ export function AdminDashboard() {
 
         {/* Stock Management Form */}
         {showStockForm && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>{editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}</CardTitle>
+          <Card className="mb-6 border-2 border-blue-500 shadow-lg">
+            <CardHeader className="bg-blue-50 border-b border-blue-200">
+              <CardTitle className="text-blue-800">{editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}</CardTitle>
+              <Button 
+                onClick={() => setShowStockForm(false)} 
+                variant="ghost" 
+                size="sm" 
+                className="absolute top-2 right-2"
+              >
+                ✕
+              </Button>
             </CardHeader>
             <CardContent>
               <Form {...stockForm}>
@@ -1776,10 +1782,7 @@ export function AdminDashboard() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Dispensary Stock</CardTitle>
             <Button 
-              onClick={() => {
-                console.log('Add button clicked');
-                handleCreateStock();
-              }} 
+              onClick={handleCreateStock}
               size="sm" 
               className="flex items-center gap-2"
             >
@@ -1796,7 +1799,6 @@ export function AdminDashboard() {
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('Edit button clicked for product:', product.name);
                         handleEditStock(product);
                       }}
                       size="sm"
