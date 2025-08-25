@@ -27,7 +27,7 @@ const unifiedStockFormSchema = z.object({
   category: z.enum(['Sativa', 'Indica', 'Hybrid']),
   productType: z.enum(['Cannabis', 'Hash']),
   imageUrl: z.string().optional(),
-  productCode: z.string().min(6).max(6).regex(/^[A-Z]{2}\d{4}$/, 'Product code must be 2 letters followed by 4 numbers (e.g., ZK4312)'),
+  productCode: z.string().min(1, 'Product code is required'),
   // Stock Management Fields (admin-only)
   supplier: z.string().min(1, 'Supplier is required'),
   onShelfGrams: z.number().min(0, 'On shelf amount must be positive'),
@@ -1431,13 +1431,12 @@ export function AdminDashboard() {
                             name="productCode"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Product Code (6 digits) *</FormLabel>
+                                <FormLabel>Product Code *</FormLabel>
                                 <FormControl>
                                   <Input 
-                                    placeholder="e.g., BD7010" 
+                                    placeholder="Enter product code" 
                                     {...field} 
                                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                                    maxLength={6}
                                   />
                                 </FormControl>
                                 <FormMessage />
