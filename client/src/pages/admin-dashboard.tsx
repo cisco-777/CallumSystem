@@ -34,6 +34,7 @@ export function AdminDashboard() {
   const [showProductForm, setShowProductForm] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [isImageUploading, setIsImageUploading] = useState<boolean>(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -756,13 +757,26 @@ export function AdminDashboard() {
                                 maxFileSize={10485760}
                                 onGetUploadParameters={handleGetUploadParameters}
                                 onComplete={handleUploadComplete}
-                                buttonClassName="bg-blue-600 hover:bg-blue-700 text-white"
+                                onUploadStart={() => setIsImageUploading(true)}
+                                buttonClassName="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400"
                                 allowedFileTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']}
+                                disabled={isImageUploading}
                               >
-                                📷 Upload Product Image
+                                {isImageUploading ? '⏳ Uploading Image...' : '📷 Upload Product Image'}
                               </ObjectUploader>
                               
-                              {imagePreview && (
+                              {isImageUploading && (
+                                <div className="mt-4">
+                                  <div className="border rounded-lg p-4 bg-blue-50 flex justify-center items-center">
+                                    <div className="text-blue-600 flex items-center space-x-2">
+                                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                      <span>Processing image...</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {imagePreview && !isImageUploading && (
                                 <div className="mt-4">
                                   <p className="text-sm text-gray-600 mb-2 font-medium">Image Preview:</p>
                                   <div className="border rounded-lg p-4 bg-gray-50 flex justify-center">
@@ -775,12 +789,16 @@ export function AdminDashboard() {
                                       }}
                                       onError={(e) => {
                                         console.error('Image failed to load:', imagePreview, e);
-                                        // Don't clear the preview immediately, let user see the issue
-                                        toast({
-                                          title: "Image Preview Error",
-                                          description: "Unable to load image preview. The image may still be uploading or processing.",
-                                          variant: "destructive"
-                                        });
+                                        // Only show error after a delay to avoid flashing errors during normal loading
+                                        setTimeout(() => {
+                                          if (imagePreview) { // Only show if preview is still set
+                                            toast({
+                                              title: "Image Display Error",
+                                              description: "Unable to display image preview. Please try uploading again.",
+                                              variant: "destructive"
+                                            });
+                                          }
+                                        }, 2000);
                                       }}
                                     />
                                   </div>

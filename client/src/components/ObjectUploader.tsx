@@ -15,9 +15,11 @@ interface ObjectUploaderProps {
   onComplete?: (
     result: UploadResult<Record<string, unknown>, Record<string, unknown>>
   ) => void;
+  onUploadStart?: () => void;
   buttonClassName?: string;
   children: ReactNode;
   allowedFileTypes?: string[];
+  disabled?: boolean;
 }
 
 /**
@@ -44,9 +46,11 @@ export function ObjectUploader({
   maxFileSize = 10485760, // 10MB default
   onGetUploadParameters,
   onComplete,
+  onUploadStart,
   buttonClassName,
   children,
-  allowedFileTypes = ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.webp']
+  allowedFileTypes = ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.webp'],
+  disabled = false
 }: ObjectUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,6 +69,7 @@ export function ObjectUploader({
       })
       .on("file-added", () => {
         setIsUploading(true);
+        onUploadStart?.();
       })
       .on("complete", (result) => {
         setIsUploading(false);
@@ -76,6 +81,8 @@ export function ObjectUploader({
   );
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled || isUploading) return;
+    
     const files = event.target.files;
     if (files && files.length > 0) {
       // Clear previous files
@@ -99,6 +106,7 @@ export function ObjectUploader({
   };
 
   const handleButtonClick = () => {
+    if (disabled || isUploading) return;
     fileInputRef.current?.click();
   };
 
@@ -111,14 +119,15 @@ export function ObjectUploader({
         onChange={handleFileSelect}
         style={{ display: 'none' }}
         multiple={maxNumberOfFiles > 1}
+        disabled={disabled || isUploading}
       />
       <Button 
         onClick={handleButtonClick} 
         className={buttonClassName} 
         type="button"
-        disabled={isUploading}
+        disabled={disabled || isUploading}
       >
-        {isUploading ? 'Uploading...' : children}
+        {children}
       </Button>
     </div>
   );
