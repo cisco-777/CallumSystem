@@ -224,6 +224,8 @@ export function AdminDashboard() {
   };
 
   const handleUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    console.log('Upload completed:', result);
+    
     if (result.successful && result.successful.length > 0) {
       const uploadURL = result.successful[0].uploadURL;
       
@@ -236,24 +238,32 @@ export function AdminDashboard() {
         });
         
         // Use the correct path for serving the uploaded image
-        // The imagePath from response is like "/objects/uploads/abc123"
         const imageServeUrl = response.imagePath;
+        console.log('Setting image preview to:', imageServeUrl);
+        
+        // Update the image preview and form
         setUploadedImageUrl(imageServeUrl);
         setImagePreview(imageServeUrl);
-        
-        // Update form field with the serve URL
         productForm.setValue('imageUrl', imageServeUrl);
+        
+        // Stop the loading state AFTER setting the preview
+        setIsImageUploading(false);
         
         toast({
           title: "Image Uploaded",
           description: "Product image uploaded successfully!"
         });
+        
       } catch (error) {
         console.error('Failed to set image ACL:', error);
+        
         // Fall back to using the upload URL directly for preview
         setUploadedImageUrl(uploadURL || '');
         setImagePreview(uploadURL || '');
         productForm.setValue('imageUrl', uploadURL || '');
+        
+        // Stop the loading state even on error
+        setIsImageUploading(false);
         
         toast({
           title: "Upload Warning",
@@ -261,6 +271,15 @@ export function AdminDashboard() {
           variant: "destructive"
         });
       }
+    } else {
+      // Stop loading state when no files were uploaded
+      setIsImageUploading(false);
+      
+      toast({
+        title: "Upload Failed",
+        description: "No files were successfully uploaded.",
+        variant: "destructive"
+      });
     }
   };
 
