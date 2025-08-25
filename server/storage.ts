@@ -27,6 +27,8 @@ export interface IStorage {
   getProducts(): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: any): Promise<Product>;
+  updateProductStock(id: number, stockData: any): Promise<Product>;
+  createStockEntry(stockData: any): Promise<Product>;
   
   // Basket operations
   getBasketItems(userId: number): Promise<BasketItem[]>;
@@ -95,6 +97,33 @@ export class DatabaseStorage implements IStorage {
     const [product] = await db
       .insert(products)
       .values(productData)
+      .returning();
+    return product;
+  }
+
+  async updateProductStock(id: number, stockData: any): Promise<Product> {
+    const [product] = await db
+      .update(products)
+      .set({
+        ...stockData,
+        stockQuantity: (stockData.onShelfGrams || 0) + (stockData.internalGrams || 0) + (stockData.externalGrams || 0),
+        adminPrice: stockData.shelfPrice, // For backward compatibility
+        lastUpdated: new Date()
+      })
+      .where(eq(products.id, id))
+      .returning();
+    return product;
+  }
+
+  async createStockEntry(stockData: any): Promise<Product> {
+    const [product] = await db
+      .insert(products)
+      .values({
+        ...stockData,
+        stockQuantity: (stockData.onShelfGrams || 0) + (stockData.internalGrams || 0) + (stockData.externalGrams || 0),
+        adminPrice: stockData.shelfPrice, // For backward compatibility
+        lastUpdated: new Date()
+      })
       .returning();
     return product;
   }

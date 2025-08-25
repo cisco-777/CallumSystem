@@ -235,6 +235,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stock management routes
+  app.put('/api/products/:id/stock', async (req, res) => {
+    const { id } = req.params;
+    const stockData = req.body;
+    
+    try {
+      // Check if product code already exists for other products (if being changed)
+      if (stockData.productCode) {
+        const existingProducts = await storage.getProducts();
+        const existingProduct = existingProducts.find((p: any) => 
+          p.productCode === stockData.productCode && p.id !== parseInt(id)
+        );
+        
+        if (existingProduct) {
+          return res.status(400).json({ message: "Product code already exists. Please use a unique 6-digit code." });
+        }
+      }
+      
+      const updatedProduct = await storage.updateProductStock(parseInt(id), stockData);
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error('Update stock error:', error);
+      res.status(500).json({ message: 'Failed to update stock' });
+    }
+  });
+
+  app.post('/api/products/stock', async (req, res) => {
+    const stockData = req.body;
+    
+    try {
+      // Check if product code already exists
+      const existingProducts = await storage.getProducts();
+      const existingProduct = existingProducts.find((p: any) => p.productCode === stockData.productCode);
+      
+      if (existingProduct) {
+        return res.status(400).json({ message: "Product code already exists. Please use a unique 6-digit code." });
+      }
+      
+      const newProduct = await storage.createStockEntry(stockData);
+      res.json(newProduct);
+    } catch (error) {
+      console.error('Create stock entry error:', error);
+      res.status(500).json({ message: 'Failed to create stock entry' });
+    }
+  });
+
   // Basket routes
   app.get("/api/basket", async (req, res) => {
     try {

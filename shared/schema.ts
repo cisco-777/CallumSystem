@@ -24,9 +24,18 @@ export const products = pgTable("products", {
   description: text("description"),
   imageUrl: text("image_url"),
   category: text("category"),
+  productType: text("product_type"),
   productCode: text("product_code").notNull().unique(),
   stockQuantity: integer("stock_quantity").notNull().default(0),
   adminPrice: text("admin_price").notNull().default("0"),
+  // Enhanced stock management fields
+  supplier: text("supplier"),
+  onShelfGrams: integer("on_shelf_grams").notNull().default(0),
+  internalGrams: integer("internal_grams").notNull().default(0),
+  externalGrams: integer("external_grams").notNull().default(0),
+  costPrice: text("cost_price").notNull().default("0"),
+  shelfPrice: text("shelf_price").notNull().default("0"),
+  lastUpdated: timestamp("last_updated").defaultNow(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -25,6 +25,20 @@ const productFormSchema = insertProductSchema.extend({
   productCode: z.string().min(6).max(6).regex(/^[A-Z]{2}\d{4}$/, 'Product code must be 2 letters followed by 4 numbers (e.g., ZK4312)')
 });
 
+const stockFormSchema = z.object({
+  name: z.string().min(1, 'Product name is required'),
+  category: z.enum(['Sativa', 'Indica', 'Hybrid']),
+  supplier: z.string().min(1, 'Supplier is required'),
+  onShelfGrams: z.number().min(0, 'On shelf amount must be positive'),
+  internalGrams: z.number().min(0, 'Internal amount must be positive'),
+  externalGrams: z.number().min(0, 'External amount must be positive'),
+  costPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Cost price must be a valid number'),
+  shelfPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Shelf price must be a valid number'),
+  productCode: z.string().min(6).max(6).regex(/^[A-Z]{2}\d{4}$/, 'Product code must be 2 letters followed by 4 numbers')
+});
+
+type StockFormData = z.infer<typeof stockFormSchema>;
+
 type ProductFormData = z.infer<typeof productFormSchema>;
 
 export function AdminDashboard() {
@@ -35,6 +49,8 @@ export function AdminDashboard() {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string>('');
   const [isImageUploading, setIsImageUploading] = useState<boolean>(false);
+  const [showStockForm, setShowStockForm] = useState(false);
+  const [editingStock, setEditingStock] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -46,6 +62,21 @@ export function AdminDashboard() {
       category: 'Sativa',
       productType: 'Cannabis',
       imageUrl: '',
+      productCode: ''
+    }
+  });
+
+  const stockForm = useForm<StockFormData>({
+    resolver: zodResolver(stockFormSchema),
+    defaultValues: {
+      name: '',
+      category: 'Sativa',
+      supplier: '',
+      onShelfGrams: 0,
+      internalGrams: 0,
+      externalGrams: 0,
+      costPrice: '0',
+      shelfPrice: '0',
       productCode: ''
     }
   });
@@ -180,6 +211,59 @@ export function AdminDashboard() {
     }
   });
 
+  const updateStockMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: StockFormData }) => {
+      return await apiRequest(`/api/products/${id}/stock`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      setShowStockForm(false);
+      setEditingStock(null);
+      stockForm.reset();
+      toast({
+        title: "Stock Updated",
+        description: "Product stock information has been updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update stock. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const createStockMutation = useMutation({
+    mutationFn: async (data: StockFormData) => {
+      return await apiRequest('/api/products/stock', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      setShowStockForm(false);
+      stockForm.reset();
+      toast({
+        title: "Stock Entry Created",
+        description: "New stock entry has been created.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create stock entry. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const updateOrderStatus = (orderId: number, status: string) => {
     updateOrderStatusMutation.mutate({ orderId, status });
   };
@@ -201,6 +285,36 @@ export function AdminDashboard() {
       imageUrl: uploadedImageUrl || data.imageUrl || ''
     };
     createProductMutation.mutate(finalData);
+  };
+
+  const onSubmitStock = (data: StockFormData) => {
+    if (editingStock) {
+      updateStockMutation.mutate({ id: editingStock.id, data });
+    } else {
+      createStockMutation.mutate(data);
+    }
+  };
+
+  const handleEditStock = (product: any) => {
+    setEditingStock(product);
+    stockForm.reset({
+      name: product.name,
+      category: product.category,
+      supplier: product.supplier || '',
+      onShelfGrams: product.onShelfGrams || 0,
+      internalGrams: product.internalGrams || 0,
+      externalGrams: product.externalGrams || 0,
+      costPrice: product.costPrice || '0',
+      shelfPrice: product.shelfPrice || product.adminPrice || '0',
+      productCode: product.productCode
+    });
+    setShowStockForm(true);
+  };
+
+  const handleCreateStock = () => {
+    setEditingStock(null);
+    stockForm.reset();
+    setShowStockForm(true);
   };
 
   const handleGetUploadParameters = async () => {
@@ -889,6 +1003,200 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
+        {/* Stock Management Form */}
+        {showStockForm && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>{editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...stockForm}>
+                <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={stockForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Blue Dream" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={stockForm.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category *</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Sativa">Sativa</SelectItem>
+                              <SelectItem value="Indica">Indica</SelectItem>
+                              <SelectItem value="Hybrid">Hybrid</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={stockForm.control}
+                      name="productCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Code (6 digits) *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., BD7010" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={stockForm.control}
+                      name="supplier"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Supplier *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Green Harvest Co." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {/* Stock Distribution */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm text-gray-700">Stock Distribution (grams)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <FormField
+                        control={stockForm.control}
+                        name="onShelfGrams"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>On Shelf</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="0" 
+                                {...field} 
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={stockForm.control}
+                        name="internalGrams"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Internal Storage</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="0" 
+                                {...field} 
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={stockForm.control}
+                        name="externalGrams"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>External Storage</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="0" 
+                                {...field} 
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Total calculation display */}
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <p className="text-sm font-medium text-blue-800">
+                        Total Amount: {(stockForm.watch('onShelfGrams') || 0) + (stockForm.watch('internalGrams') || 0) + (stockForm.watch('externalGrams') || 0)}g
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Pricing */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm text-gray-700">Pricing (€ per gram)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={stockForm.control}
+                        name="costPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Cost Price</FormLabel>
+                            <FormControl>
+                              <Input placeholder="0.00" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={stockForm.control}
+                        name="shelfPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Shelf Price</FormLabel>
+                            <FormControl>
+                              <Input placeholder="0.00" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <Button type="submit" disabled={updateStockMutation.isPending || createStockMutation.isPending}>
+                      {(updateStockMutation.isPending || createStockMutation.isPending) ? 'Saving...' : editingStock ? 'Update Stock' : 'Create Stock Entry'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => { setShowStockForm(false); setEditingStock(null); }}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Analytics Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Low Stock Alerts */}
@@ -1453,29 +1761,71 @@ export function AdminDashboard() {
 
         {/* Dispensary Stock */}
         <Card id="dispensary-stock">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Dispensary Stock</CardTitle>
+            <Button onClick={handleCreateStock} size="sm" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add New Stock Entry
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.isArray(products) && products.map((product: any) => (
-                <div key={product.id} className="border rounded-lg p-4">
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{product.description}</p>
-                  <Badge className="mt-2">{product.category}</Badge>
-                  <div className="mt-3 space-y-1">
-                    <p className="text-sm font-medium text-green-700">
-                      Stock: {product.stockQuantity || 0}g available
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Admin Price: ${product.adminPrice || '0'}/g
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Code: {product.productCode}
-                    </p>
+              {Array.isArray(products) && products.map((product: any) => {
+                const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
+                return (
+                  <div key={product.id} className="border rounded-lg p-4 relative">
+                    <Button
+                      onClick={() => handleEditStock(product)}
+                      size="sm"
+                      variant="ghost"
+                      className="absolute top-2 right-2 p-1 h-8 w-8"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <h3 className="font-semibold pr-10">{product.name}</h3>
+                    <Badge className="mt-2">{product.category}</Badge>
+                    
+                    {/* Stock Distribution */}
+                    <div className="mt-3 space-y-1">
+                      <p className="text-sm font-medium text-blue-700">
+                        Total: {totalAmount}g
+                      </p>
+                      <div className="text-xs text-gray-600 ml-2">
+                        <p>On shelf: {product.onShelfGrams || 0}g</p>
+                        <p>Internal: {product.internalGrams || 0}g</p>
+                        <p>External: {product.externalGrams || 0}g</p>
+                      </div>
+                    </div>
+                    
+                    {/* Pricing */}
+                    <div className="mt-3 space-y-1">
+                      <p className="text-sm text-green-700">
+                        Shelf: €{product.shelfPrice || product.adminPrice || '0'}/g
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Cost: €{product.costPrice || '0'}/g
+                      </p>
+                    </div>
+                    
+                    {/* Additional Info */}
+                    <div className="mt-3 pt-2 border-t border-gray-200 space-y-1">
+                      <p className="text-xs text-gray-500">
+                        Code: {product.productCode}
+                      </p>
+                      {product.supplier && (
+                        <p className="text-xs text-gray-500">
+                          Supplier: {product.supplier}
+                        </p>
+                      )}
+                      {product.lastUpdated && (
+                        <p className="text-xs text-gray-400">
+                          Updated: {new Date(product.lastUpdated).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
