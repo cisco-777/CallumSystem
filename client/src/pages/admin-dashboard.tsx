@@ -296,6 +296,7 @@ export function AdminDashboard() {
   };
 
   const handleEditStock = (product: any) => {
+    console.log('handleEditStock called with product:', product);
     setEditingStock(product);
     stockForm.reset({
       name: product.name,
@@ -312,8 +313,19 @@ export function AdminDashboard() {
   };
 
   const handleCreateStock = () => {
+    console.log('handleCreateStock called');
     setEditingStock(null);
-    stockForm.reset();
+    stockForm.reset({
+      name: '',
+      category: 'Sativa',
+      supplier: '',
+      onShelfGrams: 0,
+      internalGrams: 0,
+      externalGrams: 0,
+      costPrice: '0',
+      shelfPrice: '0',
+      productCode: ''
+    });
     setShowStockForm(true);
   };
 
@@ -1763,7 +1775,14 @@ export function AdminDashboard() {
         <Card id="dispensary-stock">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Dispensary Stock</CardTitle>
-            <Button onClick={handleCreateStock} size="sm" className="flex items-center gap-2">
+            <Button 
+              onClick={() => {
+                console.log('Add button clicked');
+                handleCreateStock();
+              }} 
+              size="sm" 
+              className="flex items-center gap-2"
+            >
               <Plus className="h-4 w-4" />
               Add New Stock Entry
             </Button>
@@ -1775,7 +1794,11 @@ export function AdminDashboard() {
                 return (
                   <div key={product.id} className="border rounded-lg p-4 relative">
                     <Button
-                      onClick={() => handleEditStock(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Edit button clicked for product:', product.name);
+                        handleEditStock(product);
+                      }}
                       size="sm"
                       variant="ghost"
                       className="absolute top-2 right-2 p-1 h-8 w-8"
