@@ -1013,60 +1013,6 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Stock Management Form */}
-        {showStockForm && (
-          <Card className="mb-6 border-2 border-blue-500 shadow-lg">
-            <CardHeader className="bg-blue-50 border-b border-blue-200">
-              <CardTitle className="text-blue-800">{editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}</CardTitle>
-              <Button 
-                onClick={() => setShowStockForm(false)} 
-                variant="ghost" 
-                size="sm" 
-                className="absolute top-2 right-2"
-              >
-                ✕
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <Form {...stockForm}>
-                <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={stockForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Product Name *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., Blue Dream" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={stockForm.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Sativa">Sativa</SelectItem>
-                              <SelectItem value="Indica">Indica</SelectItem>
-                              <SelectItem value="Hybrid">Hybrid</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     
                     <FormField
                       control={stockForm.control}
@@ -1791,6 +1737,212 @@ export function AdminDashboard() {
             </Button>
           </CardHeader>
           <CardContent>
+            {/* Stock Management Form */}
+            {showStockForm && (
+              <div className="mb-6 border-2 border-blue-500 shadow-lg rounded-lg bg-white">
+                <div className="bg-blue-50 border-b border-blue-200 p-4 rounded-t-lg relative">
+                  <h3 className="text-lg font-semibold text-blue-800">{editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}</h3>
+                  <Button 
+                    onClick={() => setShowStockForm(false)} 
+                    variant="ghost" 
+                    size="sm" 
+                    className="absolute top-2 right-2 hover:bg-blue-100"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <div className="p-4">
+                  <Form {...stockForm}>
+                    <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={stockForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Product Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g., Blue Dream" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={stockForm.control}
+                          name="category"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Category *</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a category" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="Sativa">Sativa</SelectItem>
+                                  <SelectItem value="Indica">Indica</SelectItem>
+                                  <SelectItem value="Hybrid">Hybrid</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={stockForm.control}
+                          name="productCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Product Code (6 digits) *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g., BD7010" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={stockForm.control}
+                          name="supplier"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Supplier *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g., Green Harvest Co." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      {/* Stock Distribution */}
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-sm text-gray-700">Stock Distribution (grams)</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={stockForm.control}
+                            name="onShelfGrams"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>On Shelf</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    placeholder="0" 
+                                    {...field} 
+                                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={stockForm.control}
+                            name="internalGrams"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Internal Storage</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    placeholder="0" 
+                                    {...field} 
+                                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={stockForm.control}
+                            name="externalGrams"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>External Storage</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    placeholder="0" 
+                                    {...field} 
+                                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Pricing */}
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-sm text-gray-700">Pricing (€/gram)</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={stockForm.control}
+                            name="costPrice"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Cost Price</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="0.00" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={stockForm.control}
+                            name="shelfPrice"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Shelf Price</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="0.00" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end space-x-2 pt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowStockForm(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={createStockMutation.isPending || updateStockMutation.isPending}
+                          className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
+                        >
+                          {editingStock ? 
+                            (updateStockMutation.isPending ? 'Updating...' : 'Update Stock') : 
+                            (createStockMutation.isPending ? 'Creating...' : 'Create Stock Entry')
+                          }
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </div>
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.isArray(products) && products.map((product: any) => {
                 const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
