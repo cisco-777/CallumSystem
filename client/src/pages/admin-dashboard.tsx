@@ -9,6 +9,7 @@ import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChar
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -1372,37 +1373,17 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Dispensary Stock */}
-        <Card id="dispensary-stock">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Dispensary Stock</CardTitle>
-            <Button 
-              onClick={handleCreateStock}
-              size="sm" 
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add New Stock Entry
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {/* Stock Management Form */}
-            {showStockForm && (
-              <div className="mb-6 border-2 border-blue-500 shadow-lg rounded-lg bg-white">
-                <div className="bg-blue-50 border-b border-blue-200 p-4 rounded-t-lg relative">
-                  <h3 className="text-lg font-semibold text-blue-800">{editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}</h3>
-                  <Button 
-                    onClick={() => setShowStockForm(false)} 
-                    variant="ghost" 
-                    size="sm" 
-                    className="absolute top-2 right-2 hover:bg-blue-100"
-                  >
-                    ✕
-                  </Button>
-                </div>
-                <div className="p-4">
-                  <Form {...stockForm}>
-                    <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-6">
+        {/* Stock Management Modal */}
+        <Dialog open={showStockForm} onOpenChange={setShowStockForm}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-blue-800">
+                {editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="p-2">
+              <Form {...stockForm}>
+                <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-6">
                       {/* Section 1: Product Catalog Information */}
                       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                         <h4 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
@@ -1765,30 +1746,44 @@ export function AdminDashboard() {
                       </div>
                       
                       <div className="flex justify-end space-x-2 pt-4">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setShowStockForm(false)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          disabled={createStockMutation.isPending || updateStockMutation.isPending}
-                          className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
-                        >
-                          {editingStock ? 
-                            (updateStockMutation.isPending ? 'Updating...' : 'Update Stock') : 
-                            (createStockMutation.isPending ? 'Creating...' : 'Create Stock Entry')
-                          }
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </div>
-              </div>
-            )}
-            
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowStockForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createStockMutation.isPending || updateStockMutation.isPending}
+                      className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
+                    >
+                      {editingStock ? 
+                        (updateStockMutation.isPending ? 'Updating...' : 'Update Stock') : 
+                        (createStockMutation.isPending ? 'Creating...' : 'Create Stock Entry')
+                      }
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dispensary Stock */}
+        <Card id="dispensary-stock">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Dispensary Stock</CardTitle>
+            <Button 
+              onClick={handleCreateStock}
+              size="sm" 
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add New Stock Entry
+            </Button>
+          </CardHeader>
+          <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.isArray(products) && products.map((product: any) => {
                 const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
