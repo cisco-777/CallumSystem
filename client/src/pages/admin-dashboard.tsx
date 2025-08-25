@@ -1622,7 +1622,18 @@ export function AdminDashboard() {
                                       type="number" 
                                       placeholder="0" 
                                       {...field} 
-                                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '') {
+                                          field.onChange(0);
+                                        } else {
+                                          const numValue = parseInt(value, 10);
+                                          if (!isNaN(numValue)) {
+                                            field.onChange(numValue);
+                                          }
+                                        }
+                                      }}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -1641,7 +1652,18 @@ export function AdminDashboard() {
                                       type="number" 
                                       placeholder="0" 
                                       {...field} 
-                                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '') {
+                                          field.onChange(0);
+                                        } else {
+                                          const numValue = parseInt(value, 10);
+                                          if (!isNaN(numValue)) {
+                                            field.onChange(numValue);
+                                          }
+                                        }
+                                      }}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -1660,7 +1682,18 @@ export function AdminDashboard() {
                                       type="number" 
                                       placeholder="0" 
                                       {...field} 
-                                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '') {
+                                          field.onChange(0);
+                                        } else {
+                                          const numValue = parseInt(value, 10);
+                                          if (!isNaN(numValue)) {
+                                            field.onChange(numValue);
+                                          }
+                                        }
+                                      }}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -1688,7 +1721,17 @@ export function AdminDashboard() {
                                 <FormItem>
                                   <FormLabel>Cost Price</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="0.00" {...field} />
+                                    <Input 
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00" 
+                                      {...field} 
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        field.onChange(value);
+                                      }}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -1702,7 +1745,17 @@ export function AdminDashboard() {
                                 <FormItem>
                                   <FormLabel>Shelf Price</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="0.00" {...field} />
+                                    <Input 
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00" 
+                                      {...field} 
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        field.onChange(value);
+                                      }}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
