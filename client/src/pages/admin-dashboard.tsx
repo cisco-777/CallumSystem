@@ -482,6 +482,86 @@ export function AdminDashboard() {
   
   const customerPrefs = calculateCustomerPreferences();
   
+  // Analytics calculations from real data
+  const calculateAnalytics = () => {
+    if (!Array.isArray(products) || products.length === 0) {
+      return {
+        totalStockValue: 0,
+        totalStock: 0,
+        averageStock: 0,
+        lowStockItems: [],
+        potentialRevenue: 0,
+        mostProfitable: null,
+        strainBreakdown: { indica: 0, sativa: 0, hybrid: 0 }
+      };
+    }
+
+    let totalStockValue = 0;
+    let totalStock = 0;
+    let potentialRevenue = 0;
+    const lowStockItems: Array<{name: string, stock: number, critical: boolean, urgent: boolean}> = [];
+    let mostProfitable: {name: string, price: number, stock: number, value: number} | null = null;
+    let maxProfitability = 0;
+    const strainCounts = { indica: 0, sativa: 0, hybrid: 0 };
+
+    (products as any[]).forEach((product: any) => {
+      const stock = product.stockQuantity || 0;
+      const price = parseFloat(product.adminPrice) || 0;
+      const value = stock * price;
+      
+      totalStock += stock;
+      totalStockValue += value;
+      potentialRevenue += value;
+
+      // Low stock alerts with proper thresholds
+      if (stock <= 100) {
+        const isCritical = stock >= 50 && stock <= 70; // Critical range: 50-70g
+        const isUrgent = stock >= 95 && stock <= 100;   // Urgent range: 95-100g
+        
+        if (isCritical || isUrgent) {
+          lowStockItems.push({
+            name: product.name,
+            stock: stock,
+            critical: isCritical, // Critical for 50-70g, Urgent for 95-100g
+            urgent: isUrgent
+          });
+        }
+      }
+
+      // Most profitable calculation
+      const profitability = price * stock;
+      if (profitability > maxProfitability) {
+        maxProfitability = profitability;
+        mostProfitable = {
+          name: product.name,
+          price: price,
+          stock: stock,
+          value: profitability
+        };
+      }
+
+      // Strain breakdown
+      const category = (product.category || '').toLowerCase();
+      if (category.includes('indica')) strainCounts.indica++;
+      else if (category.includes('sativa')) strainCounts.sativa++;
+      else strainCounts.hybrid++;
+    });
+
+    const averageStock = (products as any[]).length > 0 ? Math.round(totalStock / (products as any[]).length) : 0;
+
+    return {
+      totalStockValue: Math.round(totalStockValue),
+      totalStock,
+      averageStock,
+      lowStockItems,
+      potentialRevenue: Math.round(potentialRevenue),
+      mostProfitable,
+      strainBreakdown: strainCounts
+    };
+  };
+
+  const analytics = calculateAnalytics();
+  
   // Enhanced customer search functionality
   const getCustomerProfile = (userId: number) => {
     const userOrders = analyticsOrders.filter((order: any) => order.userId === userId);
@@ -566,88 +646,6 @@ export function AdminDashboard() {
     const hasCompleteProfile = user.firstName && user.lastName;
     return hasOrders || hasCompleteProfile;
   });
-
-
-
-  // Analytics calculations from real data
-  const calculateAnalytics = () => {
-    if (!Array.isArray(products) || products.length === 0) {
-      return {
-        totalStockValue: 0,
-        totalStock: 0,
-        averageStock: 0,
-        lowStockItems: [],
-        potentialRevenue: 0,
-        mostProfitable: null,
-        strainBreakdown: { indica: 0, sativa: 0, hybrid: 0 }
-      };
-    }
-
-    let totalStockValue = 0;
-    let totalStock = 0;
-    let potentialRevenue = 0;
-    const lowStockItems: Array<{name: string, stock: number, critical: boolean}> = [];
-    let mostProfitable: {name: string, price: number, stock: number, value: number} | null = null;
-    let maxProfitability = 0;
-    const strainCounts = { indica: 0, sativa: 0, hybrid: 0 };
-
-    (products as any[]).forEach((product: any) => {
-      const stock = product.stockQuantity || 0;
-      const price = parseFloat(product.adminPrice) || 0;
-      const value = stock * price;
-      
-      totalStock += stock;
-      totalStockValue += value;
-      potentialRevenue += value;
-
-      // Low stock alerts with proper thresholds
-      if (stock <= 100) {
-        const isCritical = stock >= 50 && stock <= 70; // Critical range: 50-70g
-        const isUrgent = stock >= 95 && stock <= 100;   // Urgent range: 95-100g
-        
-        if (isCritical || isUrgent) {
-          lowStockItems.push({
-            name: product.name,
-            stock: stock,
-            critical: isCritical, // Critical for 50-70g, Urgent for 95-100g
-            urgent: isUrgent
-          });
-        }
-      }
-
-      // Most profitable calculation
-      const profitability = price * stock;
-      if (profitability > maxProfitability) {
-        maxProfitability = profitability;
-        mostProfitable = {
-          name: product.name,
-          price: price,
-          stock: stock,
-          value: profitability
-        };
-      }
-
-      // Strain breakdown
-      const category = (product.category || '').toLowerCase();
-      if (category.includes('indica')) strainCounts.indica++;
-      else if (category.includes('sativa')) strainCounts.sativa++;
-      else strainCounts.hybrid++;
-    });
-
-    const averageStock = (products as any[]).length > 0 ? Math.round(totalStock / (products as any[]).length) : 0;
-
-    return {
-      totalStockValue: Math.round(totalStockValue),
-      totalStock,
-      averageStock,
-      lowStockItems,
-      potentialRevenue: Math.round(potentialRevenue),
-      mostProfitable,
-      strainBreakdown: strainCounts
-    };
-  };
-
-  const analytics = calculateAnalytics();
 
   // System Wiped Screen
   if (isSystemWiped) {
@@ -1155,11 +1153,14 @@ export function AdminDashboard() {
                       Cancel
                     </Button>
                   </div>
+                </div>
                 </form>
               </Form>
+                </div>
+              </div>
+            )}
             </CardContent>
           </Card>
-        )}
 
         {/* Analytics Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
