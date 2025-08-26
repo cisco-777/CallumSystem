@@ -25,6 +25,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
+      // Check membership status for non-admin users
+      if (email !== "admin123@gmail.com") {
+        // Update member activity
+        await storage.updateMemberActivity(user.id);
+
+        // Check if membership is expired
+        if (user.expiryDate && new Date() > new Date(user.expiryDate)) {
+          // Update status to expired if not already
+          if (user.membershipStatus !== 'expired') {
+            await storage.updateUser(user.id, { membershipStatus: 'expired' });
+          }
+          return res.status(403).json({ 
+            message: "Your membership has expired. Please contact admin for renewal.",
+            membershipExpired: true
+          });
+        }
+
+        // Check if membership is still pending approval
+        if (user.membershipStatus === 'pending') {
+          return res.status(403).json({ 
+            message: "Your membership is awaiting admin approval. You cannot access the catalog yet.",
+            membershipPending: true
+          });
+        }
+      }
+
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
@@ -77,6 +103,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Initialize existing members with approved status and 1-year expiry
+  app.post("/api/membership/initialize-existing", async (req, res) => {
+    try {
+      const users = await storage.getUsers();
+      const approvalDate = new Date();
+      const expiryDate = new Date(approvalDate.getTime() + 365 * 24 * 60 * 60 * 1000);
+      
+      let updatedCount = 0;
+      for (const user of users) {
+        // Skip if membership fields are already set
+        if (!user.membershipStatus || user.membershipStatus === 'pending') {
+          await storage.updateUser(user.id, {
+            membershipStatus: 'approved',
+            approvalDate,
+            expiryDate,
+            approvedBy: 'System Migration',
+            renewalCount: 0
+          });
+          updatedCount++;
+        }
+      }
+      
+      res.json({ 
+        message: `Updated ${updatedCount} existing members with approved status`,
+        updatedCount
+      });
+    } catch (error) {
+      console.error("Error initializing existing members:", error);
+      res.status(500).json({ message: "Failed to initialize existing members" });
+    }
+  });
+
+  // Membership Management Routes
+  app.get("/api/membership/pending", async (req, res) => {
+    try {
+      const pendingMembers = await storage.getPendingMembers();
+      res.json(pendingMembers);
+    } catch (error) {
+      console.error("Error fetching pending members:", error);
+      res.status(500).json({ message: "Failed to fetch pending members" });
+    }
+  });
+
+  app.get("/api/membership/approved", async (req, res) => {
+    try {
+      const approvedMembers = await storage.getApprovedMembers();
+      res.json(approvedMembers);
+    } catch (error) {
+      console.error("Error fetching approved members:", error);
+      res.status(500).json({ message: "Failed to fetch approved members" });
+    }
+  });
+
+  app.get("/api/membership/expired", async (req, res) => {
+    try {
+      const expiredMembers = await storage.getExpiredMembers();
+      res.json(expiredMembers);
+    } catch (error) {
+      console.error("Error fetching expired members:", error);
+      res.status(500).json({ message: "Failed to fetch expired members" });
+    }
+  });
+
+  app.get("/api/membership/statistics", async (req, res) => {
+    try {
+      const stats = await storage.getMembershipStatistics();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching membership statistics:", error);
+      res.status(500).json({ message: "Failed to fetch membership statistics" });
+    }
+  });
+
+  app.post("/api/membership/approve/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { approvedBy } = req.body;
+      
+      if (!approvedBy) {
+        return res.status(400).json({ message: "Approver information is required" });
+      }
+      
+      const user = await storage.approveMember(userId, approvedBy);
+      res.json(user);
+    } catch (error) {
+      console.error("Error approving member:", error);
+      res.status(500).json({ message: "Failed to approve member" });
+    }
+  });
+
+  app.post("/api/membership/renew/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.renewMembership(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error renewing membership:", error);
+      res.status(500).json({ message: "Failed to renew membership" });
+    }
+  });
+
+  app.post("/api/membership/update-activity/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await storage.updateMemberActivity(userId);
+      res.json({ message: "Activity updated successfully" });
+    } catch (error) {
+      console.error("Error updating member activity:", error);
+      res.status(500).json({ message: "Failed to update member activity" });
+    }
+  });
+
+  // Get single user by ID
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { password: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 

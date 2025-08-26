@@ -35,6 +35,23 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User>;
   
+  // Membership management operations
+  getPendingMembers(): Promise<User[]>;
+  getApprovedMembers(): Promise<User[]>;
+  getExpiredMembers(): Promise<User[]>;
+  getRenewedMembers(): Promise<User[]>;
+  getActiveMembers(): Promise<User[]>; // Recently active members
+  approveMember(userId: number, approvedBy: string): Promise<User>;
+  renewMembership(userId: number): Promise<User>;
+  updateMemberActivity(userId: number): Promise<void>;
+  getMembershipStatistics(): Promise<{
+    pending: number;
+    approved: number;
+    expired: number;
+    renewed: number;
+    active: number;
+  }>;
+  
   // Product operations
   getProducts(): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
@@ -122,6 +139,141 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  // Membership management operations
+  async getPendingMembers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.membershipStatus, 'pending'))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async getApprovedMembers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.membershipStatus, 'approved'))
+      .orderBy(desc(users.approvalDate));
+  }
+
+  async getExpiredMembers(): Promise<User[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.membershipStatus, 'expired'))
+      .orderBy(desc(users.expiryDate));
+  }
+
+  async getRenewedMembers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.membershipStatus, 'renewed'))
+      .orderBy(desc(users.approvalDate));
+  }
+
+  async getActiveMembers(): Promise<User[]> {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    return await db
+      .select()
+      .from(users)
+      .where(sql`${users.lastActive} > ${thirtyDaysAgo}`)
+      .orderBy(desc(users.lastActive));
+  }
+
+  async approveMember(userId: number, approvedBy: string): Promise<User> {
+    const approvalDate = new Date();
+    const expiryDate = new Date(approvalDate.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year from approval
+    
+    const [user] = await db
+      .update(users)
+      .set({
+        membershipStatus: 'approved',
+        approvalDate,
+        expiryDate,
+        approvedBy
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async renewMembership(userId: number): Promise<User> {
+    const renewalDate = new Date();
+    const expiryDate = new Date(renewalDate.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year from renewal
+    
+    const [user] = await db
+      .update(users)
+      .set({
+        membershipStatus: 'renewed',
+        approvalDate: renewalDate, // Update approval date for renewal
+        expiryDate,
+        renewalCount: sql`${users.renewalCount} + 1`
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateMemberActivity(userId: number): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        lastActive: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getMembershipStatistics(): Promise<{
+    pending: number;
+    approved: number;
+    expired: number;
+    renewed: number;
+    active: number;
+  }> {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // Count pending members
+    const [{ count: pending }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(eq(users.membershipStatus, 'pending'));
+
+    // Count approved members (not expired)
+    const [{ count: approved }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(sql`${users.membershipStatus} = 'approved' AND ${users.expiryDate} > ${now}`);
+
+    // Count expired members
+    const [{ count: expired }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(sql`${users.membershipStatus} = 'approved' AND ${users.expiryDate} <= ${now}`);
+
+    // Count renewed members
+    const [{ count: renewed }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(eq(users.membershipStatus, 'renewed'));
+
+    // Count active members (accessed system in last 30 days)
+    const [{ count: active }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(sql`${users.lastActive} > ${thirtyDaysAgo} AND (${users.membershipStatus} = 'approved' OR ${users.membershipStatus} = 'renewed')`);
+
+    return {
+      pending: Number(pending) || 0,
+      approved: Number(approved) || 0,
+      expired: Number(expired) || 0,
+      renewed: Number(renewed) || 0,
+      active: Number(active) || 0
+    };
   }
 
   async getProducts(): Promise<Product[]> {

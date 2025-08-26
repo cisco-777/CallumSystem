@@ -16,6 +16,13 @@ export const users = pgTable("users", {
   isOnboarded: boolean("is_onboarded").default(false),
   onboardingData: jsonb("onboarding_data"),
   createdAt: timestamp("created_at").defaultNow(),
+  // Membership management fields
+  membershipStatus: text("membership_status").default("pending"), // pending, approved, expired, renewed
+  approvalDate: timestamp("approval_date"), // Date when admin approved membership
+  expiryDate: timestamp("expiry_date"), // 1 year from approval date
+  approvedBy: text("approved_by"), // Admin who approved the membership
+  renewalCount: integer("renewal_count").default(0), // Track number of renewals
+  lastActive: timestamp("last_active"), // Track member activity for statistics
 });
 
 export const products = pgTable("products", {
@@ -133,6 +140,12 @@ export const insertUserSchema = createInsertSchema(users).pick({
   phoneNumber: true,
   dateOfBirth: true,
   address: true,
+  membershipStatus: true,
+  approvalDate: true,
+  expiryDate: true,
+  approvedBy: true,
+  renewalCount: true,
+  lastActive: true,
 });
 
 export const insertProductSchema = createInsertSchema(products).pick({

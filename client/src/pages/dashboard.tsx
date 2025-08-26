@@ -111,15 +111,39 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Check if current user is demo member
-  const isDemoMember = (() => {
+  // Check if current user is demo member and get user data
+  const getCurrentUser = () => {
     const savedUser = localStorage.getItem('msc-user');
     if (savedUser) {
-      const user = JSON.parse(savedUser);
-      return user.email === 'demo@member.com';
+      return JSON.parse(savedUser);
     }
-    return false;
-  })();
+    return null;
+  };
+
+  const currentUser = getCurrentUser();
+  const isDemoMember = currentUser?.email === 'demo@member.com';
+
+  // Query to get updated user information including membership expiry
+  const { data: userData } = useQuery({
+    queryKey: ['/api/user', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return null;
+      return await apiRequest(`/api/users/${currentUser.id}`);
+    },
+    enabled: !!currentUser?.id
+  });
+
+  // Calculate days until expiry
+  const getDaysUntilExpiry = () => {
+    if (!userData?.expiryDate) return null;
+    const expiryDate = new Date(userData.expiryDate);
+    const today = new Date();
+    const diffTime = expiryDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const daysUntilExpiry = getDaysUntilExpiry();
 
   // Map product names to their corresponding images
   const getProductImage = (productName: string) => {
@@ -206,6 +230,34 @@ export function Dashboard({ onLogout }: DashboardProps) {
           <div>
             <h1 className="mobile-h2 font-light text-gray-900">Demo Social Club</h1>
             <p className="mobile-text-sm text-gray-500">Member Catalogue</p>
+            
+            {/* Membership Status Display */}
+            {userData && daysUntilExpiry !== null && (
+              <div className="mt-2">
+                <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  daysUntilExpiry <= 30 ? 'bg-red-100 text-red-800' :
+                  daysUntilExpiry <= 90 ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {daysUntilExpiry > 0 ? (
+                    <>
+                      <User className="w-3 h-3 mr-1" />
+                      Membership expires in {daysUntilExpiry} days
+                    </>
+                  ) : (
+                    <>
+                      <User className="w-3 h-3 mr-1" />
+                      Membership expired {Math.abs(daysUntilExpiry)} days ago
+                    </>
+                  )}
+                </div>
+                {daysUntilExpiry <= 30 && daysUntilExpiry > 0 && (
+                  <p className="text-xs text-red-600 mt-1">
+                    Please contact admin for renewal
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">

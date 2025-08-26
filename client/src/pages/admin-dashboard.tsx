@@ -170,6 +170,69 @@ export function AdminDashboard() {
     queryKey: ['/api/shifts']
   });
 
+  // Membership management queries
+  const { data: pendingMembers = [] } = useQuery({
+    queryKey: ['/api/membership/pending'],
+    queryFn: () => apiRequest('/api/membership/pending')
+  });
+
+  const { data: membershipStats } = useQuery({
+    queryKey: ['/api/membership/statistics'],
+    queryFn: () => apiRequest('/api/membership/statistics')
+  });
+
+  // Membership management mutations
+  const approveMemberMutation = useMutation({
+    mutationFn: async ({ userId, approvedBy }: { userId: number; approvedBy: string }) => {
+      return await apiRequest(`/api/membership/approve/${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({ approvedBy }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/membership/pending'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/membership/statistics'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      toast({
+        title: "Member Approved",
+        description: "The member has been approved successfully and can now access the catalog.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Approval Failed",
+        description: "Failed to approve member. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const renewMembershipMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      return await apiRequest(`/api/membership/renew/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/membership/expired'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/membership/statistics'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      toast({
+        title: "Membership Renewed",
+        description: "The membership has been renewed for 1 year.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Renewal Failed",
+        description: "Failed to renew membership. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
       return await apiRequest(`/api/orders/${orderId}/status`, {
@@ -1212,51 +1275,55 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        {/* Inventory Overview Cards */}
+        {/* Overview Cards */}
         <div id="overview" className="mobile-admin-grid mb-6 sm:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mobile-text-xs font-medium">Total Stock Value</CardTitle>
-              <DollarSign className="h-4 w-4 text-green-600" />
+              <CardTitle className="mobile-text-xs font-medium">Total Members</CardTitle>
+              <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="mobile-text-lg font-bold text-green-700">€{analytics.totalStockValue}</div>
-              <p className="mobile-text-xs text-muted-foreground">Current inventory value</p>
+              <div className="mobile-text-lg font-bold text-blue-700">
+                {membershipStats ? membershipStats.approved + membershipStats.renewed : 0}
+              </div>
+              <p className="mobile-text-xs text-muted-foreground">Approved members</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mobile-text-xs font-medium">Stock Status</CardTitle>
-              <Package className="h-4 w-4 text-blue-600" />
+              <CardTitle className="mobile-text-xs font-medium">Pending Approval</CardTitle>
+              <Clock className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="mobile-text-lg font-bold text-blue-700">{products.length}</div>
-              <p className="mobile-text-xs text-muted-foreground">
-                {analytics.lowStockItems.length > 0 ? `${analytics.lowStockItems.length} need restocking` : 'All well stocked'}
-              </p>
+              <div className="mobile-text-lg font-bold text-orange-700">
+                {membershipStats ? membershipStats.pending : 0}
+              </div>
+              <p className="mobile-text-xs text-muted-foreground">Awaiting review</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mobile-text-xs font-medium">Average Stock</CardTitle>
-              <BarChart3 className="h-4 w-4 text-purple-600" />
+              <CardTitle className="mobile-text-xs font-medium">Active Members</CardTitle>
+              <Activity className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="mobile-text-lg font-bold text-purple-700">{analytics.averageStock}g</div>
-              <p className="mobile-text-xs text-muted-foreground">Per product average</p>
+              <div className="mobile-text-lg font-bold text-green-700">
+                {membershipStats ? membershipStats.active : 0}
+              </div>
+              <p className="mobile-text-xs text-muted-foreground">Recently active</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mobile-text-xs font-medium">Potential Revenue</CardTitle>
-              <TrendingUp className="h-4 w-4 text-orange-600" />
+              <CardTitle className="mobile-text-xs font-medium">Stock Value</CardTitle>
+              <DollarSign className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="mobile-text-lg font-bold text-orange-700">€{analytics.potentialRevenue}</div>
-              <p className="mobile-text-xs text-muted-foreground">If all stock sold</p>
+              <div className="mobile-text-lg font-bold text-purple-700">€{analytics.totalStockValue}</div>
+              <p className="mobile-text-xs text-muted-foreground">Total inventory</p>
             </CardContent>
           </Card>
         </div>
@@ -1264,6 +1331,52 @@ export function AdminDashboard() {
 
         {/* Analytics Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          {/* Membership Approval Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center mobile-text-base">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                Pending Member Approvals
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {pendingMembers.length > 0 ? (
+                <div className="space-y-2 sm:space-y-3">
+                  {pendingMembers.map((member: any) => (
+                    <div key={member.id} className="flex items-center justify-between mobile-p-2 rounded-lg bg-orange-50 border border-orange-200">
+                      <div className="flex flex-col">
+                        <span className="mobile-text-sm font-medium">
+                          {member.firstName && member.lastName 
+                            ? `${member.firstName} ${member.lastName}` 
+                            : member.email}
+                        </span>
+                        <span className="mobile-text-xs text-gray-500">{member.email}</span>
+                        <span className="mobile-text-xs text-gray-400">
+                          Registered: {new Date(member.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <Button
+                        onClick={() => approveMemberMutation.mutate({ 
+                          userId: member.id, 
+                          approvedBy: 'Admin Panel' 
+                        })}
+                        disabled={approveMemberMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700 text-white mobile-btn-sm"
+                      >
+                        {approveMemberMutation.isPending ? 'Approving...' : 'Approve'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 sm:py-8 text-blue-600">
+                  <Users className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                  <p className="mobile-text-sm font-medium">All members approved!</p>
+                  <p className="mobile-text-xs text-gray-500">No pending approvals</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
           {/* Low Stock Alerts */}
           <Card>
             <CardHeader>
