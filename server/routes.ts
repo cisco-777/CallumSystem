@@ -680,6 +680,226 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shift Management Routes
+  app.post("/api/shifts/start", async (req, res) => {
+    try {
+      const { workerName } = req.body;
+      
+      if (!workerName) {
+        return res.status(400).json({ message: "Worker name is required" });
+      }
+      
+      // Check if there's already an active shift
+      const activeShift = await storage.getActiveShift();
+      if (activeShift) {
+        return res.status(400).json({ 
+          message: "Cannot start new shift. There is already an active shift.",
+          activeShift: {
+            id: activeShift.id,
+            workerName: activeShift.workerName,
+            startTime: activeShift.startTime,
+            shiftId: activeShift.shiftId
+          }
+        });
+      }
+      
+      // Generate unique shift ID
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const existingShifts = await storage.getShifts();
+      const todayShifts = existingShifts.filter(s => s.shiftDate === new Date().toISOString().split('T')[0]);
+      const shiftNumber = (todayShifts.length + 1).toString().padStart(3, '0');
+      const shiftId = `SHIFT-${today}-${shiftNumber}`;
+      
+      const shift = await storage.createShift({
+        shiftId,
+        workerName,
+        shiftDate: new Date().toISOString().split('T')[0]
+      });
+      
+      // Create initial shift activity
+      await storage.createShiftActivity({
+        shiftId: shift.id,
+        activityType: "shift_start",
+        activityId: shift.id,
+        description: `Shift started by ${workerName}`,
+        metadata: { action: "start", worker: workerName }
+      });
+      
+      res.json(shift);
+    } catch (error) {
+      console.error("Error starting shift:", error);
+      res.status(500).json({ message: "Failed to start shift" });
+    }
+  });
+
+  app.get("/api/shifts/active", async (req, res) => {
+    try {
+      const activeShift = await storage.getActiveShift();
+      res.json(activeShift || null);
+    } catch (error) {
+      console.error("Error getting active shift:", error);
+      res.status(500).json({ message: "Failed to get active shift" });
+    }
+  });
+
+  app.post("/api/shifts/:id/end", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const shiftId = parseInt(id);
+      
+      // Get current shift
+      const shift = await storage.getShift(shiftId);
+      if (!shift) {
+        return res.status(404).json({ message: "Shift not found" });
+      }
+      
+      if (shift.status !== "active") {
+        return res.status(400).json({ message: "Shift is not active" });
+      }
+      
+      // Calculate shift totals
+      const shiftSummary = await storage.getShiftSummary(shiftId);
+      
+      // Calculate sales from orders during shift
+      const totalSales = shiftSummary.orders
+        .filter((order: any) => order.status === "completed")
+        .reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || "0"), 0);
+      
+      // Calculate expenses
+      const totalExpenses = shiftSummary.expenses
+        .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || "0"), 0);
+      
+      // Net amount
+      const netAmount = totalSales - totalExpenses;
+      
+      // End the shift with totals
+      const endedShift = await storage.endShift(shiftId, {
+        totalSales: totalSales.toFixed(2),
+        totalExpenses: totalExpenses.toFixed(2),
+        netAmount: netAmount.toFixed(2),
+        stockDiscrepancies: 0 // Will be updated after reconciliation
+      });
+      
+      // Create end shift activity
+      await storage.createShiftActivity({
+        shiftId: shiftId,
+        activityType: "shift_end",
+        activityId: shiftId,
+        description: `Shift ended. Sales: €${totalSales.toFixed(2)}, Expenses: €${totalExpenses.toFixed(2)}, Net: €${netAmount.toFixed(2)}`,
+        metadata: { 
+          action: "end", 
+          totalSales: totalSales.toFixed(2),
+          totalExpenses: totalExpenses.toFixed(2),
+          netAmount: netAmount.toFixed(2)
+        }
+      });
+      
+      res.json(endedShift);
+    } catch (error) {
+      console.error("Error ending shift:", error);
+      res.status(500).json({ message: "Failed to end shift" });
+    }
+  });
+
+  app.get("/api/shifts", async (req, res) => {
+    try {
+      const shifts = await storage.getShifts();
+      res.json(shifts);
+    } catch (error) {
+      console.error("Error getting shifts:", error);
+      res.status(500).json({ message: "Failed to get shifts" });
+    }
+  });
+
+  app.get("/api/shifts/:id/summary", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const summary = await storage.getShiftSummary(parseInt(id));
+      
+      if (!summary) {
+        return res.status(404).json({ message: "Shift not found" });
+      }
+      
+      res.json(summary);
+    } catch (error) {
+      console.error("Error getting shift summary:", error);
+      res.status(500).json({ message: "Failed to get shift summary" });
+    }
+  });
+
+  app.post("/api/shifts/:id/reconcile", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { productCounts, adminNotes } = req.body;
+      
+      const shiftId = parseInt(id);
+      const shift = await storage.getShift(shiftId);
+      
+      if (!shift) {
+        return res.status(404).json({ message: "Shift not found" });
+      }
+      
+      // Perform reconciliation
+      const reconciliationResponse = await fetch(`${req.protocol}://${req.get('host')}/api/shift-reconciliation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productCounts, adminNotes })
+      });
+      
+      const reconciliation = await reconciliationResponse.json();
+      
+      // Update shift with reconciliation data
+      await storage.endShift(shiftId, {
+        totalSales: shift.totalSales || "0",
+        totalExpenses: shift.totalExpenses || "0", 
+        netAmount: shift.netAmount || "0",
+        stockDiscrepancies: reconciliation.totalDiscrepancies || 0,
+        reconciliationId: reconciliation.id
+      });
+      
+      // Create reconciliation activity
+      await storage.createShiftActivity({
+        shiftId: shiftId,
+        activityType: "reconciliation",
+        activityId: reconciliation.id,
+        description: `Stock reconciliation completed. ${reconciliation.totalDiscrepancies || 0} discrepancies found.`,
+        metadata: { 
+          reconciliationId: reconciliation.id,
+          discrepancies: reconciliation.totalDiscrepancies,
+          products: Object.keys(productCounts).length
+        }
+      });
+      
+      res.json(reconciliation);
+    } catch (error) {
+      console.error("Error performing shift reconciliation:", error);
+      res.status(500).json({ message: "Failed to perform reconciliation" });
+    }
+  });
+
+  // Shift Activities Routes
+  app.post("/api/shift-activities", async (req, res) => {
+    try {
+      const activityData = req.body;
+      const activity = await storage.createShiftActivity(activityData);
+      res.json(activity);
+    } catch (error) {
+      console.error("Error creating shift activity:", error);
+      res.status(500).json({ message: "Failed to create shift activity" });
+    }
+  });
+
+  app.get("/api/shifts/:id/activities", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const activities = await storage.getShiftActivities(parseInt(id));
+      res.json(activities);
+    } catch (error) {
+      console.error("Error getting shift activities:", error);
+      res.status(500).json({ message: "Failed to get shift activities" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

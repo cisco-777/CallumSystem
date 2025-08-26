@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -45,6 +45,11 @@ const expenseFormSchema = z.object({
   workerName: z.string().min(1, 'Worker name is required')
 });
 
+// Start shift form schema
+const startShiftFormSchema = z.object({
+  workerName: z.string().min(1, 'Worker name is required')
+});
+
 // Keep old schema for backward compatibility
 const stockFormSchema = unifiedStockFormSchema;
 
@@ -71,6 +76,8 @@ export function AdminDashboard() {
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [showDeleteExpenseDialog, setShowDeleteExpenseDialog] = useState(false);
   const [deletingExpense, setDeletingExpense] = useState<any>(null);
+  const [showStartShiftDialog, setShowStartShiftDialog] = useState(false);
+  const [showEndShiftDialog, setShowEndShiftDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -100,6 +107,13 @@ export function AdminDashboard() {
     defaultValues: {
       description: '',
       amount: '',
+      workerName: ''
+    }
+  });
+
+  const startShiftForm = useForm<z.infer<typeof startShiftFormSchema>>({
+    resolver: zodResolver(startShiftFormSchema),
+    defaultValues: {
       workerName: ''
     }
   });
@@ -138,6 +152,14 @@ export function AdminDashboard() {
     queryKey: ['/api/expenses']
   });
 
+  const { data: activeShift = null, refetch: refetchActiveShift } = useQuery<any>({
+    queryKey: ['/api/shifts/active']
+  });
+
+  const { data: shifts = [] } = useQuery({
+    queryKey: ['/api/shifts']
+  });
+
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
       return await apiRequest(`/api/orders/${orderId}/status`, {
@@ -164,17 +186,39 @@ export function AdminDashboard() {
 
   const confirmOrderMutation = useMutation({
     mutationFn: async (orderId: number) => {
-      return await apiRequest(`/api/orders/${orderId}/confirm`, {
+      const order = await apiRequest(`/api/orders/${orderId}/confirm`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' }
       });
+      
+      // If there's an active shift, create a shift activity for this sale
+      if (activeShift && order) {
+        await apiRequest('/api/shift-activities', {
+          method: 'POST',
+          body: JSON.stringify({
+            shiftId: activeShift.id,
+            activityType: 'sale',
+            activityId: order.id,
+            description: `Order completed: ${order.pickupCode}`,
+            amount: order.totalPrice,
+            metadata: {
+              pickupCode: order.pickupCode,
+              items: order.items,
+              quantities: order.quantities
+            }
+          }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      return order;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       toast({
         title: "Order Confirmed",
-        description: "Order completed and stock quantities updated.",
+        description: activeShift ? "Order completed and linked to active shift." : "Order completed and stock quantities updated.",
       });
     },
     onError: () => {
@@ -292,18 +336,36 @@ export function AdminDashboard() {
 
   const submitShiftReconciliationMutation = useMutation({
     mutationFn: async (productCounts: Record<number, number>) => {
-      return await apiRequest('/api/shift-reconciliation', {
+      const reconciliation = await apiRequest('/api/shift-reconciliation', {
         method: 'POST',
         body: JSON.stringify({ productCounts }),
         headers: { 'Content-Type': 'application/json' }
       });
+      
+      // If there's an active shift, end it with the reconciliation data
+      if (activeShift) {
+        await apiRequest(`/api/shifts/${activeShift.id}/reconcile`, {
+          method: 'POST',
+          body: JSON.stringify({ productCounts, adminNotes: '' }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      return reconciliation;
     },
     onSuccess: (result) => {
       setReconciliationResult(result);
       setIsCountingMode(false);
+      setShowShiftReconciliation(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shifts/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shifts'] });
+      refetchActiveShift();
       toast({
-        title: "Shift Reconciliation Complete",
-        description: "Inventory discrepancies have been calculated and recorded.",
+        title: activeShift ? "Shift Ended & Reconciliation Complete" : "Shift Reconciliation Complete",
+        description: activeShift 
+          ? `Shift ended with ${result.totalDiscrepancies || 0}g total discrepancies.`
+          : "Inventory discrepancies have been calculated and recorded.",
       });
     },
     onError: (error: any) => {
@@ -317,12 +379,33 @@ export function AdminDashboard() {
   });
 
   const createExpenseMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof expenseFormSchema>) => {
-      return await apiRequest('/api/expenses', {
+    mutationFn: async (data: any) => {
+      const expense = await apiRequest('/api/expenses', {
         method: 'POST',
         body: JSON.stringify(data),
         headers: { 'Content-Type': 'application/json' }
       });
+      
+      // If expense was linked to active shift, create shift activity
+      if (data.shiftId && activeShift) {
+        await apiRequest('/api/shift-activities', {
+          method: 'POST',
+          body: JSON.stringify({
+            shiftId: data.shiftId,
+            activityType: 'expense',
+            activityId: expense.id,
+            description: `Expense logged: ${data.description}`,
+            amount: data.amount,
+            metadata: {
+              worker: data.workerName,
+              description: data.description
+            }
+          }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      return expense;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/expenses'] });
@@ -330,7 +413,7 @@ export function AdminDashboard() {
       expenseForm.reset();
       toast({
         title: "Expense Added",
-        description: "Expense has been logged successfully.",
+        description: activeShift ? "Expense logged and linked to active shift." : "Expense has been logged successfully.",
       });
     },
     onError: (error: any) => {
@@ -391,6 +474,58 @@ export function AdminDashboard() {
         variant: "destructive",
       });
     },
+  });
+
+  const startShiftMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof startShiftFormSchema>) => {
+      return await apiRequest('/api/shifts/start', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/shifts/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shifts'] });
+      setShowStartShiftDialog(false);
+      startShiftForm.reset();
+      toast({
+        title: "Shift Started",
+        description: "New shift has been started successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start shift. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const endShiftMutation = useMutation({
+    mutationFn: async (shiftId: number) => {
+      return await apiRequest(`/api/shifts/${shiftId}/end`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/shifts/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shifts'] });
+      setShowEndShiftDialog(false);
+      toast({
+        title: "Shift Ended",
+        description: "Shift has been ended and totals calculated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to end shift. Please try again.",
+        variant: "destructive",
+      });
+    }
   });
 
   const handleDeleteProduct = (product: any) => {
@@ -476,10 +611,69 @@ export function AdminDashboard() {
   };
 
   const onSubmitExpense = (data: z.infer<typeof expenseFormSchema>) => {
+    // Add active shift ID to expense data if there's an active shift
+    const expenseData = {
+      ...data,
+      shiftId: activeShift?.id || null
+    };
+    
     if (editingExpense) {
-      updateExpenseMutation.mutate({ id: editingExpense.id, data });
+      updateExpenseMutation.mutate({ id: editingExpense.id, data: expenseData });
     } else {
-      createExpenseMutation.mutate(data);
+      createExpenseMutation.mutate(expenseData);
+    }
+  };
+
+  const onSubmitStartShift = (data: z.infer<typeof startShiftFormSchema>) => {
+    startShiftMutation.mutate(data);
+  };
+
+  const handleStartShift = () => {
+    if (activeShift) {
+      toast({
+        title: "Active Shift Exists",
+        description: `There is already an active shift started by ${activeShift.workerName}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowStartShiftDialog(true);
+  };
+
+  const handleEndShift = () => {
+    if (!activeShift) {
+      toast({
+        title: "No Active Shift",
+        description: "There is no active shift to end.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowEndShiftDialog(true);
+  };
+
+  const confirmEndShift = async () => {
+    if (activeShift) {
+      try {
+        // Calculate shift totals before ending shift
+        const shiftSummary = await apiRequest(`/api/shifts/${activeShift.id}/summary`);
+        
+        // Navigate to shift reconciliation for stock counting
+        window.scrollTo({ top: document.getElementById('reconciliation')?.offsetTop || 0, behavior: 'smooth' });
+        setShowEndShiftDialog(false);
+        
+        // Show reconciliation section if not already visible
+        // This will be handled by the reconciliation component when submitting
+        toast({
+          title: "Shift Ending Process",
+          description: "Please complete stock reconciliation below to finalize shift totals.",
+        });
+        
+      } catch (error) {
+        console.error("Error getting shift summary:", error);
+        // Fallback to basic end shift if summary fails
+        endShiftMutation.mutate(activeShift.id);
+      }
     }
   };
 
@@ -1982,6 +2176,284 @@ export function AdminDashboard() {
           </DialogContent>
         </Dialog>
 
+        {/* Shift Management Section */}
+        <Card id="shift-management" className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-blue-600" />
+              Shift Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Active Shift Status */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-semibold text-blue-800 text-lg mb-2">Current Shift Status</h3>
+                    {activeShift ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-4">
+                          <Badge className="bg-green-100 text-green-800 border-green-300">
+                            <PlayCircle className="w-3 h-3 mr-1" />
+                            ACTIVE
+                          </Badge>
+                          <span className="font-medium text-blue-700">Worker: {activeShift.workerName}</span>
+                        </div>
+                        <div className="text-sm text-blue-600">
+                          <div>Shift ID: {activeShift.shiftId}</div>
+                          <div>Started: {new Date(activeShift.startTime).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}</div>
+                          <div>Duration: {Math.floor((new Date().getTime() - new Date(activeShift.startTime).getTime()) / (1000 * 60))} minutes</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Badge variant="outline" className="text-gray-600 border-gray-300">
+                          <StopCircle className="w-3 h-3 mr-1" />
+                          NO ACTIVE SHIFT
+                        </Badge>
+                        <p className="text-sm text-gray-600">No worker is currently logged in for a shift</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    {!activeShift ? (
+                      <Button 
+                        onClick={handleStartShift}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <PlayCircle className="w-4 h-4 mr-2" />
+                        Start Shift
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={handleEndShift}
+                        variant="destructive"
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        <StopCircle className="w-4 h-4 mr-2" />
+                        End Shift
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Shifts */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-gray-800">Recent Shifts</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/shifts'] })}
+                  >
+                    Refresh
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {Array.isArray(shifts) && shifts.length > 0 ? (
+                    shifts.slice(0, 5).map((shift: any) => (
+                      <div key={shift.id} className="border rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <Badge 
+                                variant={shift.status === 'active' ? 'default' : 'secondary'}
+                                className={shift.status === 'active' ? 'bg-green-100 text-green-800 border-green-300' : ''}
+                              >
+                                {shift.status === 'active' ? <PlayCircle className="w-3 h-3 mr-1" /> : <StopCircle className="w-3 h-3 mr-1" />}
+                                {shift.status.toUpperCase()}
+                              </Badge>
+                              <span className="font-medium text-blue-700">{shift.shiftId}</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <div className="flex items-center mb-1">
+                                  <Users className="w-4 h-4 mr-1 text-gray-500" />
+                                  <span className="font-medium">{shift.workerName}</span>
+                                </div>
+                                <div className="text-gray-600">
+                                  Started: {new Date(shift.startTime).toLocaleString('en-GB', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </div>
+                                {shift.endTime && (
+                                  <div className="text-gray-600">
+                                    Ended: {new Date(shift.endTime).toLocaleString('en-GB', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {shift.status === 'completed' && (
+                                <div className="space-y-1">
+                                  <div className="flex justify-between">
+                                    <span className="text-green-600">Sales:</span>
+                                    <span className="font-medium text-green-700">€{shift.totalSales || '0.00'}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-red-600">Expenses:</span>
+                                    <span className="font-medium text-red-700">€{shift.totalExpenses || '0.00'}</span>
+                                  </div>
+                                  <div className="flex justify-between border-t pt-1">
+                                    <span className="font-medium">Net:</span>
+                                    <span className={`font-bold ${parseFloat(shift.netAmount || '0') >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                                      €{shift.netAmount || '0.00'}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {shift.status === 'completed' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="ml-4"
+                              onClick={() => {
+                                // TODO: Navigate to shift summary page
+                                toast({
+                                  title: "Shift Summary",
+                                  description: "Shift summary page will be available soon.",
+                                });
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              View
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No shifts recorded yet.</p>
+                      <p className="text-sm">Start your first shift to begin tracking.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Start Shift Dialog */}
+        <Dialog open={showStartShiftDialog} onOpenChange={setShowStartShiftDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-green-800 flex items-center">
+                <PlayCircle className="w-5 h-5 mr-2" />
+                Start New Shift
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Form {...startShiftForm}>
+              <form onSubmit={startShiftForm.handleSubmit(onSubmitStartShift)} className="space-y-4">
+                <FormField
+                  control={startShiftForm.control}
+                  name="workerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Worker Name *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter your name"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> Only one shift can be active at a time. 
+                    All expenses and sales during your shift will be automatically tracked.
+                  </p>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowStartShiftDialog(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={startShiftMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {startShiftMutation.isPending ? 'Starting...' : 'Start Shift'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* End Shift Confirmation Dialog */}
+        <AlertDialog open={showEndShiftDialog} onOpenChange={setShowEndShiftDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center text-red-700">
+                <StopCircle className="w-5 h-5 mr-2" />
+                End Current Shift
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to end the current shift?
+                <br /><br />
+                {activeShift && (
+                  <>
+                    <strong>Shift ID:</strong> {activeShift.shiftId}
+                    <br />
+                    <strong>Worker:</strong> {activeShift.workerName}
+                    <br />
+                    <strong>Duration:</strong> {Math.floor((new Date().getTime() - new Date(activeShift.startTime).getTime()) / (1000 * 60))} minutes
+                    <br /><br />
+                  </>
+                )}
+                This will calculate all shift totals (sales, expenses, net amount) and prepare data for reconciliation.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                onClick={() => setShowEndShiftDialog(false)}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmEndShift}
+                disabled={endShiftMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {endShiftMutation.isPending ? 'Ending...' : 'End Shift'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* Expenses Log Section */}
         <Card id="expenses-log" className="mb-8">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -2520,6 +2992,128 @@ export function AdminDashboard() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Shift History & Summary Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Clock className="w-5 h-5 mr-2" />
+              Shift History & Summary
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              View completed shifts with comprehensive summaries ready for email reporting
+            </p>
+          </CardHeader>
+          <CardContent>
+            {Array.isArray(shifts) && shifts.length > 0 ? (
+              <div className="space-y-4">
+                {shifts
+                  .filter((shift: any) => shift.status === 'completed')
+                  .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
+                  .slice(0, 10) // Show last 10 completed shifts
+                  .map((shift: any) => (
+                    <div key={shift.id} className="border rounded-lg p-4 bg-gray-50">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        {/* Shift Basic Info */}
+                        <div>
+                          <h3 className="font-semibold text-gray-800">Shift #{shift.id}</h3>
+                          <p className="text-sm text-gray-600">
+                            Worker: {shift.workerName}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {new Date(shift.startTime).toLocaleDateString()} 
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Duration: {Math.floor((new Date(shift.endTime).getTime() - new Date(shift.startTime).getTime()) / (1000 * 60))} minutes
+                          </p>
+                        </div>
+
+                        {/* Financial Summary */}
+                        <div>
+                          <h4 className="font-medium text-gray-700 mb-1">Financial Summary</h4>
+                          <p className="text-sm">
+                            <span className="text-green-600">Sales: £{shift.totalSales || '0.00'}</span>
+                          </p>
+                          <p className="text-sm">
+                            <span className="text-red-600">Expenses: £{shift.totalExpenses || '0.00'}</span>
+                          </p>
+                          <p className="text-sm font-medium">
+                            <span className={parseFloat(shift.netAmount || '0') >= 0 ? 'text-green-700' : 'text-red-700'}>
+                              Net: £{shift.netAmount || '0.00'}
+                            </span>
+                          </p>
+                        </div>
+
+                        {/* Stock Reconciliation */}
+                        <div>
+                          <h4 className="font-medium text-gray-700 mb-1">Stock Status</h4>
+                          <p className="text-sm">
+                            Discrepancies: <span className="font-medium">{shift.stockDiscrepancies || 0}g</span>
+                          </p>
+                          {shift.reconciliationId && (
+                            <Badge className="mt-1 bg-green-100 text-green-800">
+                              Reconciled
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Email Ready Status */}
+                        <div className="flex flex-col justify-center">
+                          <div className="text-center">
+                            <Badge className="mb-2 bg-blue-100 text-blue-800">
+                              Email Ready
+                            </Badge>
+                            <p className="text-xs text-gray-500">
+                              All data collected for email report
+                            </p>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="mt-2 text-xs"
+                              onClick={() => {
+                                // Future: Trigger email generation
+                                toast({
+                                  title: "Email Integration Coming Soon",
+                                  description: "Email reporting system will be available in next update."
+                                });
+                              }}
+                            >
+                              Preview Report
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Shift Activities Summary */}
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="flex flex-wrap gap-2">
+                          <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
+                            {(shifts.find((s: any) => s.id === shift.id)?.activities || []).filter((a: any) => a.activityType === 'expense').length} Expenses
+                          </span>
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
+                            {(shifts.find((s: any) => s.id === shift.id)?.activities || []).filter((a: any) => a.activityType === 'sale').length} Sales
+                          </span>
+                          {shift.reconciliationId && (
+                            <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded">
+                              Stock Reconciled
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Clock className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-600 mb-2">No Completed Shifts</h3>
+                <p className="text-gray-500">
+                  Complete your first shift to see summaries here
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
       </div>
     </div>

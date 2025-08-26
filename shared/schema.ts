@@ -86,7 +86,38 @@ export const expenses = pgTable("expenses", {
   amount: text("amount").notNull(), // Store as string to preserve decimal formatting
   workerName: text("worker_name").notNull(),
   expenseDate: timestamp("expense_date").defaultNow(),
+  shiftId: integer("shift_id").references(() => shifts.id), // Link to shift
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Shift management tables
+export const shifts = pgTable("shifts", {
+  id: serial("id").primaryKey(),
+  shiftId: text("shift_id").notNull().unique(), // Unique shift identifier (e.g., SHIFT-20250826-001)
+  workerName: text("worker_name").notNull(),
+  startTime: timestamp("start_time").defaultNow(),
+  endTime: timestamp("end_time"),
+  status: text("status").notNull().default("active"), // active, completed
+  shiftDate: text("shift_date").notNull(), // YYYY-MM-DD format
+  // Calculated totals (filled when shift ends)
+  totalSales: text("total_sales").default("0"),
+  totalExpenses: text("total_expenses").default("0"),
+  netAmount: text("net_amount").default("0"),
+  stockDiscrepancies: integer("stock_discrepancies").default(0),
+  reconciliationId: integer("reconciliation_id").references(() => shiftReconciliations.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const shiftActivities = pgTable("shift_activities", {
+  id: serial("id").primaryKey(),
+  shiftId: integer("shift_id").references(() => shifts.id).notNull(),
+  activityType: text("activity_type").notNull(), // expense, sale, stock_change, reconciliation
+  activityId: integer("activity_id").notNull(), // ID of the related record (expense_id, order_id, etc.)
+  description: text("description").notNull(),
+  amount: text("amount"), // For sales and expenses
+  timestamp: timestamp("timestamp").defaultNow(),
+  metadata: jsonb("metadata"), // Additional data specific to activity type
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -134,12 +165,31 @@ export const insertExpenseSchema = createInsertSchema(expenses).pick({
   description: true,
   amount: true,
   workerName: true,
+  shiftId: true,
+});
+
+export const insertShiftSchema = createInsertSchema(shifts).pick({
+  shiftId: true,
+  workerName: true,
+  shiftDate: true,
+  notes: true,
+});
+
+export const insertShiftActivitySchema = createInsertSchema(shiftActivities).pick({
+  shiftId: true,
+  activityType: true,
+  activityId: true,
+  description: true,
+  amount: true,
+  metadata: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type InsertShiftReconciliation = z.infer<typeof insertShiftReconciliationSchema>;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
+export type InsertShift = z.infer<typeof insertShiftSchema>;
+export type InsertShiftActivity = z.infer<typeof insertShiftActivitySchema>;
 export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type BasketItem = typeof basketItems.$inferSelect;
@@ -147,3 +197,5 @@ export type Donation = typeof donations.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type ShiftReconciliation = typeof shiftReconciliations.$inferSelect;
 export type Expense = typeof expenses.$inferSelect;
+export type Shift = typeof shifts.$inferSelect;
+export type ShiftActivity = typeof shiftActivities.$inferSelect;

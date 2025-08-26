@@ -6,6 +6,8 @@ import {
   orders,
   shiftReconciliations,
   expenses,
+  shifts,
+  shiftActivities,
   type User,
   type InsertUser,
   type Product,
@@ -17,6 +19,10 @@ import {
   type InsertShiftReconciliation,
   type Expense,
   type InsertExpense,
+  type Shift,
+  type InsertShift,
+  type ShiftActivity,
+  type InsertShiftActivity,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -69,6 +75,21 @@ export interface IStorage {
   getExpense(id: number): Promise<Expense | undefined>;
   updateExpense(id: number, updates: Partial<Expense>): Promise<Expense>;
   deleteExpense(id: number): Promise<void>;
+  
+  // Shift operations
+  createShift(shiftData: InsertShift): Promise<Shift>;
+  getShifts(): Promise<Shift[]>;
+  getShift(id: number): Promise<Shift | undefined>;
+  getActiveShift(): Promise<Shift | undefined>;
+  endShift(id: number, totals: { totalSales: string; totalExpenses: string; netAmount: string; stockDiscrepancies: number; reconciliationId?: number; }): Promise<Shift>;
+  
+  // Shift activity operations
+  createShiftActivity(activityData: InsertShiftActivity): Promise<ShiftActivity>;
+  getShiftActivities(shiftId: number): Promise<ShiftActivity[]>;
+  
+  // Enhanced methods with shift tracking
+  getTodaysExpenses(): Promise<Expense[]>;
+  getShiftSummary(shiftId: number): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -323,6 +344,102 @@ export class DatabaseStorage implements IStorage {
 
   async deleteExpense(id: number): Promise<void> {
     await db.delete(expenses).where(eq(expenses.id, id));
+  }
+
+  // Shift operations
+  async createShift(shiftData: InsertShift): Promise<Shift> {
+    const [shift] = await db
+      .insert(shifts)
+      .values(shiftData)
+      .returning();
+    return shift;
+  }
+
+  async getShifts(): Promise<Shift[]> {
+    return await db.select().from(shifts).orderBy(desc(shifts.createdAt));
+  }
+
+  async getShift(id: number): Promise<Shift | undefined> {
+    const [shift] = await db.select().from(shifts).where(eq(shifts.id, id));
+    return shift || undefined;
+  }
+
+  async getActiveShift(): Promise<Shift | undefined> {
+    const [shift] = await db.select().from(shifts).where(eq(shifts.status, "active"));
+    return shift || undefined;
+  }
+
+  async endShift(id: number, totals: { totalSales: string; totalExpenses: string; netAmount: string; stockDiscrepancies: number; reconciliationId?: number; }): Promise<Shift> {
+    const [shift] = await db
+      .update(shifts)
+      .set({
+        status: "completed",
+        endTime: new Date(),
+        totalSales: totals.totalSales,
+        totalExpenses: totals.totalExpenses,
+        netAmount: totals.netAmount,
+        stockDiscrepancies: totals.stockDiscrepancies,
+        reconciliationId: totals.reconciliationId
+      })
+      .where(eq(shifts.id, id))
+      .returning();
+    return shift;
+  }
+
+  // Shift activity operations
+  async createShiftActivity(activityData: InsertShiftActivity): Promise<ShiftActivity> {
+    const [activity] = await db
+      .insert(shiftActivities)
+      .values(activityData)
+      .returning();
+    return activity;
+  }
+
+  async getShiftActivities(shiftId: number): Promise<ShiftActivity[]> {
+    return await db.select().from(shiftActivities)
+      .where(eq(shiftActivities.shiftId, shiftId))
+      .orderBy(desc(shiftActivities.timestamp));
+  }
+
+  // Enhanced methods with shift tracking
+  async getTodaysExpenses(): Promise<Expense[]> {
+    const today = new Date().toISOString().split('T')[0];
+    return await db.select().from(expenses)
+      .where(sql`DATE(${expenses.expenseDate}) = ${today}`)
+      .orderBy(desc(expenses.createdAt));
+  }
+
+  async getShiftSummary(shiftId: number): Promise<any> {
+    // Get shift details
+    const shift = await this.getShift(shiftId);
+    if (!shift) return null;
+
+    // Get all activities for this shift
+    const activities = await this.getShiftActivities(shiftId);
+
+    // Get detailed expenses and orders linked to this shift
+    const shiftExpenses = await db.select().from(expenses)
+      .where(eq(expenses.shiftId, shiftId))
+      .orderBy(desc(expenses.createdAt));
+
+    // Get orders created during this shift (by time range)
+    const shiftOrders = await db.select().from(orders)
+      .where(sql`${orders.createdAt} >= ${shift.startTime} AND ${orders.createdAt} <= ${shift.endTime || new Date()}`)
+      .orderBy(desc(orders.createdAt));
+
+    // Get reconciliation if exists
+    let reconciliation = null;
+    if (shift.reconciliationId) {
+      reconciliation = await this.getShiftReconciliation(shift.reconciliationId);
+    }
+
+    return {
+      shift,
+      activities,
+      expenses: shiftExpenses,
+      orders: shiftOrders,
+      reconciliation
+    };
   }
 }
 
