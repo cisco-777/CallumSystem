@@ -2547,11 +2547,11 @@ export function AdminDashboard() {
                 );
               }
 
-              // Get relevant shifts: current active shift + 3 most recent completed shifts
+              // Get relevant shifts: current active shift + 1 most recent completed shift
               const completedShifts = shifts
                 .filter((shift: any) => shift.status === 'completed')
                 .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
-                .slice(0, 3);
+                .slice(0, 1);
               
               const relevantShifts = activeShift ? [activeShift, ...completedShifts] : completedShifts;
               
@@ -2581,7 +2581,7 @@ export function AdminDashboard() {
                           <div className="flex justify-between items-center">
                             <div>
                               <h3 className={`font-semibold ${isActiveShift ? 'text-purple-800' : 'text-gray-800'}`}>
-                                {isActiveShift ? 'Current Shift Expenses' : `${shift.shiftId} Expenses`}
+                                {isActiveShift ? 'Current Shift Expenses' : 'Previous Shift Expenses'}
                               </h3>
                               <p className={`text-sm ${isActiveShift ? 'text-purple-600' : 'text-gray-600'}`}>
                                 {isActiveShift ? `${shift.shiftId} - ${shift.workerName}` : `Worker: ${shift.workerName} • ${new Date(shift.endTime).toLocaleDateString()}`}

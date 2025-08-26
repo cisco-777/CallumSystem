@@ -450,9 +450,9 @@ export class DatabaseStorage implements IStorage {
         .where(eq(shifts.status, "completed"))
         .orderBy(desc(shifts.endTime));
 
-      // If we have more than 3 completed shifts, delete the old ones
-      if (completedShifts.length > 3) {
-        const shiftsToDelete = completedShifts.slice(3); // Keep first 3, delete the rest
+      // If we have more than 1 completed shift, delete the old ones
+      if (completedShifts.length > 1) {
+        const shiftsToDelete = completedShifts.slice(1); // Keep first 1, delete the rest
         
         for (const shiftToDelete of shiftsToDelete) {
           // Delete all expenses associated with this shift
@@ -474,7 +474,7 @@ export class DatabaseStorage implements IStorage {
             .where(eq(shifts.id, shiftToDelete.id));
         }
         
-        console.log(`Cleaned up ${shiftsToDelete.length} old shifts. Keeping 3 most recent.`);
+        console.log(`Cleaned up ${shiftsToDelete.length} old shifts. Keeping 1 most recent.`);
       }
     } catch (error) {
       console.error("Error cleaning up old shifts:", error);
