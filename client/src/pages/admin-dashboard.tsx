@@ -2537,37 +2537,34 @@ export function AdminDashboard() {
             </Button>
           </CardHeader>
           <CardContent>
-            {/* Today's Total */}
+            {/* Current Shift Total */}
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-semibold text-purple-800">Today's Total Expenses</h3>
+                  <h3 className="font-semibold text-purple-800">Current Shift Expenses</h3>
                   <p className="text-sm text-purple-600">
-                    {new Date().toLocaleDateString('en-GB', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
+                    {activeShift ? `${activeShift.shiftId} - ${activeShift.workerName}` : 'No active shift'}
                   </p>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-purple-700">
-                    £{Array.isArray(expenses) ? expenses
-                      .filter((expense: any) => {
-                        const expenseDate = new Date(expense.expenseDate || expense.createdAt);
-                        const today = new Date();
-                        return expenseDate.toDateString() === today.toDateString();
-                      })
-                      .reduce((total: number, expense: any) => total + parseFloat(expense.amount || 0), 0)
-                      .toFixed(2) : '0.00'}
+                    £{(() => {
+                      if (!activeShift || !Array.isArray(expenses)) return '0.00';
+                      const shiftExpenses = expenses.filter((expense: any) => 
+                        expense.shiftId === activeShift.id
+                      );
+                      return shiftExpenses.reduce((total: number, expense: any) => 
+                        total + parseFloat(expense.amount || 0), 0
+                      ).toFixed(2);
+                    })()}
                   </div>
                   <div className="text-sm text-purple-600">
-                    {Array.isArray(expenses) ? expenses.filter((expense: any) => {
-                      const expenseDate = new Date(expense.expenseDate || expense.createdAt);
-                      const today = new Date();
-                      return expenseDate.toDateString() === today.toDateString();
-                    }).length : 0} expenses today
+                    {(() => {
+                      if (!activeShift || !Array.isArray(expenses)) return 0;
+                      return expenses.filter((expense: any) => 
+                        expense.shiftId === activeShift.id
+                      ).length;
+                    })()} expenses this shift
                   </div>
                 </div>
               </div>
@@ -2575,8 +2572,16 @@ export function AdminDashboard() {
 
             {/* Expenses List */}
             <div className="space-y-3">
-              {Array.isArray(expenses) && expenses.length > 0 ? (
-                expenses.map((expense: any) => (
+              {(() => {
+                if (!Array.isArray(expenses)) return null;
+                
+                // Filter to show only current shift expenses
+                const displayExpenses = activeShift 
+                  ? expenses.filter((expense: any) => expense.shiftId === activeShift.id)
+                  : [];
+                
+                return displayExpenses.length > 0 ? (
+                  displayExpenses.map((expense: any) => (
                   <div key={expense.id} className="border rounded-lg p-4 bg-white">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -2625,14 +2630,15 @@ export function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No expenses logged yet.</p>
-                  <p className="text-sm">Click "Add Expense" to record your first expense.</p>
-                </div>
-              )}
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>{activeShift ? 'No expenses logged for current shift yet.' : 'No active shift - start a shift to track expenses.'}</p>
+                    <p className="text-sm">{activeShift ? 'Click "Add Expense" to record your first expense.' : 'Start a shift above to begin tracking expenses.'}</p>
+                  </div>
+                );
+              })()}
             </div>
           </CardContent>
         </Card>
