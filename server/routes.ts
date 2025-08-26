@@ -538,7 +538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Shift reconciliation routes
   app.post("/api/shift-reconciliation", async (req, res) => {
     try {
-      const { productCounts } = req.body;
+      const { productCounts, cashInTill, coins, notes } = req.body;
       
       // Get all current products to calculate discrepancies
       const products = await storage.getProducts();
@@ -563,11 +563,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Save the reconciliation
+      // Save the reconciliation with cash breakdown
       const reconciliation = await storage.createShiftReconciliation({
         productCounts,
         discrepancies,
-        totalDiscrepancies
+        totalDiscrepancies,
+        cashInTill: cashInTill || '0',
+        coins: coins || '0',
+        notes: notes || '0'
       });
       
       res.json(reconciliation);
@@ -685,7 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Shift Management Routes
   app.post("/api/shifts/start", async (req, res) => {
     try {
-      const { workerName } = req.body;
+      const { workerName, startingTillAmount } = req.body;
       
       if (!workerName) {
         return res.status(400).json({ message: "Worker name is required" });
@@ -739,7 +742,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const shift = await storage.createShift({
         shiftId,
         workerName,
-        shiftDate: new Date().toISOString().split('T')[0]
+        shiftDate: new Date().toISOString().split('T')[0],
+        startingTillAmount: startingTillAmount || '0'
       });
       
       // Create initial shift activity

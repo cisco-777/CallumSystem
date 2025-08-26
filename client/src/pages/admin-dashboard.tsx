@@ -47,7 +47,11 @@ const expenseFormSchema = z.object({
 
 // Start shift form schema
 const startShiftFormSchema = z.object({
-  workerName: z.string().min(1, 'Worker name is required')
+  workerName: z.string().min(1, 'Worker name is required'),
+  startingTillAmount: z.string().min(1, 'Starting till amount is required').refine(
+    (val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0,
+    'Please enter a valid amount (0 or greater)'
+  )
 });
 
 // Keep old schema for backward compatibility
@@ -71,6 +75,11 @@ export function AdminDashboard() {
   const [showShiftReconciliation, setShowShiftReconciliation] = useState(false);
   const [physicalCounts, setPhysicalCounts] = useState<Record<number, number>>({});
   const [reconciliationResult, setReconciliationResult] = useState<any>(null);
+  const [cashBreakdown, setCashBreakdown] = useState({
+    cashInTill: '',
+    coins: '',
+    notes: ''
+  });
   const [isCountingMode, setIsCountingMode] = useState(true);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
@@ -114,7 +123,8 @@ export function AdminDashboard() {
   const startShiftForm = useForm<z.infer<typeof startShiftFormSchema>>({
     resolver: zodResolver(startShiftFormSchema),
     defaultValues: {
-      workerName: ''
+      workerName: '',
+      startingTillAmount: ''
     }
   });
 
@@ -338,7 +348,12 @@ export function AdminDashboard() {
     mutationFn: async (productCounts: Record<number, number>) => {
       const reconciliation = await apiRequest('/api/shift-reconciliation', {
         method: 'POST',
-        body: JSON.stringify({ productCounts }),
+        body: JSON.stringify({ 
+          productCounts,
+          cashInTill: cashBreakdown.cashInTill || '0',
+          coins: cashBreakdown.coins || '0',
+          notes: cashBreakdown.notes || '0'
+        }),
         headers: { 'Content-Type': 'application/json' }
       });
       
@@ -346,7 +361,13 @@ export function AdminDashboard() {
       if (activeShift) {
         await apiRequest(`/api/shifts/${activeShift.id}/reconcile`, {
           method: 'POST',
-          body: JSON.stringify({ productCounts, adminNotes: '' }),
+          body: JSON.stringify({ 
+            productCounts, 
+            adminNotes: '',
+            cashInTill: cashBreakdown.cashInTill || '0',
+            coins: cashBreakdown.coins || '0',
+            notes: cashBreakdown.notes || '0'
+          }),
           headers: { 'Content-Type': 'application/json' }
         });
       }
@@ -573,6 +594,11 @@ export function AdminDashboard() {
     setIsCountingMode(true);
     setPhysicalCounts({});
     setReconciliationResult(null);
+    setCashBreakdown({
+      cashInTill: '',
+      coins: '',
+      notes: ''
+    });
   };
 
   const handlePhysicalCountChange = (productId: number, count: number) => {
@@ -590,6 +616,11 @@ export function AdminDashboard() {
     setIsCountingMode(true);
     setPhysicalCounts({});
     setReconciliationResult(null);
+    setCashBreakdown({
+      cashInTill: '',
+      coins: '',
+      notes: ''
+    });
   };
 
   // Expense functions
@@ -2451,6 +2482,26 @@ export function AdminDashboard() {
                   )}
                 />
 
+                <FormField
+                  control={startShiftForm.control}
+                  name="startingTillAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Starting Till Amount *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <p className="text-sm text-blue-800">
                     <strong>Note:</strong> Only one shift can be active at a time. 
@@ -2978,6 +3029,63 @@ export function AdminDashboard() {
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Cash Breakdown Section */}
+                  <div className="mt-8 pt-6 border-t">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                      <h3 className="font-semibold text-green-800 mb-2">Cash Breakdown</h3>
+                      <p className="text-sm text-green-700">
+                        Enter the cash amounts counted at the end of your shift.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                          Cash in Till (£)
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={cashBreakdown.cashInTill}
+                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, cashInTill: e.target.value }))}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                          Coins (£)
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={cashBreakdown.coins}
+                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, coins: e.target.value }))}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                          Notes (£)
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={cashBreakdown.notes}
+                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, notes: e.target.value }))}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">

@@ -77,6 +77,10 @@ export const shiftReconciliations = pgTable("shift_reconciliations", {
   discrepancies: jsonb("discrepancies").notNull(), // {productId: {expected, actual, difference, type}}
   totalDiscrepancies: integer("total_discrepancies").default(0),
   adminNotes: text("admin_notes"),
+  // Cash breakdown fields
+  cashInTill: text("cash_in_till").default("0"), // Total cash amount
+  coins: text("coins").default("0"), // Coin amount
+  notes: text("notes_amount").default("0"), // Note/bill amount
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -99,6 +103,7 @@ export const shifts = pgTable("shifts", {
   endTime: timestamp("end_time"),
   status: text("status").notNull().default("active"), // active, completed
   shiftDate: text("shift_date").notNull(), // YYYY-MM-DD format
+  startingTillAmount: text("starting_till_amount").default("0"), // Amount in till when shift starts
   // Calculated totals (filled when shift ends)
   totalSales: text("total_sales").default("0"),
   totalExpenses: text("total_expenses").default("0"),
@@ -159,6 +164,9 @@ export const insertShiftReconciliationSchema = createInsertSchema(shiftReconcili
   discrepancies: true,
   totalDiscrepancies: true,
   adminNotes: true,
+  cashInTill: true,
+  coins: true,
+  notes: true,
 });
 
 export const insertExpenseSchema = createInsertSchema(expenses).pick({
@@ -172,6 +180,7 @@ export const insertShiftSchema = createInsertSchema(shifts).pick({
   shiftId: true,
   workerName: true,
   shiftDate: true,
+  startingTillAmount: true,
   notes: true,
 });
 
