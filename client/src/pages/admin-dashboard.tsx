@@ -2119,7 +2119,6 @@ export function AdminDashboard() {
                       <FormLabel>Description/Reason *</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="e.g., Paid delivery driver, Deca wage, Supplier payment" 
                           {...field} 
                         />
                       </FormControl>
@@ -2140,7 +2139,6 @@ export function AdminDashboard() {
                           <Input 
                             type="number"
                             step="0.01"
-                            placeholder="0.00" 
                             className="pl-10"
                             {...field} 
                           />
@@ -2159,7 +2157,6 @@ export function AdminDashboard() {
                       <FormLabel>Worker Name *</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Enter your name" 
                           {...field} 
                         />
                       </FormControl>
