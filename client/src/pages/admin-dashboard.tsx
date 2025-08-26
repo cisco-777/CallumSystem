@@ -2537,109 +2537,143 @@ export function AdminDashboard() {
             </Button>
           </CardHeader>
           <CardContent>
-            {/* Current Shift Total */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-semibold text-purple-800">Current Shift Expenses</h3>
-                  <p className="text-sm text-purple-600">
-                    {activeShift ? `${activeShift.shiftId} - ${activeShift.workerName}` : 'No active shift'}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-purple-700">
-                    £{(() => {
-                      if (!activeShift || !Array.isArray(expenses)) return '0.00';
-                      const shiftExpenses = expenses.filter((expense: any) => 
-                        expense.shiftId === activeShift.id
-                      );
-                      return shiftExpenses.reduce((total: number, expense: any) => 
-                        total + parseFloat(expense.amount || 0), 0
-                      ).toFixed(2);
-                    })()}
-                  </div>
-                  <div className="text-sm text-purple-600">
-                    {(() => {
-                      if (!activeShift || !Array.isArray(expenses)) return 0;
-                      return expenses.filter((expense: any) => 
-                        expense.shiftId === activeShift.id
-                      ).length;
-                    })()} expenses this shift
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Expenses List */}
-            <div className="space-y-3">
-              {(() => {
-                if (!Array.isArray(expenses)) return null;
-                
-                // Filter to show only current shift expenses
-                const displayExpenses = activeShift 
-                  ? expenses.filter((expense: any) => expense.shiftId === activeShift.id)
-                  : [];
-                
-                return displayExpenses.length > 0 ? (
-                  displayExpenses.map((expense: any) => (
-                  <div key={expense.id} className="border rounded-lg p-4 bg-white">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold">{expense.description}</h4>
-                          <div className="text-right">
-                            <div className="font-bold text-lg text-green-600">£{expense.amount}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <div className="flex items-center">
-                            <Users className="w-4 h-4 mr-1" />
-                            {expense.workerName}
-                          </div>
-                          <div className="flex items-center">
-                            <Timer className="w-4 h-4 mr-1" />
-                            {new Date(expense.expenseDate || expense.createdAt).toLocaleString('en-GB', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex space-x-2 ml-4">
-                        <Button
-                          onClick={() => handleEditExpense(expense)}
-                          size="sm"
-                          variant="ghost"
-                          className="p-1 h-8 w-8"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteExpense(expense)}
-                          size="sm"
-                          variant="ghost"
-                          className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  ))
-                ) : (
+            {(() => {
+              if (!Array.isArray(expenses) || !Array.isArray(shifts)) {
+                return (
                   <div className="text-center py-8 text-gray-500">
                     <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>{activeShift ? 'No expenses logged for current shift yet.' : 'No active shift - start a shift to track expenses.'}</p>
-                    <p className="text-sm">{activeShift ? 'Click "Add Expense" to record your first expense.' : 'Start a shift above to begin tracking expenses.'}</p>
+                    <p>Loading expenses...</p>
                   </div>
                 );
-              })()}
-            </div>
+              }
+
+              // Get relevant shifts: current active shift + 3 most recent completed shifts
+              const completedShifts = shifts
+                .filter((shift: any) => shift.status === 'completed')
+                .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
+                .slice(0, 3);
+              
+              const relevantShifts = activeShift ? [activeShift, ...completedShifts] : completedShifts;
+              
+              if (relevantShifts.length === 0) {
+                return (
+                  <div className="text-center py-8 text-gray-500">
+                    <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No shifts available</p>
+                    <p className="text-sm">Start a shift above to begin tracking expenses.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-6">
+                  {relevantShifts.map((shift: any, index: number) => {
+                    const isActiveShift = shift.status === 'active';
+                    const shiftExpenses = expenses.filter((expense: any) => expense.shiftId === shift.id);
+                    const totalExpenses = shiftExpenses.reduce((sum: number, expense: any) => 
+                      sum + parseFloat(expense.amount || 0), 0
+                    );
+
+                    return (
+                      <div key={shift.id} className={`border rounded-lg ${isActiveShift ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-gray-50'}`}>
+                        {/* Shift Header */}
+                        <div className="px-4 py-3 border-b">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h3 className={`font-semibold ${isActiveShift ? 'text-purple-800' : 'text-gray-800'}`}>
+                                {isActiveShift ? 'Current Shift Expenses' : `${shift.shiftId} Expenses`}
+                              </h3>
+                              <p className={`text-sm ${isActiveShift ? 'text-purple-600' : 'text-gray-600'}`}>
+                                {isActiveShift ? `${shift.shiftId} - ${shift.workerName}` : `Worker: ${shift.workerName} • ${new Date(shift.endTime).toLocaleDateString()}`}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className={`text-xl font-bold ${isActiveShift ? 'text-purple-700' : 'text-gray-700'}`}>
+                                £{totalExpenses.toFixed(2)}
+                              </div>
+                              <div className={`text-sm ${isActiveShift ? 'text-purple-600' : 'text-gray-600'}`}>
+                                {shiftExpenses.length} expenses
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Expenses List for this shift */}
+                        <div className="p-4">
+                          {shiftExpenses.length > 0 ? (
+                            <div className="space-y-3">
+                              {shiftExpenses.map((expense: any) => (
+                                <div key={expense.id} className="border rounded-lg p-3 bg-white">
+                                  <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <h4 className="font-semibold">{expense.description}</h4>
+                                        <div className="text-right">
+                                          <div className="font-bold text-lg text-green-600">£{expense.amount}</div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                        <div className="flex items-center">
+                                          <Users className="w-4 h-4 mr-1" />
+                                          {expense.workerName}
+                                        </div>
+                                        <div className="flex items-center">
+                                          <Timer className="w-4 h-4 mr-1" />
+                                          {new Date(expense.expenseDate || expense.createdAt).toLocaleString('en-GB', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                          })}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Only show edit/delete buttons for current shift */}
+                                    {isActiveShift && (
+                                      <div className="flex space-x-2 ml-4">
+                                        <Button
+                                          onClick={() => handleEditExpense(expense)}
+                                          size="sm"
+                                          variant="ghost"
+                                          className="p-1 h-8 w-8"
+                                        >
+                                          <Edit className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                          onClick={() => handleDeleteExpense(expense)}
+                                          size="sm"
+                                          variant="ghost"
+                                          className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-6 text-gray-500">
+                              <Receipt className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                              <p className="text-sm">
+                                {isActiveShift ? 'No expenses logged for current shift yet.' : 'No expenses recorded for this shift.'}
+                              </p>
+                              {isActiveShift && (
+                                <p className="text-xs text-gray-400 mt-1">Click "Add Expense" above to record an expense.</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
 
@@ -3065,127 +3099,6 @@ export function AdminDashboard() {
           </DialogContent>
         </Dialog>
 
-        {/* Shift History & Summary Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Clock className="w-5 h-5 mr-2" />
-              Shift History & Summary
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              View completed shifts with comprehensive summaries ready for email reporting
-            </p>
-          </CardHeader>
-          <CardContent>
-            {Array.isArray(shifts) && shifts.length > 0 ? (
-              <div className="space-y-4">
-                {shifts
-                  .filter((shift: any) => shift.status === 'completed')
-                  .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
-                  .slice(0, 10) // Show last 10 completed shifts
-                  .map((shift: any) => (
-                    <div key={shift.id} className="border rounded-lg p-4 bg-gray-50">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {/* Shift Basic Info */}
-                        <div>
-                          <h3 className="font-semibold text-gray-800">Shift #{shift.id}</h3>
-                          <p className="text-sm text-gray-600">
-                            Worker: {shift.workerName}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {new Date(shift.startTime).toLocaleDateString()} 
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Duration: {Math.floor((new Date(shift.endTime).getTime() - new Date(shift.startTime).getTime()) / (1000 * 60))} minutes
-                          </p>
-                        </div>
-
-                        {/* Financial Summary */}
-                        <div>
-                          <h4 className="font-medium text-gray-700 mb-1">Financial Summary</h4>
-                          <p className="text-sm">
-                            <span className="text-green-600">Sales: £{shift.totalSales || '0.00'}</span>
-                          </p>
-                          <p className="text-sm">
-                            <span className="text-red-600">Expenses: £{shift.totalExpenses || '0.00'}</span>
-                          </p>
-                          <p className="text-sm font-medium">
-                            <span className={parseFloat(shift.netAmount || '0') >= 0 ? 'text-green-700' : 'text-red-700'}>
-                              Net: £{shift.netAmount || '0.00'}
-                            </span>
-                          </p>
-                        </div>
-
-                        {/* Stock Reconciliation */}
-                        <div>
-                          <h4 className="font-medium text-gray-700 mb-1">Stock Status</h4>
-                          <p className="text-sm">
-                            Discrepancies: <span className="font-medium">{shift.stockDiscrepancies || 0}g</span>
-                          </p>
-                          {shift.reconciliationId && (
-                            <Badge className="mt-1 bg-green-100 text-green-800">
-                              Reconciled
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Email Ready Status */}
-                        <div className="flex flex-col justify-center">
-                          <div className="text-center">
-                            <Badge className="mb-2 bg-blue-100 text-blue-800">
-                              Email Ready
-                            </Badge>
-                            <p className="text-xs text-gray-500">
-                              All data collected for email report
-                            </p>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="mt-2 text-xs"
-                              onClick={() => {
-                                // Future: Trigger email generation
-                                toast({
-                                  title: "Email Integration Coming Soon",
-                                  description: "Email reporting system will be available in next update."
-                                });
-                              }}
-                            >
-                              Preview Report
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Shift Activities Summary */}
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <div className="flex flex-wrap gap-2">
-                          <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
-                            {(shifts.find((s: any) => s.id === shift.id)?.activities || []).filter((a: any) => a.activityType === 'expense').length} Expenses
-                          </span>
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
-                            {(shifts.find((s: any) => s.id === shift.id)?.activities || []).filter((a: any) => a.activityType === 'sale').length} Sales
-                          </span>
-                          {shift.reconciliationId && (
-                            <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded">
-                              Stock Reconciled
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Clock className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">No Completed Shifts</h3>
-                <p className="text-gray-500">
-                  Complete your first shift to see summaries here
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
       </div>
     </div>
