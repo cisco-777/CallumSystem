@@ -714,9 +714,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check for existing shifts today and create unique ID
       const allShifts = await storage.getShifts();
-      const shiftsToday = allShifts.filter(shift => shift.shiftId.includes(dateStr));
-      const shiftNumber = shiftsToday.length + 1;
-      const shiftId = shiftNumber === 1 ? `SHIFT ${dateStr}` : `SHIFT ${dateStr}-${shiftNumber}`;
+      const baseShiftId = `SHIFT ${dateStr}`;
+      
+      // Find all shifts that start with today's base shift ID
+      const shiftsToday = allShifts.filter(shift => {
+        return shift.shiftId === baseShiftId || shift.shiftId.startsWith(`${baseShiftId} - `);
+      });
+      
+      // Generate the next sequential shift ID
+      let shiftId = baseShiftId;
+      if (shiftsToday.length > 0) {
+        // Extract sequence numbers from existing shift IDs
+        const sequenceNumbers = shiftsToday.map(shift => {
+          if (shift.shiftId === baseShiftId) return 1;
+          const match = shift.shiftId.match(/ - (\d+)$/);
+          return match ? parseInt(match[1]) : 1;
+        });
+        
+        // Find the next available sequence number
+        const nextSequence = Math.max(...sequenceNumbers) + 1;
+        shiftId = `${baseShiftId} - ${nextSequence}`;
+      }
       
       const shift = await storage.createShift({
         shiftId,
