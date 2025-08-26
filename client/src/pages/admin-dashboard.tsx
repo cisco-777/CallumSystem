@@ -370,9 +370,23 @@ export function AdminDashboard() {
     },
     onError: (error: any) => {
       console.error('Reconciliation error:', error);
+      let errorMessage = "Failed to submit reconciliation. Please try again.";
+      
+      if (error.message) {
+        if (error.message.includes('constraint')) {
+          errorMessage = "Database constraint error. Please contact support.";
+        } else if (error.message.includes('network')) {
+          errorMessage = "Network error. Check your connection and try again.";
+        } else if (error.message.includes('timeout')) {
+          errorMessage = "Request timed out. Please try again.";
+        } else {
+          errorMessage = `Error: ${error.message}`;
+        }
+      }
+      
       toast({
         title: "Reconciliation Failed",
-        description: "Failed to submit reconciliation. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     },

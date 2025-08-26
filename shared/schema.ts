@@ -113,7 +113,7 @@ export const shiftActivities = pgTable("shift_activities", {
   id: serial("id").primaryKey(),
   shiftId: integer("shift_id").references(() => shifts.id).notNull(),
   activityType: text("activity_type").notNull(), // expense, sale, stock_change, reconciliation
-  activityId: integer("activity_id").notNull(), // ID of the related record (expense_id, order_id, etc.)
+  activityId: integer("activity_id"), // ID of the related record (expense_id, order_id, etc.) - nullable for reconciliation activities
   description: text("description").notNull(),
   amount: text("amount"), // For sales and expenses
   timestamp: timestamp("timestamp").defaultNow(),
