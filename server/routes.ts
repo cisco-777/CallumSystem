@@ -606,7 +606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense routes
   app.post("/api/expenses", async (req, res) => {
     try {
-      const { description, amount, workerName } = req.body;
+      const { description, amount, workerName, shiftId } = req.body;
       
       if (!description || !amount || !workerName) {
         return res.status(400).json({ message: "Description, amount, and worker name are required" });
@@ -615,7 +615,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const expense = await storage.createExpense({
         description,
         amount,
-        workerName
+        workerName,
+        shiftId: shiftId || null
       });
       
       res.json(expense);
@@ -654,12 +655,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/expenses/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const { description, amount, workerName } = req.body;
+      const { description, amount, workerName, shiftId } = req.body;
       
       const expense = await storage.updateExpense(parseInt(id), {
         description,
         amount,
-        workerName
+        workerName,
+        shiftId: shiftId || null
       });
       
       res.json(expense);
