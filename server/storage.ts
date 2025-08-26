@@ -142,12 +142,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProductStock(id: number, stockData: any): Promise<Product> {
+    // Get current product to preserve existing values if not provided
+    const [currentProduct] = await db.select().from(products).where(eq(products.id, id));
+    if (!currentProduct) throw new Error("Product not found");
+
+    // Calculate new stock values using provided data or current values
+    const newOnShelfGrams = stockData.onShelfGrams !== undefined ? stockData.onShelfGrams : currentProduct.onShelfGrams || 0;
+    const newInternalGrams = stockData.internalGrams !== undefined ? stockData.internalGrams : currentProduct.internalGrams || 0;
+    const newExternalGrams = stockData.externalGrams !== undefined ? stockData.externalGrams : currentProduct.externalGrams || 0;
+    const newTotalStock = newOnShelfGrams + newInternalGrams + newExternalGrams;
+
     const [product] = await db
       .update(products)
       .set({
         ...stockData,
-        stockQuantity: (stockData.onShelfGrams || 0) + (stockData.internalGrams || 0) + (stockData.externalGrams || 0),
-        adminPrice: stockData.shelfPrice, // For backward compatibility
+        stockQuantity: newTotalStock,
+        adminPrice: stockData.shelfPrice || currentProduct.adminPrice, // For backward compatibility
         lastUpdated: new Date()
       })
       .where(eq(products.id, id))
@@ -266,12 +276,29 @@ export class DatabaseStorage implements IStorage {
     const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
     if (!order) throw new Error("Order not found");
 
-    // Reduce stock for each item
+    // Validate and reduce stock for each item
     for (const quantity of order.quantities as any[]) {
+      // Get current product stock
+      const [product] = await db.select().from(products).where(eq(products.id, quantity.productId));
+      if (!product) throw new Error(`Product not found: ${quantity.productId}`);
+
+      // Check if sufficient shelf stock is available
+      const availableShelfStock = product.onShelfGrams || 0;
+      if (availableShelfStock < quantity.quantity) {
+        throw new Error(`Insufficient shelf stock for ${product.name}. Available: ${availableShelfStock}g, Required: ${quantity.quantity}g`);
+      }
+
+      // Calculate new stock values
+      const newOnShelfGrams = availableShelfStock - quantity.quantity;
+      const newTotalStock = newOnShelfGrams + (product.internalGrams || 0) + (product.externalGrams || 0);
+
+      // Update product stock quantities
       await db
         .update(products)
         .set({ 
-          stockQuantity: sql`${products.stockQuantity} - ${quantity.quantity}`
+          onShelfGrams: newOnShelfGrams,
+          stockQuantity: newTotalStock,
+          lastUpdated: new Date()
         })
         .where(eq(products.id, quantity.productId));
     }
