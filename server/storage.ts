@@ -5,7 +5,6 @@ import {
   donations,
   orders,
   shiftReconciliations,
-  expenses,
   type User,
   type InsertUser,
   type Product,
@@ -15,8 +14,6 @@ import {
   type InsertOrder,
   type ShiftReconciliation,
   type InsertShiftReconciliation,
-  type Expense,
-  type InsertExpense,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -62,13 +59,6 @@ export interface IStorage {
   createShiftReconciliation(reconciliationData: InsertShiftReconciliation): Promise<ShiftReconciliation>;
   getShiftReconciliations(): Promise<ShiftReconciliation[]>;
   getShiftReconciliation(id: number): Promise<ShiftReconciliation | undefined>;
-  
-  // Expense operations
-  createExpense(expenseData: InsertExpense): Promise<Expense>;
-  getExpenses(): Promise<Expense[]>;
-  getExpense(id: number): Promise<Expense | undefined>;
-  updateExpense(id: number, updates: Partial<Expense>): Promise<Expense>;
-  deleteExpense(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -293,36 +283,6 @@ export class DatabaseStorage implements IStorage {
   async getShiftReconciliation(id: number): Promise<ShiftReconciliation | undefined> {
     const [reconciliation] = await db.select().from(shiftReconciliations).where(eq(shiftReconciliations.id, id));
     return reconciliation || undefined;
-  }
-
-  async createExpense(expenseData: InsertExpense): Promise<Expense> {
-    const [expense] = await db
-      .insert(expenses)
-      .values(expenseData)
-      .returning();
-    return expense;
-  }
-
-  async getExpenses(): Promise<Expense[]> {
-    return await db.select().from(expenses).orderBy(desc(expenses.createdAt));
-  }
-
-  async getExpense(id: number): Promise<Expense | undefined> {
-    const [expense] = await db.select().from(expenses).where(eq(expenses.id, id));
-    return expense || undefined;
-  }
-
-  async updateExpense(id: number, updates: Partial<Expense>): Promise<Expense> {
-    const [expense] = await db
-      .update(expenses)
-      .set(updates)
-      .where(eq(expenses.id, id))
-      .returning();
-    return expense;
-  }
-
-  async deleteExpense(id: number): Promise<void> {
-    await db.delete(expenses).where(eq(expenses.id, id));
   }
 }
 

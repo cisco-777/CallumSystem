@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -38,13 +38,6 @@ const unifiedStockFormSchema = z.object({
   shelfPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Shelf price must be a valid number')
 });
 
-// Expense form schema
-const expenseFormSchema = z.object({
-  description: z.string().min(1, 'Description is required'),
-  amount: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Amount must be a valid number'),
-  workerName: z.string().min(1, 'Worker name is required')
-});
-
 // Keep old schema for backward compatibility
 const stockFormSchema = unifiedStockFormSchema;
 
@@ -67,10 +60,6 @@ export function AdminDashboard() {
   const [physicalCounts, setPhysicalCounts] = useState<Record<number, number>>({});
   const [reconciliationResult, setReconciliationResult] = useState<any>(null);
   const [isCountingMode, setIsCountingMode] = useState(true);
-  const [showExpenseForm, setShowExpenseForm] = useState(false);
-  const [editingExpense, setEditingExpense] = useState<any>(null);
-  const [showDeleteExpenseDialog, setShowDeleteExpenseDialog] = useState(false);
-  const [deletingExpense, setDeletingExpense] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -92,15 +81,6 @@ export function AdminDashboard() {
       externalGrams: 0,
       costPrice: '0',
       shelfPrice: '0'
-    }
-  });
-
-  const expenseForm = useForm<z.infer<typeof expenseFormSchema>>({
-    resolver: zodResolver(expenseFormSchema),
-    defaultValues: {
-      description: '',
-      amount: '',
-      workerName: ''
     }
   });
 
@@ -132,10 +112,6 @@ export function AdminDashboard() {
     queryFn: async () => {
       return await apiRequest('/api/orders/analytics');
     }
-  });
-
-  const { data: expenses = [] } = useQuery({
-    queryKey: ['/api/expenses']
   });
 
   const updateOrderStatusMutation = useMutation({
@@ -316,83 +292,6 @@ export function AdminDashboard() {
     },
   });
 
-  const createExpenseMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof expenseFormSchema>) => {
-      return await apiRequest('/api/expenses', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/expenses'] });
-      setShowExpenseForm(false);
-      expenseForm.reset();
-      toast({
-        title: "Expense Added",
-        description: "Expense has been logged successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add expense. Please try again.",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const updateExpenseMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: z.infer<typeof expenseFormSchema> }) => {
-      return await apiRequest(`/api/expenses/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/expenses'] });
-      setShowExpenseForm(false);
-      setEditingExpense(null);
-      expenseForm.reset();
-      toast({
-        title: "Expense Updated",
-        description: "Expense has been updated successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update expense. Please try again.",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const deleteExpenseMutation = useMutation({
-    mutationFn: async (expenseId: number) => {
-      return await apiRequest(`/api/expenses/${expenseId}`, {
-        method: 'DELETE'
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/expenses'] });
-      setShowDeleteExpenseDialog(false);
-      setDeletingExpense(null);
-      toast({
-        title: "Expense Deleted",
-        description: "Expense has been removed successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete expense. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleDeleteProduct = (product: any) => {
     setDeletingProduct(product);
     setShowDeleteDialog(true);
@@ -441,46 +340,6 @@ export function AdminDashboard() {
     setIsCountingMode(true);
     setPhysicalCounts({});
     setReconciliationResult(null);
-  };
-
-  // Expense functions
-  const handleCreateExpense = () => {
-    setEditingExpense(null);
-    setShowExpenseForm(true);
-    expenseForm.reset({
-      description: '',
-      amount: '',
-      workerName: ''
-    });
-  };
-
-  const handleEditExpense = (expense: any) => {
-    setEditingExpense(expense);
-    setShowExpenseForm(true);
-    expenseForm.reset({
-      description: expense.description,
-      amount: expense.amount,
-      workerName: expense.workerName
-    });
-  };
-
-  const handleDeleteExpense = (expense: any) => {
-    setDeletingExpense(expense);
-    setShowDeleteExpenseDialog(true);
-  };
-
-  const confirmDeleteExpense = () => {
-    if (deletingExpense) {
-      deleteExpenseMutation.mutate(deletingExpense.id);
-    }
-  };
-
-  const onSubmitExpense = (data: z.infer<typeof expenseFormSchema>) => {
-    if (editingExpense) {
-      updateExpenseMutation.mutate({ id: editingExpense.id, data });
-    } else {
-      createExpenseMutation.mutate(data);
-    }
   };
 
 
@@ -961,14 +820,6 @@ export function AdminDashboard() {
             >
               <ClipboardCheck className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">End of Shift</span>
-            </Button>
-            
-            <Button
-              onClick={handleCreateExpense}
-              className="bg-purple-600 hover:bg-purple-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
-            >
-              <Receipt className="w-4 h-4 mr-2" />
-              <span className="mobile-text-sm">Expenses Log</span>
             </Button>
           </div>
         </div>
@@ -1981,253 +1832,6 @@ export function AdminDashboard() {
             </div>
           </DialogContent>
         </Dialog>
-
-        {/* Expenses Log Section */}
-        <Card id="expenses-log" className="mb-8">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center">
-              <Receipt className="w-5 h-5 mr-2" />
-              Expenses Log
-            </CardTitle>
-            <Button 
-              onClick={handleCreateExpense}
-              size="sm" 
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
-            >
-              <Plus className="h-4 w-4" />
-              Add Expense
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {/* Today's Total */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-semibold text-purple-800">Today's Total Expenses</h3>
-                  <p className="text-sm text-purple-600">
-                    {new Date().toLocaleDateString('en-GB', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-purple-700">
-                    £{Array.isArray(expenses) ? expenses
-                      .filter((expense: any) => {
-                        const expenseDate = new Date(expense.expenseDate || expense.createdAt);
-                        const today = new Date();
-                        return expenseDate.toDateString() === today.toDateString();
-                      })
-                      .reduce((total: number, expense: any) => total + parseFloat(expense.amount || 0), 0)
-                      .toFixed(2) : '0.00'}
-                  </div>
-                  <div className="text-sm text-purple-600">
-                    {Array.isArray(expenses) ? expenses.filter((expense: any) => {
-                      const expenseDate = new Date(expense.expenseDate || expense.createdAt);
-                      const today = new Date();
-                      return expenseDate.toDateString() === today.toDateString();
-                    }).length : 0} expenses today
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Expenses List */}
-            <div className="space-y-3">
-              {Array.isArray(expenses) && expenses.length > 0 ? (
-                expenses.map((expense: any) => (
-                  <div key={expense.id} className="border rounded-lg p-4 bg-white">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold">{expense.description}</h4>
-                          <div className="text-right">
-                            <div className="font-bold text-lg text-green-600">£{expense.amount}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <div className="flex items-center">
-                            <Users className="w-4 h-4 mr-1" />
-                            {expense.workerName}
-                          </div>
-                          <div className="flex items-center">
-                            <Timer className="w-4 h-4 mr-1" />
-                            {new Date(expense.expenseDate || expense.createdAt).toLocaleString('en-GB', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex space-x-2 ml-4">
-                        <Button
-                          onClick={() => handleEditExpense(expense)}
-                          size="sm"
-                          variant="ghost"
-                          className="p-1 h-8 w-8"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteExpense(expense)}
-                          size="sm"
-                          variant="ghost"
-                          className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No expenses logged yet.</p>
-                  <p className="text-sm">Click "Add Expense" to record your first expense.</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Expense Form Dialog */}
-        <Dialog open={showExpenseForm} onOpenChange={setShowExpenseForm}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-purple-800 flex items-center">
-                <Receipt className="w-5 h-5 mr-2" />
-                {editingExpense ? 'Edit Expense' : 'Add New Expense'}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <Form {...expenseForm}>
-              <form onSubmit={expenseForm.handleSubmit(onSubmitExpense)} className="space-y-4">
-                <FormField
-                  control={expenseForm.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description/Reason *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g., Paid delivery driver, Deca wage, Supplier payment" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={expenseForm.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount (£) *</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <PoundSterling className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                          <Input 
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00" 
-                            className="pl-10"
-                            {...field} 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={expenseForm.control}
-                  name="workerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Worker Name *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter your name" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end space-x-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowExpenseForm(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createExpenseMutation.isPending || updateExpenseMutation.isPending}
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    {editingExpense ? 
-                      (updateExpenseMutation.isPending ? 'Updating...' : 'Update Expense') : 
-                      (createExpenseMutation.isPending ? 'Adding...' : 'Add Expense')
-                    }
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Delete Expense Confirmation Dialog */}
-        <AlertDialog open={showDeleteExpenseDialog} onOpenChange={setShowDeleteExpenseDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Expense</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this expense entry?
-                <br /><br />
-                <strong>Description:</strong> {deletingExpense?.description}
-                <br />
-                <strong>Amount:</strong> £{deletingExpense?.amount}
-                <br />
-                <strong>Worker:</strong> {deletingExpense?.workerName}
-                <br /><br />
-                This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel 
-                onClick={() => {
-                  setShowDeleteExpenseDialog(false);
-                  setDeletingExpense(null);
-                }}
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={confirmDeleteExpense}
-                disabled={deleteExpenseMutation.isPending}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                {deleteExpenseMutation.isPending ? 'Deleting...' : 'Delete Expense'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
         {/* Dispensary Stock */}
         <Card id="dispensary-stock">
