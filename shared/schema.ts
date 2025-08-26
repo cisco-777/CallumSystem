@@ -70,6 +70,16 @@ export const orders = pgTable("orders", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const shiftReconciliations = pgTable("shift_reconciliations", {
+  id: serial("id").primaryKey(),
+  shiftDate: timestamp("shift_date").defaultNow(),
+  productCounts: jsonb("product_counts").notNull(), // {productId: physicalCount}
+  discrepancies: jsonb("discrepancies").notNull(), // {productId: {expected, actual, difference, type}}
+  totalDiscrepancies: integer("total_discrepancies").default(0),
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
@@ -104,10 +114,19 @@ export const insertOrderSchema = createInsertSchema(orders).pick({
   totalPrice: true,
 });
 
+export const insertShiftReconciliationSchema = createInsertSchema(shiftReconciliations).pick({
+  productCounts: true,
+  discrepancies: true,
+  totalDiscrepancies: true,
+  adminNotes: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type InsertShiftReconciliation = z.infer<typeof insertShiftReconciliationSchema>;
 export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type BasketItem = typeof basketItems.$inferSelect;
 export type Donation = typeof donations.$inferSelect;
 export type Order = typeof orders.$inferSelect;
+export type ShiftReconciliation = typeof shiftReconciliations.$inferSelect;

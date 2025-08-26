@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2 } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -56,6 +56,10 @@ export function AdminDashboard() {
   const [editingStock, setEditingStock] = useState<any>(null);
   const [deletingProduct, setDeletingProduct] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showShiftReconciliation, setShowShiftReconciliation] = useState(false);
+  const [physicalCounts, setPhysicalCounts] = useState<Record<number, number>>({});
+  const [reconciliationResult, setReconciliationResult] = useState<any>(null);
+  const [isCountingMode, setIsCountingMode] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -262,6 +266,32 @@ export function AdminDashboard() {
     }
   });
 
+  const submitShiftReconciliationMutation = useMutation({
+    mutationFn: async (productCounts: Record<number, number>) => {
+      return await apiRequest('/api/shift-reconciliation', {
+        method: 'POST',
+        body: JSON.stringify({ productCounts }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: (result) => {
+      setReconciliationResult(result);
+      setIsCountingMode(false);
+      toast({
+        title: "Shift Reconciliation Complete",
+        description: "Inventory discrepancies have been calculated and recorded.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Reconciliation error:', error);
+      toast({
+        title: "Reconciliation Failed",
+        description: "Failed to submit reconciliation. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleDeleteProduct = (product: any) => {
     setDeletingProduct(product);
     setShowDeleteDialog(true);
@@ -285,6 +315,31 @@ export function AdminDashboard() {
     if (window.confirm("Are you sure you want to remove ALL orders from the Order Control Center? Orders will be archived but customer history and analytics will be preserved.")) {
       deleteAllOrdersMutation.mutate();
     }
+  };
+
+  // Shift reconciliation functions
+  const handleStartShiftReconciliation = () => {
+    setShowShiftReconciliation(true);
+    setIsCountingMode(true);
+    setPhysicalCounts({});
+    setReconciliationResult(null);
+  };
+
+  const handlePhysicalCountChange = (productId: number, count: number) => {
+    setPhysicalCounts(prev => ({
+      ...prev,
+      [productId]: count
+    }));
+  };
+
+  const handleSubmitCounts = () => {
+    submitShiftReconciliationMutation.mutate(physicalCounts);
+  };
+
+  const handleNewShiftReconciliation = () => {
+    setIsCountingMode(true);
+    setPhysicalCounts({});
+    setReconciliationResult(null);
   };
 
 
@@ -757,6 +812,14 @@ export function AdminDashboard() {
             >
               <QrCode className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">Scan QR Code</span>
+            </Button>
+            
+            <Button
+              onClick={handleStartShiftReconciliation}
+              className="bg-orange-600 hover:bg-orange-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
+            >
+              <ClipboardCheck className="w-4 h-4 mr-2" />
+              <span className="mobile-text-sm">End of Shift</span>
             </Button>
           </div>
         </div>
@@ -1895,6 +1958,175 @@ export function AdminDashboard() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* End of Shift Reconciliation Dialog */}
+        <Dialog open={showShiftReconciliation} onOpenChange={setShowShiftReconciliation}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-orange-800 flex items-center">
+                <Timer className="w-5 h-5 mr-2" />
+                End of Shift - Inventory Reconciliation
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {isCountingMode ? (
+                // Physical Counting Mode
+                <div>
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+                    <h3 className="font-semibold text-orange-800 mb-2">Physical Stock Count</h3>
+                    <p className="text-sm text-orange-700">
+                      Weigh and enter the actual amount of each product currently on the shelf. 
+                      Do not include internal or external storage amounts.
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Array.isArray(products) && products.map((product: any) => (
+                      <div key={product.id} className="border rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold">{product.name}</h4>
+                            <Badge className="mt-1">{product.category}</Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700">
+                            Physical Count (grams on shelf)
+                          </label>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="0"
+                            value={physicalCounts[product.id] || ''}
+                            onChange={(e) => handlePhysicalCountChange(product.id, parseInt(e.target.value) || 0)}
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowShiftReconciliation(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSubmitCounts}
+                      disabled={submitShiftReconciliationMutation.isPending || Object.keys(physicalCounts).length === 0}
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      {submitShiftReconciliationMutation.isPending ? 'Processing...' : 'Submit Counts'}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Results Display Mode
+                <div>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <h3 className="font-semibold text-green-800 mb-2">Reconciliation Complete</h3>
+                    <p className="text-sm text-green-700">
+                      Shift reconciliation completed at {new Date().toLocaleString()}
+                    </p>
+                  </div>
+                  
+                  {reconciliationResult && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-orange-600">
+                                {reconciliationResult.totalDiscrepancies || 0}g
+                              </div>
+                              <div className="text-sm text-gray-600">Total Discrepancies</div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-red-600">
+                                {Object.values(reconciliationResult.discrepancies || {}).filter((d: any) => d.type === 'missing').length}
+                              </div>
+                              <div className="text-sm text-gray-600">Products with Missing Stock</div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-blue-600">
+                                {Object.values(reconciliationResult.discrepancies || {}).filter((d: any) => d.type === 'excess').length}
+                              </div>
+                              <div className="text-sm text-gray-600">Products with Excess Stock</div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                      
+                      {Object.keys(reconciliationResult.discrepancies || {}).length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-3">Discrepancy Details</h4>
+                          <div className="space-y-3">
+                            {Object.entries(reconciliationResult.discrepancies || {}).map(([productId, discrepancy]: [string, any]) => (
+                              <div key={productId} className={`border rounded-lg p-4 ${
+                                discrepancy.type === 'missing' ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'
+                              }`}>
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <div className="font-medium">{discrepancy.productName}</div>
+                                    <div className="text-sm text-gray-600">
+                                      Physical count: {discrepancy.actual}g
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <Badge className={discrepancy.type === 'missing' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}>
+                                      {discrepancy.difference}g {discrepancy.type}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {Object.keys(reconciliationResult.discrepancies || {}).length === 0 && (
+                        <div className="text-center py-8">
+                          <div className="text-green-600 text-lg font-semibold mb-2">Perfect Match!</div>
+                          <div className="text-gray-600">All physical counts match expected on-shelf amounts.</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowShiftReconciliation(false)}
+                    >
+                      Close
+                    </Button>
+                    <Button
+                      onClick={handleNewShiftReconciliation}
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      New Reconciliation
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
       </div>
     </div>

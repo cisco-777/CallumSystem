@@ -535,6 +535,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shift reconciliation routes
+  app.post("/api/shift-reconciliation", async (req, res) => {
+    try {
+      const { productCounts } = req.body;
+      
+      // Get all current products to calculate discrepancies
+      const products = await storage.getProducts();
+      const discrepancies: any = {};
+      let totalDiscrepancies = 0;
+      
+      // Calculate discrepancies for each product
+      for (const product of products) {
+        const physicalCount = productCounts[product.id] || 0;
+        const expectedOnShelf = product.onShelfGrams || 0;
+        const difference = expectedOnShelf - physicalCount;
+        
+        if (difference !== 0) {
+          discrepancies[product.id] = {
+            productName: product.name,
+            expected: expectedOnShelf,
+            actual: physicalCount,
+            difference: Math.abs(difference),
+            type: difference > 0 ? 'missing' : 'excess'
+          };
+          totalDiscrepancies += Math.abs(difference);
+        }
+      }
+      
+      // Save the reconciliation
+      const reconciliation = await storage.createShiftReconciliation({
+        productCounts,
+        discrepancies,
+        totalDiscrepancies
+      });
+      
+      res.json(reconciliation);
+    } catch (error) {
+      console.error("Error creating shift reconciliation:", error);
+      res.status(500).json({ message: "Failed to create shift reconciliation" });
+    }
+  });
+
+  app.get("/api/shift-reconciliation", async (req, res) => {
+    try {
+      const reconciliations = await storage.getShiftReconciliations();
+      res.json(reconciliations);
+    } catch (error) {
+      console.error("Error fetching shift reconciliations:", error);
+      res.status(500).json({ message: "Failed to fetch shift reconciliations" });
+    }
+  });
+
+  app.get("/api/shift-reconciliation/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const reconciliation = await storage.getShiftReconciliation(parseInt(id));
+      
+      if (!reconciliation) {
+        return res.status(404).json({ message: "Shift reconciliation not found" });
+      }
+      
+      res.json(reconciliation);
+    } catch (error) {
+      console.error("Error fetching shift reconciliation:", error);
+      res.status(500).json({ message: "Failed to fetch shift reconciliation" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

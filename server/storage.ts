@@ -4,6 +4,7 @@ import {
   basketItems,
   donations,
   orders,
+  shiftReconciliations,
   type User,
   type InsertUser,
   type Product,
@@ -11,6 +12,8 @@ import {
   type Donation,
   type Order,
   type InsertOrder,
+  type ShiftReconciliation,
+  type InsertShiftReconciliation,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -51,6 +54,11 @@ export interface IStorage {
   updateOrderStatus(orderId: number, status: string): Promise<Order>;
   confirmOrderAndReduceStock(orderId: number): Promise<Order>;
   deleteAllOrders(): Promise<void>;
+  
+  // Shift reconciliation operations
+  createShiftReconciliation(reconciliationData: InsertShiftReconciliation): Promise<ShiftReconciliation>;
+  getShiftReconciliations(): Promise<ShiftReconciliation[]>;
+  getShiftReconciliation(id: number): Promise<ShiftReconciliation | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -258,6 +266,23 @@ export class DatabaseStorage implements IStorage {
     
     // Then delete the product itself
     await db.delete(products).where(eq(products.id, id));
+  }
+
+  async createShiftReconciliation(reconciliationData: InsertShiftReconciliation): Promise<ShiftReconciliation> {
+    const [reconciliation] = await db
+      .insert(shiftReconciliations)
+      .values(reconciliationData)
+      .returning();
+    return reconciliation;
+  }
+
+  async getShiftReconciliations(): Promise<ShiftReconciliation[]> {
+    return await db.select().from(shiftReconciliations).orderBy(desc(shiftReconciliations.createdAt));
+  }
+
+  async getShiftReconciliation(id: number): Promise<ShiftReconciliation | undefined> {
+    const [reconciliation] = await db.select().from(shiftReconciliations).where(eq(shiftReconciliations.id, id));
+    return reconciliation || undefined;
   }
 }
 
