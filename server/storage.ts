@@ -441,6 +441,46 @@ export class DatabaseStorage implements IStorage {
       reconciliation
     };
   }
+
+  async cleanupOldShifts(): Promise<void> {
+    try {
+      // Get all completed shifts ordered by newest first
+      const completedShifts = await db.select()
+        .from(shifts)
+        .where(eq(shifts.status, "completed"))
+        .orderBy(desc(shifts.endTime));
+
+      // If we have more than 3 completed shifts, delete the old ones
+      if (completedShifts.length > 3) {
+        const shiftsToDelete = completedShifts.slice(3); // Keep first 3, delete the rest
+        
+        for (const shiftToDelete of shiftsToDelete) {
+          // Delete all expenses associated with this shift
+          await db.delete(expenses)
+            .where(eq(expenses.shiftId, shiftToDelete.id));
+          
+          // Delete all shift activities
+          await db.delete(shiftActivities)
+            .where(eq(shiftActivities.shiftId, shiftToDelete.id));
+          
+          // Delete reconciliation record if exists
+          if (shiftToDelete.reconciliationId) {
+            await db.delete(shiftReconciliations)
+              .where(eq(shiftReconciliations.id, shiftToDelete.reconciliationId));
+          }
+          
+          // Finally delete the shift record
+          await db.delete(shifts)
+            .where(eq(shifts.id, shiftToDelete.id));
+        }
+        
+        console.log(`Cleaned up ${shiftsToDelete.length} old shifts. Keeping 3 most recent.`);
+      }
+    } catch (error) {
+      console.error("Error cleaning up old shifts:", error);
+      // Don't throw error to avoid disrupting the reconciliation process
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

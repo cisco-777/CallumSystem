@@ -705,12 +705,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Generate unique shift ID
-      const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
-      const existingShifts = await storage.getShifts();
-      const todayShifts = existingShifts.filter(s => s.shiftDate === new Date().toISOString().split('T')[0]);
-      const shiftNumber = (todayShifts.length + 1).toString().padStart(3, '0');
-      const shiftId = `SHIFT-${today}-${shiftNumber}`;
+      // Generate unique shift ID in DD/MM/YYYY format
+      const today = new Date();
+      const dayStr = today.getDate().toString().padStart(2, '0');
+      const monthStr = (today.getMonth() + 1).toString().padStart(2, '0');
+      const yearStr = today.getFullYear().toString();
+      const shiftId = `SHIFT ${dayStr}/${monthStr}/${yearStr}`;
       
       const shift = await storage.createShift({
         shiftId,
@@ -904,6 +904,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           products: Object.keys(productCounts).length
         }
       });
+      
+      // Perform automatic cleanup: keep only 3 most recent completed shifts
+      await storage.cleanupOldShifts();
       
       res.json(reconciliation);
     } catch (error) {

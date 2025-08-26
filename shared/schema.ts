@@ -93,7 +93,7 @@ export const expenses = pgTable("expenses", {
 // Shift management tables
 export const shifts = pgTable("shifts", {
   id: serial("id").primaryKey(),
-  shiftId: text("shift_id").notNull().unique(), // Unique shift identifier (e.g., SHIFT-20250826-001)
+  shiftId: text("shift_id").notNull().unique(), // Unique shift identifier (e.g., SHIFT 26/08/2025)
   workerName: text("worker_name").notNull(),
   startTime: timestamp("start_time").defaultNow(),
   endTime: timestamp("end_time"),
