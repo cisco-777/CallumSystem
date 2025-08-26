@@ -603,6 +603,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Expense routes
+  app.post("/api/expenses", async (req, res) => {
+    try {
+      const { description, amount, workerName } = req.body;
+      
+      if (!description || !amount || !workerName) {
+        return res.status(400).json({ message: "Description, amount, and worker name are required" });
+      }
+      
+      const expense = await storage.createExpense({
+        description,
+        amount,
+        workerName
+      });
+      
+      res.json(expense);
+    } catch (error) {
+      console.error("Error creating expense:", error);
+      res.status(500).json({ message: "Failed to create expense" });
+    }
+  });
+
+  app.get("/api/expenses", async (req, res) => {
+    try {
+      const expenses = await storage.getExpenses();
+      res.json(expenses);
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+      res.status(500).json({ message: "Failed to fetch expenses" });
+    }
+  });
+
+  app.get("/api/expenses/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const expense = await storage.getExpense(parseInt(id));
+      
+      if (!expense) {
+        return res.status(404).json({ message: "Expense not found" });
+      }
+      
+      res.json(expense);
+    } catch (error) {
+      console.error("Error fetching expense:", error);
+      res.status(500).json({ message: "Failed to fetch expense" });
+    }
+  });
+
+  app.put("/api/expenses/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { description, amount, workerName } = req.body;
+      
+      const expense = await storage.updateExpense(parseInt(id), {
+        description,
+        amount,
+        workerName
+      });
+      
+      res.json(expense);
+    } catch (error) {
+      console.error("Error updating expense:", error);
+      res.status(500).json({ message: "Failed to update expense" });
+    }
+  });
+
+  app.delete("/api/expenses/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteExpense(parseInt(id));
+      res.json({ message: "Expense deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      res.status(500).json({ message: "Failed to delete expense" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
