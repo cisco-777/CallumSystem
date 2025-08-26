@@ -710,7 +710,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dayStr = today.getDate().toString().padStart(2, '0');
       const monthStr = (today.getMonth() + 1).toString().padStart(2, '0');
       const yearStr = today.getFullYear().toString();
-      const shiftId = `SHIFT ${dayStr}/${monthStr}/${yearStr}`;
+      const dateStr = `${dayStr}/${monthStr}/${yearStr}`;
+      
+      // Check for existing shifts today and create unique ID
+      const allShifts = await storage.getShifts();
+      const shiftsToday = allShifts.filter(shift => shift.shiftId.includes(dateStr));
+      const shiftNumber = shiftsToday.length + 1;
+      const shiftId = shiftNumber === 1 ? `SHIFT ${dateStr}` : `SHIFT ${dateStr}-${shiftNumber}`;
       
       const shift = await storage.createShift({
         shiftId,
