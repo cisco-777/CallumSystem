@@ -820,7 +820,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Shift not found" });
       }
       
-      res.json(summary);
+      // Calculate real-time totals
+      const totalExpenses = summary.expenses
+        .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || "0"), 0);
+      
+      const totalSales = summary.orders
+        .filter((order: any) => order.status === "completed")
+        .reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || "0"), 0);
+      
+      const netAmount = totalSales - totalExpenses;
+      
+      // Add calculated totals to response
+      const enhancedSummary = {
+        ...summary,
+        calculatedTotals: {
+          totalSales: totalSales.toFixed(2),
+          totalExpenses: totalExpenses.toFixed(2),
+          netAmount: netAmount.toFixed(2)
+        }
+      };
+      
+      res.json(enhancedSummary);
     } catch (error) {
       console.error("Error getting shift summary:", error);
       res.status(500).json({ message: "Failed to get shift summary" });
@@ -848,11 +868,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const reconciliation = await reconciliationResponse.json();
       
-      // Update shift with reconciliation data
+      // Get current shift summary to calculate actual totals
+      const shiftSummary = await storage.getShiftSummary(shiftId);
+      
+      // Calculate actual totals from expenses and orders
+      const totalExpenses = shiftSummary.expenses
+        .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || "0"), 0);
+      
+      const totalSales = shiftSummary.orders
+        .filter((order: any) => order.status === "completed")
+        .reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || "0"), 0);
+      
+      const netAmount = totalSales - totalExpenses;
+      
+      // Update shift with reconciliation data and calculated totals
       await storage.endShift(shiftId, {
-        totalSales: shift.totalSales || "0",
-        totalExpenses: shift.totalExpenses || "0", 
-        netAmount: shift.netAmount || "0",
+        totalSales: totalSales.toFixed(2),
+        totalExpenses: totalExpenses.toFixed(2), 
+        netAmount: netAmount.toFixed(2),
         stockDiscrepancies: reconciliation.totalDiscrepancies || 0,
         reconciliationId: reconciliation.id
       });

@@ -2225,6 +2225,58 @@ export function AdminDashboard() {
                           })}</div>
                           <div>Duration: {Math.floor((new Date().getTime() - new Date(activeShift.startTime).getTime()) / (1000 * 60))} minutes</div>
                         </div>
+                        
+                        {/* Real-time shift totals */}
+                        <div className="mt-4 pt-3 border-t border-blue-200">
+                          <h4 className="font-medium text-blue-700 mb-2">Current Shift Totals</h4>
+                          <div className="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <span className="text-green-600 font-medium">
+                                Sales: £{(() => {
+                                  const shiftOrders = Array.isArray(orders) ? orders.filter((order: any) => 
+                                    order.status === "completed" &&
+                                    new Date(order.createdAt) >= new Date(activeShift.startTime)
+                                  ) : [];
+                                  return shiftOrders.reduce((sum: number, order: any) => 
+                                    sum + parseFloat(order.totalPrice || "0"), 0
+                                  ).toFixed(2);
+                                })()}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-red-600 font-medium">
+                                Expenses: £{(() => {
+                                  const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
+                                    expense.shiftId === activeShift.id
+                                  ) : [];
+                                  return shiftExpenses.reduce((sum: number, expense: any) => 
+                                    sum + parseFloat(expense.amount || "0"), 0
+                                  ).toFixed(2);
+                                })()}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-blue-700 font-medium">
+                                Net: £{(() => {
+                                  const shiftOrders = Array.isArray(orders) ? orders.filter((order: any) => 
+                                    order.status === "completed" &&
+                                    new Date(order.createdAt) >= new Date(activeShift.startTime)
+                                  ) : [];
+                                  const sales = shiftOrders.reduce((sum: number, order: any) => 
+                                    sum + parseFloat(order.totalPrice || "0"), 0
+                                  );
+                                  const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
+                                    expense.shiftId === activeShift.id
+                                  ) : [];
+                                  const expenseTotal = shiftExpenses.reduce((sum: number, expense: any) => 
+                                    sum + parseFloat(expense.amount || "0"), 0
+                                  );
+                                  return (sales - expenseTotal).toFixed(2);
+                                })()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-2">
