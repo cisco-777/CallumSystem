@@ -1536,6 +1536,13 @@ export function AdminDashboard() {
                           </Badge>
                           <span className="font-medium text-blue-700">Worker: {activeShift.workerName}</span>
                         </div>
+                        <Button
+                          onClick={handleStartShiftReconciliation}
+                          className="bg-orange-600 hover:bg-orange-700 text-white"
+                        >
+                          <StopCircle className="w-4 h-4 mr-2" />
+                          End Shift
+                        </Button>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
