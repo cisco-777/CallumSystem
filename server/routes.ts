@@ -819,6 +819,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/orders/clear-all", async (req, res) => {
+    try {
+      await storage.deleteAllOrders();
+      res.json({ message: "All orders cleared successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear all orders" });
+    }
+  });
+
   // Seed some initial products
   app.post("/api/seed-products", async (req, res) => {
     try {
