@@ -40,10 +40,11 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     };
 
     const formatTime = (date: Date) => {
-      return date.toLocaleTimeString('en-GB', { 
+      return date.toLocaleString('en-GB', { 
         hour: '2-digit', 
         minute: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'Europe/London'
       });
     };
 
