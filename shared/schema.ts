@@ -75,6 +75,7 @@ export const orders = pgTable("orders", {
   totalPrice: text("total_price").notNull(),
   status: text("status").default("pending"),
   archivedFromAdmin: boolean("archived_from_admin").default(false),
+  shiftId: integer("shift_id").references(() => shifts.id), // Link orders to shifts
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -171,6 +172,7 @@ export const insertOrderSchema = createInsertSchema(orders).pick({
   items: true,
   quantities: true,
   totalPrice: true,
+  shiftId: true,
 });
 
 export const insertShiftReconciliationSchema = createInsertSchema(shiftReconciliations).pick({

@@ -693,6 +693,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return sum + ((item.quantity || 1) * price);
       }, 0).toString();
       
+      // Get active shift to link order
+      const activeShift = await storage.getActiveShift();
+      
       // Prepare order data
       const orderData = {
         userId,
@@ -707,7 +710,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           productId: item.productId,
           quantity: item.quantity || 1
         })),
-        totalPrice
+        totalPrice,
+        shiftId: activeShift?.id || null // Link order to active shift
       };
 
       // Create order record

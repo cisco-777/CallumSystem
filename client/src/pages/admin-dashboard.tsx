@@ -1844,7 +1844,7 @@ export function AdminDashboard() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Order Control Center</CardTitle>
-              {orders.length > 0 && (
+              {activeShift && orders.filter((order: any) => order.shiftId === activeShift.id).length > 0 && (
                 <Button
                   onClick={deleteAllOrders}
                   disabled={deleteAllOrdersMutation.isPending}
@@ -1859,12 +1859,19 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {orders.length === 0 ? (
+              {!activeShift ? (
                 <div className="text-center py-8 text-gray-500">
-                  No orders to display
+                  <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="font-medium">No Active Shift</p>
+                  <p className="text-sm">Start a shift to begin taking orders.</p>
+                </div>
+              ) : orders.filter((order: any) => order.shiftId === activeShift.id).length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No orders for current shift</p>
+                  <p className="text-sm text-green-600">Active shift: {activeShift.workerName}</p>
                 </div>
               ) : (
-                orders.map((order: any) => (
+                orders.filter((order: any) => order.shiftId === activeShift.id).map((order: any) => (
                   <div key={order.id} className="border rounded-lg p-4 bg-white">
                     <div className="flex justify-between items-start mb-2">
                       <div>
