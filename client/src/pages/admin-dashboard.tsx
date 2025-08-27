@@ -3940,6 +3940,50 @@ export function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Low Stock Alerts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-600" />
+                  Low Stock Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analytics.lowStockItems.length > 0 ? (
+                  <div className="space-y-2 sm:space-y-3">
+                    {analytics.lowStockItems.map((item: any, index) => (
+                      <div key={index} className={`flex items-center justify-between mobile-p-2 rounded-lg ${
+                        item.critical ? 'bg-red-50 border border-red-200' : 
+                        item.urgent ? 'bg-yellow-50 border border-yellow-200' : 'bg-orange-50 border border-orange-200'
+                      }`}>
+                        <span className="mobile-text-sm font-medium">{item.name}</span>
+                        <div className="flex items-center space-x-1 sm:space-x-2">
+                          <span className={`mobile-text-xs font-bold ${
+                            item.critical ? 'text-red-700' : 
+                            item.urgent ? 'text-yellow-700' : 'text-orange-700'
+                          }`}>
+                            {item.stock}g
+                          </span>
+                          <Badge className={`mobile-text-xs ${
+                            item.critical ? 'bg-red-100 text-red-800 border-red-300' : 
+                            item.urgent ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-orange-100 text-orange-800 border-orange-300'
+                          }`}>
+                            {item.critical ? 'Critical' : item.urgent ? 'Urgent' : 'Low'}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 sm:py-8 text-green-600">
+                    <AlertCircle className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                    <p className="mobile-text-sm font-medium">All stock levels healthy!</p>
+                    <p className="mobile-text-xs text-gray-500">No low stock alerts</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
           
           {/* Analytics Tab */}
