@@ -2524,7 +2524,7 @@ export function AdminDashboard() {
                 
                 <div className="space-y-3">
                   {Array.isArray(shifts) && shifts.length > 0 ? (
-                    shifts.slice(0, 5).map((shift: any) => (
+                    shifts.filter((shift: any) => shift.status === 'completed').slice(0, 1).map((shift: any) => (
                       <div key={shift.id} className="border rounded-lg p-4 bg-white">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -2609,8 +2609,8 @@ export function AdminDashboard() {
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                      <p>No shifts recorded yet.</p>
-                      <p className="text-sm">Start your first shift to begin tracking.</p>
+                      <p>No completed shifts found.</p>
+                      <p className="text-sm">Complete a shift to see it here.</p>
                     </div>
                   )}
                 </div>
