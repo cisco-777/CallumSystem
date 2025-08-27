@@ -3834,98 +3834,166 @@ export function AdminDashboard() {
           
           {/* Expenses Tab */}
           <TabsContent value="expenses">
-            {/* Expenses Management */}
-            <Card id="expenses-management" className="mb-8">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center">
-                  <Receipt className="w-5 h-5 mr-2 text-purple-600" />
-                  Expenses Management
-                </CardTitle>
-                <Button 
-                  onClick={handleCreateExpense}
-                  size="sm" 
-                  className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add New Expense
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {Array.isArray(expenses) && expenses.length > 0 ? (
-                    expenses.map((expense: any) => (
-                      <div key={expense.id} className="border rounded-lg p-4 bg-white">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <Badge className="bg-purple-100 text-purple-800 border-purple-300">
-                                EXPENSE
-                              </Badge>
-                              <span className="font-medium text-gray-800">{expense.description}</span>
-                            </div>
-                            
-                            <div className="space-y-1">
-                              <div className="text-sm font-medium text-red-700">
-                                Amount: €{expense.amount}
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                Worker: {expense.workerName}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                Created: {new Date(expense.createdAt).toLocaleString()}
-                              </div>
-                              {expense.shiftId && (
-                                <div className="text-xs text-blue-600">
-                                  Shift ID: {expense.shiftId}
-                                </div>
-                              )}
-                            </div>
+            {/* Expenses Management Header */}
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-purple-800">Expenses Management</h2>
+                <p className="text-purple-600">Track and manage shift expenses</p>
+              </div>
+              <Button 
+                onClick={handleCreateExpense}
+                className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add New Expense
+              </Button>
+            </div>
+
+            {/* Expenses organized by shifts */}
+            <div className="space-y-6">
+              {/* Get unique shifts that have expenses or active shift */}
+              {(() => {
+                const expenseShifts = Array.isArray(shifts) ? shifts.filter((shift: any) => {
+                  const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
+                    expense.shiftId === shift.id
+                  ) : [];
+                  return shiftExpenses.length > 0 || (!shift.endTime && activeShift?.id === shift.id);
+                }) : [];
+
+                // Sort to show active shift first, then by end time descending
+                expenseShifts.sort((a: any, b: any) => {
+                  if (!a.endTime && b.endTime) return -1; // Active shift first
+                  if (a.endTime && !b.endTime) return 1;
+                  if (!a.endTime && !b.endTime) return 0;
+                  return new Date(b.endTime).getTime() - new Date(a.endTime).getTime();
+                });
+
+                if (expenseShifts.length === 0) {
+                  return (
+                    <Card>
+                      <CardContent className="text-center py-12">
+                        <Receipt className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">No Expenses Recorded</h3>
+                        <p className="text-gray-500 mb-4">Start adding expenses to track your operational costs.</p>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+
+                return expenseShifts.map((shift: any, index: number) => {
+                  const isActiveShift = !shift.endTime && activeShift?.id === shift.id;
+                  const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
+                    expense.shiftId === shift.id
+                  ) : [];
+                  const totalExpenses = shiftExpenses.reduce((sum: number, expense: any) => 
+                    sum + parseFloat(expense.amount || "0"), 0
+                  );
+
+                  return (
+                    <Card key={shift.id} className={`${isActiveShift ? 'ring-2 ring-purple-200 bg-purple-50' : 'bg-white'}`}>
+                      {/* Shift Header */}
+                      <div className="px-4 py-3 border-b">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className={`font-semibold ${isActiveShift ? 'text-purple-800' : 'text-gray-800'}`}>
+                              {isActiveShift ? 'Current Shift Expenses' : 'Previous Shift Expenses'}
+                            </h3>
+                            <p className={`text-sm ${isActiveShift ? 'text-purple-600' : 'text-gray-600'}`}>
+                              {isActiveShift ? `${shift.shiftId} - ${shift.workerName}` : `Worker: ${shift.workerName} • ${new Date(shift.endTime).toLocaleDateString()}`}
+                            </p>
                           </div>
-                          
-                          <div className="flex space-x-2 ml-4">
-                            <Button
-                              onClick={() => {
-                                setEditingExpense(expense);
-                                expenseForm.reset({
-                                  description: expense.description,
-                                  amount: expense.amount.toString(),
-                                  workerName: expense.workerName
-                                });
-                                setShowExpenseForm(true);
-                              }}
-                              size="sm"
-                              variant="outline"
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <Edit className="w-4 h-4 mr-1" />
-                              Edit
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                setDeletingExpense(expense);
-                                setShowDeleteExpenseDialog(true);
-                              }}
-                              size="sm"
-                              variant="outline"
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              Delete
-                            </Button>
+                          <div className="text-right">
+                            <div className={`text-xl font-bold ${isActiveShift ? 'text-purple-700' : 'text-gray-700'}`}>
+                              €{totalExpenses.toFixed(2)}
+                            </div>
+                            <div className={`text-sm ${isActiveShift ? 'text-purple-600' : 'text-gray-600'}`}>
+                              {shiftExpenses.length} expenses
+                            </div>
                           </div>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                      <p>No expenses recorded yet.</p>
-                      <p className="text-sm">Add expenses to track operational costs.</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+
+                      {/* Expenses List for this shift */}
+                      <div className="p-4">
+                        {shiftExpenses.length > 0 ? (
+                          <div className="space-y-3">
+                            {shiftExpenses.map((expense: any) => (
+                              <div key={expense.id} className="border rounded-lg p-3 bg-white">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h4 className="font-semibold">{expense.description}</h4>
+                                      <div className="text-right">
+                                        <div className="font-bold text-lg text-green-600">€{expense.amount}</div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                      <div className="flex items-center">
+                                        <Users className="w-4 h-4 mr-1" />
+                                        {expense.workerName}
+                                      </div>
+                                      <div className="flex items-center">
+                                        <Timer className="w-4 h-4 mr-1" />
+                                        {new Date(expense.expenseDate || expense.createdAt).toLocaleString('en-GB', {
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Only show edit/delete buttons for current shift or allow editing of all */}
+                                  <div className="flex space-x-2 ml-4">
+                                    <Button
+                                      onClick={() => {
+                                        setEditingExpense(expense);
+                                        expenseForm.reset({
+                                          description: expense.description,
+                                          amount: expense.amount.toString(),
+                                          workerName: expense.workerName
+                                        });
+                                        setShowExpenseForm(true);
+                                      }}
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-blue-600 hover:text-blue-700"
+                                    >
+                                      <Edit className="w-4 h-4 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      onClick={() => {
+                                        setDeletingExpense(expense);
+                                        setShowDeleteExpenseDialog(true);
+                                      }}
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-red-600 hover:text-red-700"
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-1" />
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6 text-gray-500">
+                            <Receipt className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">No expenses recorded for this shift.</p>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                });
+              })()}
+            </div>
           </TabsContent>
         </Tabs>
 
