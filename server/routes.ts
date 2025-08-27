@@ -69,10 +69,12 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
     if (summary.orders && summary.orders.length > 0) {
       // Process completed orders from this shift
       summary.orders.filter((order: any) => order.status === 'completed').forEach((order: any) => {
-        if (order.items && Array.isArray(order.items)) {
-          order.items.forEach((item: any) => {
+        if (order.items && Array.isArray(order.items) && order.quantities && Array.isArray(order.quantities)) {
+          order.items.forEach((item: any, index: number) => {
             const product = products.find((p: any) => p.id === item.productId);
-            if (product) {
+            const quantityData = order.quantities.find((q: any) => q.productId === item.productId);
+            
+            if (product && quantityData) {
               const productType = product.productType || 'Cannabis';
               const unitType = getUnitType(productType);
               
@@ -84,9 +86,14 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
                 };
               }
               
+              // Calculate price from product code (last 2 digits) like in donation process
+              const productCode = item.productCode || product.productCode || '';
+              const itemPrice = parseInt(productCode.slice(-2)) || 10;
+              const quantity = quantityData.quantity || 1;
+              
               // Add to category totals
-              salesByCategory[productType].totalAmount += parseFloat(item.price || '0') * item.quantity;
-              salesByCategory[productType].totalQuantity += item.quantity;
+              salesByCategory[productType].totalAmount += itemPrice * quantity;
+              salesByCategory[productType].totalQuantity += quantity;
             }
           });
         }
