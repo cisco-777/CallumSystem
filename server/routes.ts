@@ -631,9 +631,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Basket routes
-  app.get("/api/basket", async (req, res) => {
+  app.get("/api/basket/:userId", async (req, res) => {
     try {
-      const userId = 1; // Would get from session/token in real app
+      const userId = parseInt(req.params.userId);
       const basketItems = await storage.getBasketItems(userId);
       res.json(basketItems);
     } catch (error) {
@@ -641,9 +641,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/basket", async (req, res) => {
+  app.post("/api/basket/:userId", async (req, res) => {
     try {
-      const userId = 1; // Would get from session/token in real app
+      const userId = parseInt(req.params.userId);
       const { productId, quantity = 1 } = req.body;
       const item = await storage.addToBasket(userId, productId, quantity);
       res.json(item);
@@ -663,9 +663,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Member dashboard routes
-  app.get("/api/member/donations", async (req, res) => {
+  app.get("/api/member/donations/:userId", async (req, res) => {
     try {
-      const userId = 2; // Demo member ID - would get from session in real app
+      const userId = parseInt(req.params.userId);
       const donations = await storage.getUserDonations(userId);
       res.json(donations);
     } catch (error) {
@@ -674,9 +674,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Donation route
-  app.post("/api/donate", async (req, res) => {
+  app.post("/api/donate/:userId", async (req, res) => {
     try {
-      const userId = 1; // Would get from session/token in real app
+      const userId = parseInt(req.params.userId);
       const basketItems = await storage.getBasketItems(userId);
       
       if (basketItems.length === 0) {
@@ -756,13 +756,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get all orders for admin
         orders = await storage.getAllOrders();
       } else {
-        const userId = 1; // Would get from session/token in real app
-        orders = await storage.getUserOrders(userId);
+        // This route should not be used for user orders - use /api/orders/:userId instead
+        return res.status(400).json({ message: "Use /api/orders/:userId for user-specific orders" });
       }
       
       res.json(orders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/orders/user/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const orders = await storage.getUserOrders(userId);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user orders" });
     }
   });
 

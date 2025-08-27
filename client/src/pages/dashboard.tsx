@@ -90,19 +90,25 @@ export function Dashboard({ onLogout }: DashboardProps) {
   });
 
   const { data: basketItems = [] } = useQuery({
-    queryKey: ['/api/basket']
+    queryKey: ['/api/basket', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return [];
+      return await apiRequest(`/api/basket/${currentUser.id}`);
+    },
+    enabled: !!currentUser?.id
   });
 
   const addToBasketMutation = useMutation({
     mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
-      return await apiRequest('/api/basket', {
+      if (!currentUser?.id) throw new Error('User ID not found');
+      return await apiRequest(`/api/basket/${currentUser.id}`, {
         method: 'POST',
         body: JSON.stringify({ productId, quantity }),
         headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/basket'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/basket', currentUser?.id] });
       toast({
         title: "Added to basket",
         description: "Item has been added to your selection.",
@@ -117,19 +123,20 @@ export function Dashboard({ onLogout }: DashboardProps) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/basket'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/basket', currentUser?.id] });
     }
   });
 
   const completeDonationMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('/api/donate', {
+      if (!currentUser?.id) throw new Error('User ID not found');
+      return await apiRequest(`/api/donate/${currentUser.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/basket'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/basket', currentUser?.id] });
       setShowBasket(false);
       toast({
         title: "Order Completed!",

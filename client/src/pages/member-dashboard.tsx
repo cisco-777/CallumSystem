@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { Calendar, TrendingUp, Heart, Bell, LogOut, BarChart3 } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
+import { apiRequest } from '@/lib/queryClient';
 
 interface DonationRecord {
   id: number;
@@ -26,8 +27,24 @@ interface DonationRecord {
 export function MemberDashboard() {
   const [, setLocation] = useLocation();
 
+  // Get current user
+  const getCurrentUser = () => {
+    const savedUser = localStorage.getItem('msc-user');
+    if (savedUser) {
+      return JSON.parse(savedUser);
+    }
+    return null;
+  };
+
+  const currentUser = getCurrentUser();
+
   const { data: donationHistory = [] } = useQuery<DonationRecord[]>({
-    queryKey: ['/api/member/donations']
+    queryKey: ['/api/member/donations', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return [];
+      return await apiRequest(`/api/member/donations/${currentUser.id}`);
+    },
+    enabled: !!currentUser?.id
   });
 
   const { data: products = [] } = useQuery({
