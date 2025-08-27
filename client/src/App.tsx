@@ -10,8 +10,9 @@ import { AdminDashboard } from "@/pages/admin-dashboard";
 import { FakeAdminDemo } from "@/pages/fake-admin-demo";
 import { MemberDashboard } from "@/pages/member-dashboard";
 import { PendingApproval } from "@/pages/pending-approval";
+import { RegistrationComplete } from "@/pages/registration-complete";
 
-type AppState = 'landing' | 'auth' | 'dashboard' | 'admin' | 'fake-demo' | 'member-dashboard' | 'pending-approval';
+type AppState = 'landing' | 'auth' | 'dashboard' | 'admin' | 'fake-demo' | 'member-dashboard' | 'pending-approval' | 'registration-complete';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('landing');
@@ -30,6 +31,12 @@ function App() {
     // Check for pending approval status
     if (urlParams.get('status') === 'pending') {
       setAppState('pending-approval');
+      return;
+    }
+
+    // Check for registration complete status
+    if (urlParams.get('status') === 'registration-complete') {
+      setAppState('registration-complete');
       return;
     }
 
@@ -84,6 +91,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('msc-user');
     localStorage.removeItem('msc-pending-user');
+    localStorage.removeItem('msc-registration-email');
     setUser(null);
     setAppState('landing');
   };
@@ -130,6 +138,14 @@ function App() {
                 const pendingUser = localStorage.getItem('msc-pending-user');
                 return pendingUser ? JSON.parse(pendingUser).email : undefined;
               })()}
+            />
+          )}
+          
+          {appState === 'registration-complete' && (
+            <RegistrationComplete 
+              onLoginSuccess={handleAuthSuccess}
+              onBackToLanding={handleBackToLanding}
+              userEmail={localStorage.getItem('msc-registration-email') || undefined}
             />
           )}
         </div>

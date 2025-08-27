@@ -150,7 +150,15 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
       });
     },
     onSuccess: (data) => {
-      localStorage.setItem('msc-user', JSON.stringify(data.user));
+      // DO NOT store user in localStorage - force logout
+      // Store email for registration complete page
+      localStorage.setItem('msc-registration-email', email);
+      
+      toast({
+        title: "Registration Successful",
+        description: "Your account has been created. Please complete onboarding.",
+      });
+      
       setStep('welcome');
     },
     onError: () => {
@@ -184,8 +192,17 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
     },
     onSuccess: (data) => {
       console.log('Onboarding completed successfully:', data);
-      localStorage.setItem('msc-user', JSON.stringify(data.user));
-      onSuccess();
+      // DO NOT store user in localStorage - force logout after registration
+      // Clear any existing user data and redirect to registration complete
+      localStorage.removeItem('msc-user');
+      
+      toast({
+        title: "Registration Complete!",
+        description: "Your account is pending admin approval. You must login manually once approved.",
+      });
+      
+      // Redirect to registration complete page
+      window.location.href = '/?status=registration-complete';
     },
     onError: (error) => {
       console.error('Onboarding error:', error);
