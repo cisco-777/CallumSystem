@@ -1927,7 +1927,7 @@ export function AdminDashboard() {
                       <div>
                         <h3 className="font-semibold text-lg">Order #{order.id}</h3>
                         <p className="text-sm text-gray-600">Pickup Code: <span className="font-mono font-bold text-blue-600">{order.pickupCode}</span></p>
-                        <p className="text-sm text-gray-500">Total: ${order.totalPrice}</p>
+                        <p className="text-sm text-gray-500">Total: €{order.totalPrice}</p>
                       </div>
                       <div className="text-right">
                         <Badge variant={order.status === 'pending' ? 'secondary' : 'default'}>
@@ -2429,7 +2429,7 @@ export function AdminDashboard() {
                           <div className="grid grid-cols-3 gap-4 text-sm">
                             <div>
                               <span className="text-green-600 font-medium">
-                                Sales: £{(() => {
+                                Sales: €{(() => {
                                   const shiftOrders = Array.isArray(orders) ? orders.filter((order: any) => 
                                     order.status === "completed" &&
                                     new Date(order.createdAt) >= new Date(activeShift.startTime)
@@ -2442,7 +2442,7 @@ export function AdminDashboard() {
                             </div>
                             <div>
                               <span className="text-red-600 font-medium">
-                                Expenses: £{(() => {
+                                Expenses: €{(() => {
                                   const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
                                     expense.shiftId === activeShift.id
                                   ) : [];
@@ -2454,7 +2454,7 @@ export function AdminDashboard() {
                             </div>
                             <div>
                               <span className="text-blue-700 font-medium">
-                                Net: £{(() => {
+                                Net: €{(() => {
                                   const shiftOrders = Array.isArray(orders) ? orders.filter((order: any) => 
                                     order.status === "completed" &&
                                     new Date(order.createdAt) >= new Date(activeShift.startTime)
@@ -2806,7 +2806,7 @@ export function AdminDashboard() {
                             </div>
                             <div className="text-right">
                               <div className={`text-xl font-bold ${isActiveShift ? 'text-purple-700' : 'text-gray-700'}`}>
-                                £{totalExpenses.toFixed(2)}
+                                €{totalExpenses.toFixed(2)}
                               </div>
                               <div className={`text-sm ${isActiveShift ? 'text-purple-600' : 'text-gray-600'}`}>
                                 {shiftExpenses.length} expenses
@@ -2826,7 +2826,7 @@ export function AdminDashboard() {
                                       <div className="flex items-center justify-between mb-2">
                                         <h4 className="font-semibold">{expense.description}</h4>
                                         <div className="text-right">
-                                          <div className="font-bold text-lg text-green-600">£{expense.amount}</div>
+                                          <div className="font-bold text-lg text-green-600">€{expense.amount}</div>
                                         </div>
                                       </div>
                                       
@@ -2927,14 +2927,14 @@ export function AdminDashboard() {
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount (£) *</FormLabel>
+                      <FormLabel>Amount (€) *</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <PoundSterling className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm font-medium">€</span>
                           <Input 
                             type="number"
                             step="0.01"
-                            className="pl-10"
+                            className="pl-8"
                             {...field} 
                           />
                         </div>
@@ -3209,7 +3209,7 @@ export function AdminDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Cash in Till (£)
+                          Cash in Till (€)
                         </label>
                         <Input
                           type="number"
