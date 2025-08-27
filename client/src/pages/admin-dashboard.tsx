@@ -3772,7 +3772,7 @@ export function AdminDashboard() {
                 <div className="space-y-4">
                   {Array.isArray(orders) && orders.length > 0 ? (
                     orders.filter((order: any) => 
-                      !order.archivedFromAdmin && 
+                      order.archivedFromAdmin !== true && 
                       activeShift && 
                       new Date(order.createdAt) >= new Date(activeShift.startTime)
                     ).map((order: any) => (
