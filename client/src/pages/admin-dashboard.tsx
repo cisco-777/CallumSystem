@@ -1629,7 +1629,7 @@ export function AdminDashboard() {
               <CardContent>
                 {Array.isArray(shifts) && shifts.length > 0 ? (
                   <div className="space-y-4">
-                    {shifts.slice(0, 5).map((shift: any) => (
+                    {shifts.filter((shift: any) => shift.endTime).slice(0, 1).map((shift: any) => (
                       <div key={shift.id} className="border rounded-lg p-4 bg-white">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
