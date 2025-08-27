@@ -57,39 +57,49 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
     let report = `Worker: ${shift.workerName}\n`;
     report += `Shift - ${shiftDate} ${shiftStartTime} - ${shiftEndTime}\n\n`;
 
-    // Dispensary section
+    // Dispensary section - Show actual sales data from shift
     report += `DISPENSARY\n`;
-    if (reconciliation && reconciliation.discrepancies) {
-      const discrepancies = reconciliation.discrepancies as any;
-      
-      // Group products by type for better organization
-      const productsByType: { [key: string]: any[] } = {};
-      products.forEach((product: any) => {
-        const type = product.productType || 'Cannabis';
-        if (!productsByType[type]) {
-          productsByType[type] = [];
+    
+    // Calculate sales by product category from completed orders during this shift
+    const salesByCategory: { [key: string]: { totalAmount: number, totalQuantity: number, unitType: string } } = {};
+    
+    if (summary.orders && summary.orders.length > 0) {
+      // Process completed orders from this shift
+      summary.orders.filter((order: any) => order.status === 'completed').forEach((order: any) => {
+        if (order.items && Array.isArray(order.items)) {
+          order.items.forEach((item: any) => {
+            const product = products.find((p: any) => p.id === item.productId);
+            if (product) {
+              const productType = product.productType || 'Cannabis';
+              const unitType = getUnitType(productType);
+              
+              if (!salesByCategory[productType]) {
+                salesByCategory[productType] = {
+                  totalAmount: 0,
+                  totalQuantity: 0,
+                  unitType: unitType
+                };
+              }
+              
+              // Add to category totals
+              salesByCategory[productType].totalAmount += parseFloat(item.price || '0') * item.quantity;
+              salesByCategory[productType].totalQuantity += item.quantity;
+            }
+          });
         }
-        productsByType[type].push(product);
       });
-
-      // Show each product category
-      Object.keys(productsByType).forEach(productType => {
-        const typeProducts = productsByType[productType];
-        const unitType = getUnitType(productType);
-        
-        typeProducts.forEach((product: any) => {
-          const discrepancy = discrepancies[product.id];
-          if (discrepancy) {
-            const price = product.shelfPrice || '0';
-            report += `${product.name}: ${discrepancy.actual} ${unitType} - ₳${price}\n`;
-          } else {
-            // Show products with no discrepancy (expected = actual)
-            const expected = product.onShelfGrams || 0;
-            const price = product.shelfPrice || '0';
-            report += `${product.name}: ${expected} ${unitType} - ₳${price}\n`;
-          }
+      
+      // Display sales by category
+      if (Object.keys(salesByCategory).length > 0) {
+        Object.keys(salesByCategory).forEach(categoryType => {
+          const categoryData = salesByCategory[categoryType];
+          report += `${categoryType}: ₳${categoryData.totalAmount.toFixed(0)} ${categoryData.totalQuantity}${categoryData.unitType === 'grams' ? 'g' : ' units'} sold\n`;
         });
-      });
+      } else {
+        report += `No sales recorded during this shift\n`;
+      }
+    } else {
+      report += `No sales recorded during this shift\n`;
     }
     report += `\n`;
 
