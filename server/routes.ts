@@ -102,13 +102,13 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
       Object.keys(discrepancies).forEach(productId => {
         const discrepancy = discrepancies[productId];
         const product = products.find((p: any) => p.id === parseInt(productId));
-        if (product && discrepancy.difference > 0) {
+        if (product && discrepancy.difference !== 0) {
           hasDiscrepancies = true;
           const unitType = getUnitType(product.productType || 'Cannabis');
           report += `${discrepancy.productName}:\n`;
           report += `Starting: ${discrepancy.expected} ${unitType}\n`;
           report += `Physical count: ${discrepancy.actual} ${unitType}\n`;
-          report += `${discrepancy.type}: ${discrepancy.difference} ${unitType}\n\n`;
+          report += `${discrepancy.type}: ${Math.abs(discrepancy.difference)} ${unitType}\n\n`;
         }
       });
 
@@ -866,9 +866,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (difference !== 0) {
           discrepancies[product.id] = {
             productName: product.name,
+            productType: product.productType,
             expected: expectedOnShelf,
             actual: physicalCount,
-            difference: Math.abs(difference),
+            difference: difference, // Store actual difference (positive = missing, negative = excess)
             type: difference > 0 ? 'missing' : 'excess'
           };
           totalDiscrepancies += Math.abs(difference);

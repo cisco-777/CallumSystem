@@ -3189,7 +3189,7 @@ export function AdminDashboard() {
                         
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
-                            Physical Count (grams on shelf)
+                            Physical Count ({product.productType && ['Pre-Rolls', 'Edibles'].includes(product.productType) ? 'units' : 'grams'} on shelf)
                           </label>
                           <Input
                             type="number"
@@ -3337,12 +3337,12 @@ export function AdminDashboard() {
                                   <div>
                                     <div className="font-medium">{discrepancy.productName}</div>
                                     <div className="text-sm text-gray-600">
-                                      Physical count: {discrepancy.actual}g
+                                      Physical count: {discrepancy.actual}{discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g'}
                                     </div>
                                   </div>
                                   <div className="text-right">
                                     <Badge className={discrepancy.type === 'missing' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}>
-                                      {discrepancy.difference}g {discrepancy.type}
+                                      {Math.abs(discrepancy.difference)}{discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g'} {discrepancy.type}
                                     </Badge>
                                   </div>
                                 </div>
