@@ -237,35 +237,35 @@ export class DatabaseStorage implements IStorage {
     const now = new Date();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    // Count pending members
+    // Count pending members (exclude admin accounts)
     const [{ count: pending }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
-      .where(eq(users.membershipStatus, 'pending'));
+      .where(sql`${users.membershipStatus} = 'pending' AND ${users.email} != 'admin123@gmail.com'`);
 
-    // Count approved members (not expired)
+    // Count approved members (not expired, exclude admin accounts)
     const [{ count: approved }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
-      .where(sql`${users.membershipStatus} = 'approved' AND ${users.expiryDate} > ${now}`);
+      .where(sql`${users.membershipStatus} = 'approved' AND ${users.expiryDate} > ${now} AND ${users.email} != 'admin123@gmail.com'`);
 
-    // Count expired members
+    // Count expired members (exclude admin accounts)
     const [{ count: expired }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
-      .where(sql`${users.membershipStatus} = 'approved' AND ${users.expiryDate} <= ${now}`);
+      .where(sql`${users.membershipStatus} = 'approved' AND ${users.expiryDate} <= ${now} AND ${users.email} != 'admin123@gmail.com'`);
 
-    // Count renewed members
+    // Count renewed members (exclude admin accounts)
     const [{ count: renewed }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
-      .where(eq(users.membershipStatus, 'renewed'));
+      .where(sql`${users.membershipStatus} = 'renewed' AND ${users.email} != 'admin123@gmail.com'`);
 
-    // Count active members (accessed system in last 30 days)
+    // Count active members (non-expired members only, exclude admin accounts)
     const [{ count: active }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
-      .where(sql`${users.lastActive} > ${thirtyDaysAgo} AND (${users.membershipStatus} = 'approved' OR ${users.membershipStatus} = 'renewed')`);
+      .where(sql`${users.email} != 'admin123@gmail.com' AND ((${users.membershipStatus} = 'approved' AND ${users.expiryDate} > ${now}) OR ${users.membershipStatus} = 'renewed')`);
 
     return {
       pending: Number(pending) || 0,
