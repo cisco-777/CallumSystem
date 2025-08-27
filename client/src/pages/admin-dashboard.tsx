@@ -746,6 +746,7 @@ export function AdminDashboard() {
 
   // Shift reconciliation functions
   const handleStartShiftReconciliation = () => {
+    console.log('END OF SHIFT BUTTON CLICKED!');
     setShowShiftReconciliation(true);
     setIsCountingMode(true);
     setPhysicalCounts({});
@@ -782,6 +783,7 @@ export function AdminDashboard() {
 
   // Expense functions
   const handleCreateExpense = () => {
+    console.log('EXPENSES LOG BUTTON CLICKED!');
     setEditingExpense(null);
     setShowExpenseForm(true);
     expenseForm.reset({
