@@ -3727,7 +3727,11 @@ export function AdminDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {Array.isArray(orders) && orders.length > 0 ? (
-                    orders.filter((order: any) => !order.archivedFromAdmin).map((order: any) => (
+                    orders.filter((order: any) => 
+                      !order.archivedFromAdmin && 
+                      activeShift && 
+                      new Date(order.createdAt) >= new Date(activeShift.startTime)
+                    ).map((order: any) => (
                       <div key={order.id} className="border rounded-lg p-4 bg-white">
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex-1">
