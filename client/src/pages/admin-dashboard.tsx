@@ -1208,7 +1208,7 @@ export function AdminDashboard() {
            lastName.includes(query);
   }).filter(user => {
     // Only show users who have at least made one order or have complete profile info
-    const hasOrders = orders.some((order: any) => order.userId === user.id);
+    const hasOrders = analyticsOrders.some((order: any) => order.userId === user.id);
     const hasCompleteProfile = user.firstName && user.lastName;
     return hasOrders || hasCompleteProfile;
   });
