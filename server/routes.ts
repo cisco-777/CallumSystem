@@ -125,19 +125,22 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
         if (product && discrepancy.difference !== 0) {
           hasDiscrepancies = true;
           const unitType = getUnitType(product.productType || 'Cannabis');
-          report += `${discrepancy.productName}:\n`;
-          report += `Starting: ${discrepancy.expected} ${unitType}\n`;
-          report += `Physical count: ${discrepancy.actual} ${unitType}\n`;
-          report += `${discrepancy.type}: ${Math.abs(discrepancy.difference)} ${unitType}\n\n`;
+          const productName = discrepancy.productName || product.name;
+          const difference = Math.abs(discrepancy.difference);
+          const overUnder = discrepancy.difference > 0 ? 'over' : 'under';
+          
+          // Simple format: "Product Name: Xg over/under"
+          report += `${productName}: ${difference}${unitType === 'grams' ? 'g' : ' units'} ${overUnder}\n`;
         }
       });
 
       if (!hasDiscrepancies) {
-        report += `No stock discrepancies found\n\n`;
+        report += `No stock discrepancies found\n`;
       }
     } else {
-      report += `No reconciliation data available\n\n`;
+      report += `No stock discrepancies found\n`;
     }
+    report += `\n`;
 
     // Member details section
     report += `MEMBER DETAILS\n`;
