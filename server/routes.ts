@@ -23,6 +23,9 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
 
     // Get member statistics
     const memberStats = await storage.getMembershipStatistics();
+    
+    // Calculate new members registered during this shift (exclude admin accounts)
+    const newMembersCount = await storage.getNewMembersDuringShift(shift.startTime, shift.endTime);
 
     // Get all products for stock information
     const products = await storage.getProducts();
@@ -131,7 +134,7 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
 
     // Member details section
     report += `MEMBER DETAILS\n`;
-    report += `New members: ${memberStats.pending}\n`;
+    report += `New members: ${newMembersCount}\n`;
     report += `All members: ${memberStats.approved + memberStats.renewed + memberStats.expired}\n`;
     report += `Active members: ${memberStats.active}\n`;
     report += `Renewed members: ${memberStats.renewed}\n`;

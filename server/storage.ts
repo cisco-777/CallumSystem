@@ -276,6 +276,19 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getNewMembersDuringShift(shiftStartTime: string | Date, shiftEndTime?: string | Date | null): Promise<number> {
+    const startTime = new Date(shiftStartTime);
+    const endTime = shiftEndTime ? new Date(shiftEndTime) : new Date(); // Use current time if shift is ongoing
+    
+    // Count new registrations during shift timeframe, exclude admin accounts
+    const [{ count: newMembers }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(sql`${users.createdAt} >= ${startTime} AND ${users.createdAt} <= ${endTime} AND ${users.email} != 'admin123@gmail.com'`);
+    
+    return Number(newMembers) || 0;
+  }
+
   async getProducts(): Promise<Product[]> {
     return await db.select().from(products).where(eq(products.isActive, true));
   }
