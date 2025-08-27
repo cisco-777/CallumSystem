@@ -1000,7 +1000,7 @@ export function AdminDashboard() {
     if (!Array.isArray(analyticsOrders) || analyticsOrders.length === 0) return null;
     
     let sativaCount = 0, indicaCount = 0, hybridCount = 0;
-    let cannabisCount = 0, hashCount = 0;
+    let cannabisCount = 0, hashCount = 0, ediblesCount = 0, preRollsCount = 0, caliPaxCount = 0;
     const categoryCount: { [key: string]: number } = {};
     
     analyticsOrders.forEach((order: any) => {
@@ -1013,9 +1013,18 @@ export function AdminDashboard() {
           else if (category.includes('indica')) indicaCount++;
           else hybridCount++;
           
-          // Cannabis vs Hash analysis
-          if (category.includes('hash')) hashCount++;
-          else cannabisCount++;
+          // Product type analysis
+          if (category.includes('hash')) {
+            hashCount++;
+          } else if (item.name && item.name.toLowerCase().includes('edible')) {
+            ediblesCount++;
+          } else if (item.name && item.name.toLowerCase().includes('pre-roll')) {
+            preRollsCount++;
+          } else if (item.name && item.name.toLowerCase().includes('cali pax')) {
+            caliPaxCount++;
+          } else {
+            cannabisCount++; // Default to cannabis for flower products
+          }
           
           // Category counting
           categoryCount[item.category || 'Other'] = (categoryCount[item.category || 'Other'] || 0) + 1;
@@ -1024,7 +1033,7 @@ export function AdminDashboard() {
     });
     
     const total = sativaCount + indicaCount + hybridCount;
-    const productTotal = cannabisCount + hashCount;
+    const productTotal = cannabisCount + hashCount + ediblesCount + preRollsCount + caliPaxCount;
     
     return {
       strainPreferences: {
@@ -1034,7 +1043,10 @@ export function AdminDashboard() {
       },
       productPreferences: {
         cannabis: productTotal > 0 ? Math.round((cannabisCount / productTotal) * 100) : 0,
-        hash: productTotal > 0 ? Math.round((hashCount / productTotal) * 100) : 0
+        hash: productTotal > 0 ? Math.round((hashCount / productTotal) * 100) : 0,
+        edibles: productTotal > 0 ? Math.round((ediblesCount / productTotal) * 100) : 0,
+        preRolls: productTotal > 0 ? Math.round((preRollsCount / productTotal) * 100) : 0,
+        caliPax: productTotal > 0 ? Math.round((caliPaxCount / productTotal) * 100) : 0
       },
       popularCategories: Object.entries(categoryCount)
         .sort(([,a], [,b]) => (b as number) - (a as number))
@@ -1054,8 +1066,7 @@ export function AdminDashboard() {
         averageStock: 0,
         lowStockItems: [],
         potentialRevenue: 0,
-        mostProfitable: null,
-        strainBreakdown: { indica: 0, sativa: 0, hybrid: 0 }
+        mostProfitable: null
       };
     }
 
@@ -1065,7 +1076,6 @@ export function AdminDashboard() {
     const lowStockItems: Array<{name: string, stock: number, critical: boolean, urgent: boolean}> = [];
     let mostProfitable: {name: string, price: number, stock: number, value: number} | null = null;
     let maxProfitability = 0;
-    const strainCounts = { indica: 0, sativa: 0, hybrid: 0 };
 
     (products as any[]).forEach((product: any) => {
       const stock = product.stockQuantity || 0;
@@ -1091,23 +1101,32 @@ export function AdminDashboard() {
         }
       }
 
-      // Most profitable calculation
-      const profitability = price * stock;
-      if (profitability > maxProfitability) {
-        maxProfitability = profitability;
+      // Most profitable calculation based on actual sales revenue
+      const productRevenue = Array.isArray(analyticsOrders) ? analyticsOrders
+        .filter((order: any) => order.status === 'completed')
+        .reduce((total: number, order: any) => {
+          if (order.items && Array.isArray(order.items)) {
+            const productItems = order.items.filter((item: any) => item.name === product.name);
+            if (productItems.length > 0) {
+              // Get quantities for this product in this order
+              const quantities = order.quantities || [];
+              const productQuantity = quantities.find((q: any) => q.productId === product.id)?.quantity || 1;
+              return total + (price * productQuantity);
+            }
+          }
+          return total;
+        }, 0) : 0;
+      
+      if (productRevenue > maxProfitability) {
+        maxProfitability = productRevenue;
         mostProfitable = {
           name: product.name,
           price: price,
           stock: stock,
-          value: profitability
+          value: productRevenue
         };
       }
 
-      // Strain breakdown
-      const category = (product.category || '').toLowerCase();
-      if (category.includes('indica')) strainCounts.indica++;
-      else if (category.includes('sativa')) strainCounts.sativa++;
-      else strainCounts.hybrid++;
     });
 
     const averageStock = (products as any[]).length > 0 ? Math.round(totalStock / (products as any[]).length) : 0;
@@ -1118,8 +1137,7 @@ export function AdminDashboard() {
       averageStock,
       lowStockItems,
       potentialRevenue: Math.round(potentialRevenue),
-      mostProfitable,
-      strainBreakdown: strainCounts
+      mostProfitable
     };
   };
 
@@ -1145,12 +1163,15 @@ export function AdminDashboard() {
       indica: 0, 
       hybrid: 0,
       cannabis: 0,
-      hash: 0
+      hash: 0,
+      edibles: 0,
+      preRolls: 0,
+      caliPax: 0
     };
     
     if (userOrders.length > 0) {
       let sativaCount = 0, indicaCount = 0, hybridCount = 0;
-      let cannabisCount = 0, hashCount = 0;
+      let cannabisCount = 0, hashCount = 0, ediblesCount = 0, preRollsCount = 0, caliPaxCount = 0;
       let totalItems = 0;
       
       userOrders.forEach((order: any) => {
@@ -1165,8 +1186,17 @@ export function AdminDashboard() {
             else hybridCount++;
             
             // Product type preferences
-            if (category.includes('hash')) hashCount++;
-            else cannabisCount++;
+            if (category.includes('hash')) {
+              hashCount++;
+            } else if (item.name && item.name.toLowerCase().includes('edible')) {
+              ediblesCount++;
+            } else if (item.name && item.name.toLowerCase().includes('pre-roll')) {
+              preRollsCount++;
+            } else if (item.name && item.name.toLowerCase().includes('cali pax')) {
+              caliPaxCount++;
+            } else {
+              cannabisCount++; // Default to cannabis for flower products
+            }
           });
         }
       });
@@ -1177,7 +1207,10 @@ export function AdminDashboard() {
           indica: Math.round((indicaCount / totalItems) * 100),
           hybrid: Math.round((hybridCount / totalItems) * 100),
           cannabis: Math.round((cannabisCount / totalItems) * 100),
-          hash: Math.round((hashCount / totalItems) * 100)
+          hash: Math.round((hashCount / totalItems) * 100),
+          edibles: Math.round((ediblesCount / totalItems) * 100),
+          preRolls: Math.round((preRollsCount / totalItems) * 100),
+          caliPax: Math.round((caliPaxCount / totalItems) * 100)
         };
       }
     }
@@ -1463,42 +1496,15 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3 sm:space-y-4">
-                {analytics.mostProfitable && (
+                {analytics.mostProfitable && analytics.mostProfitable.value > 0 && (
                   <div className="bg-green-50 border border-green-200 rounded-lg mobile-p-3">
-                    <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Most Profitable</h4>
+                    <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Most Profitable Product</h4>
                     <p className="mobile-text-base font-bold text-green-700">{analytics.mostProfitable.name}</p>
-                    <p className="mobile-text-xs text-green-600">
-                      €{analytics.mostProfitable.price}/g with {analytics.mostProfitable.stock}g in stock
-                    </p>
-                    <p className="mobile-text-xs text-green-500 mt-1">
-                      Total value: €{analytics.mostProfitable.value}
+                    <p className="mobile-text-xs text-green-600 mt-1">
+                      Total revenue from completed orders: €{analytics.mostProfitable.value.toFixed(2)}
                     </p>
                   </div>
                 )}
-                
-                <div className="bg-blue-50 border border-blue-200 rounded-lg mobile-p-3">
-                  <h4 className="mobile-text-sm font-semibold text-blue-800 mb-3">Strain Type Breakdown</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="mobile-text-xs">Indica:</span>
-                      <span className="mobile-text-xs font-medium text-blue-700">
-                        {Math.round((analytics.strainBreakdown.indica / products.length) * 100)}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="mobile-text-xs">Sativa:</span>
-                      <span className="mobile-text-xs font-medium text-blue-700">
-                        {Math.round((analytics.strainBreakdown.sativa / products.length) * 100)}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="mobile-text-xs">Hybrid:</span>
-                      <span className="mobile-text-xs font-medium text-blue-700">
-                        {Math.round((analytics.strainBreakdown.hybrid / products.length) * 100)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -1522,7 +1528,12 @@ export function AdminDashboard() {
               
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg mobile-p-3">
                 <h4 className="mobile-text-sm font-semibold text-blue-800 mb-2">Average Order Value</h4>
-                <p className="mobile-text-lg font-bold text-blue-700">€{orders.length > 0 ? Math.round(analytics.potentialRevenue / orders.length) : '0'}</p>
+                <p className="mobile-text-lg font-bold text-blue-700">€{(() => {
+                  const completedOrders = Array.isArray(analyticsOrders) ? analyticsOrders.filter((order: any) => order.status === 'completed') : [];
+                  if (completedOrders.length === 0) return '0';
+                  const totalRevenue = completedOrders.reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || '0'), 0);
+                  return Math.round(totalRevenue / completedOrders.length);
+                })()}</p>
                 <p className="mobile-text-xs text-blue-600 mt-1">Based on completed orders</p>
               </div>
               
@@ -1583,6 +1594,18 @@ export function AdminDashboard() {
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Hash:</span>
                       <span className="font-bold text-green-700">{customerPrefs.productPreferences.hash}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Edibles:</span>
+                      <span className="font-bold text-green-700">{customerPrefs.productPreferences.edibles}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Pre-Rolls:</span>
+                      <span className="font-bold text-green-700">{customerPrefs.productPreferences.preRolls}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Cali Pax:</span>
+                      <span className="font-bold text-green-700">{customerPrefs.productPreferences.caliPax}%</span>
                     </div>
                   </div>
                 </div>
@@ -1760,6 +1783,42 @@ export function AdminDashboard() {
                                     ></div>
                                   </div>
                                   <span className="font-bold text-purple-700 text-sm">{profile.preferences.hash}%</span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm">Edibles:</span>
+                                <div className="flex items-center">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div 
+                                      className="bg-purple-600 h-2 rounded-full" 
+                                      style={{width: `${profile.preferences.edibles}%`}}
+                                    ></div>
+                                  </div>
+                                  <span className="font-bold text-purple-700 text-sm">{profile.preferences.edibles}%</span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm">Pre-Rolls:</span>
+                                <div className="flex items-center">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div 
+                                      className="bg-purple-600 h-2 rounded-full" 
+                                      style={{width: `${profile.preferences.preRolls}%`}}
+                                    ></div>
+                                  </div>
+                                  <span className="font-bold text-purple-700 text-sm">{profile.preferences.preRolls}%</span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm">Cali Pax:</span>
+                                <div className="flex items-center">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div 
+                                      className="bg-purple-600 h-2 rounded-full" 
+                                      style={{width: `${profile.preferences.caliPax}%`}}
+                                    ></div>
+                                  </div>
+                                  <span className="font-bold text-purple-700 text-sm">{profile.preferences.caliPax}%</span>
                                 </div>
                               </div>
                             </div>
