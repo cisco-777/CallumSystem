@@ -1214,14 +1214,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Shift not found" });
       }
       
-      // Perform reconciliation
-      const reconciliationResponse = await fetch(`${req.protocol}://${req.get('host')}/api/shift-reconciliation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productCounts, adminNotes })
-      });
+      // Perform reconciliation directly without HTTP call to preserve data structure
+      const { productCounts: reqProductCounts, cashInTill, coins, notes } = req.body;
       
-      const reconciliation = await reconciliationResponse.json();
+      // Get all current products to calculate discrepancies
+      const products = await storage.getProducts();
+      const discrepancies: any = {};
+      let totalDiscrepancies = 0;
+      
+      // Calculate discrepancies for each product
+      for (const product of products) {
+        const physicalCount = reqProductCounts[product.id] || 0;
+        const expectedOnShelf = product.onShelfGrams || 0;
+        const difference = expectedOnShelf - physicalCount;
+        
+        if (difference !== 0) {
+          discrepancies[product.id] = {
+            productName: product.name,
+            productType: product.productType,
+            expected: expectedOnShelf,
+            actual: physicalCount,
+            difference: difference, // Store actual difference (positive = missing, negative = excess)
+            type: difference > 0 ? 'missing' : 'excess'
+          };
+          totalDiscrepancies += Math.abs(difference);
+        }
+      }
+      
+      // Save the reconciliation with cash breakdown
+      const reconciliation = await storage.createShiftReconciliation({
+        productCounts: reqProductCounts,
+        discrepancies,
+        totalDiscrepancies,
+        cashInTill: cashInTill || '0',
+        coins: coins || '0',
+        notes: notes || '0'
+      });
       
       // Get current shift summary to calculate actual totals
       const shiftSummary = await storage.getShiftSummary(shiftId);
