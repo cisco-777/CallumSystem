@@ -3702,6 +3702,53 @@ export function AdminDashboard() {
           
           {/* Orders & Members Tab */}
           <TabsContent value="orders-members">
+            {/* Pending Member Approvals */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                  Pending Member Approvals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pendingMembers.length > 0 ? (
+                  <div className="space-y-2 sm:space-y-3">
+                    {pendingMembers.map((member: any) => (
+                      <div key={member.id} className="flex items-center justify-between mobile-p-2 rounded-lg bg-orange-50 border border-orange-200">
+                        <div className="flex flex-col">
+                          <span className="mobile-text-sm font-medium">
+                            {member.firstName && member.lastName 
+                              ? `${member.firstName} ${member.lastName}` 
+                              : member.email}
+                          </span>
+                          <span className="mobile-text-xs text-gray-500">{member.email}</span>
+                          <span className="mobile-text-xs text-gray-400">
+                            Registered: {new Date(member.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <Button
+                          onClick={() => approveMemberMutation.mutate({ 
+                            userId: member.id, 
+                            approvedBy: 'Admin Panel' 
+                          })}
+                          disabled={approveMemberMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700 text-white mobile-btn-sm"
+                        >
+                          {approveMemberMutation.isPending ? 'Approving...' : 'Approve'}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 sm:py-8 text-blue-600">
+                    <Users className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                    <p className="mobile-text-sm font-medium">All members approved!</p>
+                    <p className="mobile-text-xs text-gray-500">No pending approvals</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Order Control Center */}
             <Card id="order-control-center" className="mb-8">
               <CardHeader className="flex flex-row items-center justify-between">
