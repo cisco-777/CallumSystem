@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 // Email report generator function
-async function generateShiftEmailReport(shiftId: number, storage: any): Promise<string> {
+async function generateShiftEmailReport(shiftId: number, storage: any, liveReconciliation?: any): Promise<string> {
   try {
     // Get shift details
     const shift = await storage.getShift(shiftId);
@@ -15,9 +15,9 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
     // Get shift summary with all data
     const summary = await storage.getShiftSummary(shiftId);
     
-    // Get reconciliation data
-    let reconciliation = null;
-    if (shift.reconciliationId) {
+    // Use live reconciliation data if provided, otherwise get from database
+    let reconciliation = liveReconciliation;
+    if (!reconciliation && shift.reconciliationId) {
       reconciliation = await storage.getShiftReconciliation(shift.reconciliationId);
     }
 
@@ -115,26 +115,12 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
 
     // Stock discrepancies section
     report += `STOCK DISCREPANCIES\n`;
-    
-    // DEBUG: Log all reconciliation data to see what's available
-    console.log('=== EMAIL REPORT DEBUG ===');
-    console.log('reconciliation object:', JSON.stringify(reconciliation, null, 2));
-    console.log('reconciliation exists:', !!reconciliation);
-    console.log('reconciliation.discrepancies exists:', !!(reconciliation && reconciliation.discrepancies));
-    if (reconciliation && reconciliation.discrepancies) {
-      console.log('discrepancies keys:', Object.keys(reconciliation.discrepancies));
-      console.log('discrepancies data:', JSON.stringify(reconciliation.discrepancies, null, 2));
-    }
-    console.log('=== END EMAIL REPORT DEBUG ===');
-    
     if (reconciliation && reconciliation.discrepancies) {
       const discrepancies = reconciliation.discrepancies as any;
       let hasDiscrepancies = false;
 
       Object.keys(discrepancies).forEach(productId => {
         const discrepancy = discrepancies[productId];
-        console.log(`Processing discrepancy for product ${productId}:`, discrepancy);
-        
         if (discrepancy && discrepancy.difference !== 0) {
           hasDiscrepancies = true;
           const productName = discrepancy.productName;
@@ -142,18 +128,15 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
           const discrepancyType = discrepancy.type || (discrepancy.difference > 0 ? 'excess' : 'missing');
           const unitType = discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g';
           
-          console.log(`Adding to report: ${productName}: ${difference}${unitType} ${discrepancyType}`);
-          // Format matching the interface: "Product Name: Xg missing/excess"
+          // Format exactly like interface: "Product Name: Xg missing/excess"
           report += `${productName}: ${difference}${unitType} ${discrepancyType}\n`;
         }
       });
 
       if (!hasDiscrepancies) {
-        console.log('No discrepancies found, showing default message');
         report += `No stock discrepancies found\n`;
       }
     } else {
-      console.log('No reconciliation or discrepancies data available');
       report += `No stock discrepancies found\n`;
     }
     report += `\n`;
@@ -1288,8 +1271,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Perform automatic cleanup: keep only 3 most recent completed shifts
       await storage.cleanupOldShifts();
       
-      // Generate email report for completed shift
-      const emailReport = await generateShiftEmailReport(shiftId, storage);
+      // Generate email report for completed shift using live reconciliation data
+      const emailReport = await generateShiftEmailReport(shiftId, storage, reconciliation);
       
       res.json({ ...reconciliation, emailReport });
     } catch (error) {
