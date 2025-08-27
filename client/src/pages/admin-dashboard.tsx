@@ -1434,16 +1434,28 @@ export function AdminDashboard() {
             </AlertDialog>
             
             <Button
-              onClick={handleStartShiftReconciliation}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('END OF SHIFT CLICKED FROM HEADER');
+                handleStartShiftReconciliation();
+              }}
               className="bg-orange-600 hover:bg-orange-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
+              style={{ zIndex: 9999, pointerEvents: 'auto' }}
             >
               <ClipboardCheck className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">End of Shift</span>
             </Button>
             
             <Button
-              onClick={handleCreateExpense}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('EXPENSES LOG CLICKED FROM HEADER');
+                handleCreateExpense();
+              }}
               className="bg-purple-600 hover:bg-purple-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
+              style={{ zIndex: 9999, pointerEvents: 'auto' }}
             >
               <Receipt className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">Expenses Log</span>
