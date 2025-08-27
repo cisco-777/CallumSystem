@@ -1,0 +1,25 @@
+Context: I have a cannabis dispensary management system with completed shift data. I need to create an email report generation system that creates a formatted text report that workers can copy and paste to send to the owner.
+Specific Task: Create an email report generator that produces a formatted text report when end-of-shift reconciliation is completed, pulling all data from the completed shift.
+Requirements:
+
+Generate formatted text report automatically when shift reconciliation completed
+Pull all data from the completed shift: All expenses logged during that specific shift, Stock reconciliation data (starting amounts, physical counts, discrepancies), Financial data (starting till, cash breakdown, totals), Worker name and shift times
+Report format sections: Header: "Worker: [worker name]" and "Shift - [date] [start time] - [end time]", Dispensary section: Show each product category with quantities ("grams" for Cannabis/Hash/Cali Pax, "units" for Pre-Rolls/Edibles) and prices with "₳" symbol, Stock discrepancies: Starting stock amount, Physical count entered by worker, Missing/excess calculation per product, Member details: New members count, All members count, Active members count, Renewed members count, Expired members count, Banned members count, Deleted members count, Finances section: "Expenses: [total]₳", List each individual expense entry with amount in "₳", "Starting till [amount]₳", "Cash in till [amount]₳", "Coins: [amount]₳", "Notes: [amount]₳", "Total taken: [amount]₳", "Total banked: [total taken minus expenses]₳"
+Display in copyable text area after shift completion
+Only generate when shift reconciliation successfully completes
+
+CRITICAL DATABASE SAFETY REQUIREMENTS:
+
+Do not modify, drop, or recreate any existing database tables or schema
+Only ADD new tables/columns without affecting existing data
+Preserve all current data including products, orders, users, and analytics
+Use database migrations that are additive only - never destructive
+Test all database changes in development mode first
+
+Constraints:
+
+Pull data only from the completed shift
+Use exact member count categories as shown in image
+Format exactly like WhatsApp example with "₳" for money
+
+Please create the email report generator with these specific member statistics and exact formatting.

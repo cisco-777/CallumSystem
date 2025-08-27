@@ -3,6 +3,162 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
+// Email report generator function
+async function generateShiftEmailReport(shiftId: number, storage: any): Promise<string> {
+  try {
+    // Get shift details
+    const shift = await storage.getShift(shiftId);
+    if (!shift) {
+      throw new Error("Shift not found");
+    }
+
+    // Get shift summary with all data
+    const summary = await storage.getShiftSummary(shiftId);
+    
+    // Get reconciliation data
+    let reconciliation = null;
+    if (shift.reconciliationId) {
+      reconciliation = await storage.getShiftReconciliation(shift.reconciliationId);
+    }
+
+    // Get member statistics
+    const memberStats = await storage.getMembershipStatistics();
+
+    // Get all products for stock information
+    const products = await storage.getProducts();
+
+    // Format dates and times
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-GB', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      });
+    };
+
+    const formatTime = (date: Date) => {
+      return date.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false
+      });
+    };
+
+    const shiftStartTime = formatTime(new Date(shift.startTime));
+    const shiftEndTime = shift.endTime ? formatTime(new Date(shift.endTime)) : 'Ongoing';
+    const shiftDate = formatDate(new Date(shift.startTime));
+
+    // Helper function to get unit type for product category
+    const getUnitType = (productType: string) => {
+      return ['Pre-Rolls', 'Edibles'].includes(productType) ? 'units' : 'grams';
+    };
+
+    // Build the report
+    let report = `Worker: ${shift.workerName}\n`;
+    report += `Shift - ${shiftDate} ${shiftStartTime} - ${shiftEndTime}\n\n`;
+
+    // Dispensary section
+    report += `DISPENSARY\n`;
+    if (reconciliation && reconciliation.discrepancies) {
+      const discrepancies = reconciliation.discrepancies as any;
+      
+      // Group products by type for better organization
+      const productsByType: { [key: string]: any[] } = {};
+      products.forEach((product: any) => {
+        const type = product.productType || 'Cannabis';
+        if (!productsByType[type]) {
+          productsByType[type] = [];
+        }
+        productsByType[type].push(product);
+      });
+
+      // Show each product category
+      Object.keys(productsByType).forEach(productType => {
+        const typeProducts = productsByType[productType];
+        const unitType = getUnitType(productType);
+        
+        typeProducts.forEach((product: any) => {
+          const discrepancy = discrepancies[product.id];
+          if (discrepancy) {
+            const price = product.shelfPrice || '0';
+            report += `${product.name}: ${discrepancy.actual} ${unitType} - ₳${price}\n`;
+          } else {
+            // Show products with no discrepancy (expected = actual)
+            const expected = product.onShelfGrams || 0;
+            const price = product.shelfPrice || '0';
+            report += `${product.name}: ${expected} ${unitType} - ₳${price}\n`;
+          }
+        });
+      });
+    }
+    report += `\n`;
+
+    // Stock discrepancies section
+    report += `STOCK DISCREPANCIES\n`;
+    if (reconciliation && reconciliation.discrepancies) {
+      const discrepancies = reconciliation.discrepancies as any;
+      let hasDiscrepancies = false;
+
+      Object.keys(discrepancies).forEach(productId => {
+        const discrepancy = discrepancies[productId];
+        const product = products.find((p: any) => p.id === parseInt(productId));
+        if (product && discrepancy.difference > 0) {
+          hasDiscrepancies = true;
+          const unitType = getUnitType(product.productType || 'Cannabis');
+          report += `${discrepancy.productName}:\n`;
+          report += `Starting: ${discrepancy.expected} ${unitType}\n`;
+          report += `Physical count: ${discrepancy.actual} ${unitType}\n`;
+          report += `${discrepancy.type}: ${discrepancy.difference} ${unitType}\n\n`;
+        }
+      });
+
+      if (!hasDiscrepancies) {
+        report += `No stock discrepancies found\n\n`;
+      }
+    } else {
+      report += `No reconciliation data available\n\n`;
+    }
+
+    // Member details section
+    report += `MEMBER DETAILS\n`;
+    report += `New members: ${memberStats.pending}\n`;
+    report += `All members: ${memberStats.approved + memberStats.renewed + memberStats.expired}\n`;
+    report += `Active members: ${memberStats.active}\n`;
+    report += `Renewed members: ${memberStats.renewed}\n`;
+    report += `Expired members: ${memberStats.expired}\n\n`;
+
+    // Financial summary
+    report += `FINANCIAL SUMMARY\n`;
+    report += `Starting till: ₳${shift.startingTillAmount || '0'}\n`;
+    report += `Total sales: ₳${shift.totalSales || '0'}\n`;
+    report += `Total expenses: ₳${shift.totalExpenses || '0'}\n`;
+    
+    // Cash breakdown
+    if (reconciliation) {
+      report += `Cash in till: ₳${reconciliation.cashInTill || '0'}\n`;
+      report += `Coins: ₳${reconciliation.coins || '0'}\n`;
+      report += `Notes: ₳${reconciliation.notes || '0'}\n`;
+    }
+    
+    report += `Net amount: ₳${shift.netAmount || '0'}\n\n`;
+
+    // Expenses section
+    if (summary.expenses && summary.expenses.length > 0) {
+      report += `EXPENSES\n`;
+      summary.expenses.forEach((expense: any) => {
+        report += `${expense.description}: ₳${expense.amount} (${expense.workerName})\n`;
+      });
+      report += `\n`;
+    }
+
+    return report;
+
+  } catch (error) {
+    console.error('Error generating email report:', error);
+    return `Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}`;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Auth routes
@@ -1092,7 +1248,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Perform automatic cleanup: keep only 3 most recent completed shifts
       await storage.cleanupOldShifts();
       
-      res.json(reconciliation);
+      // Generate email report for completed shift
+      const emailReport = await generateShiftEmailReport(shiftId, storage);
+      
+      res.json({ ...reconciliation, emailReport });
     } catch (error) {
       console.error("Error performing shift reconciliation:", error);
       res.status(500).json({ message: "Failed to perform reconciliation" });

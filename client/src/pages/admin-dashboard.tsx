@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -99,6 +99,7 @@ export function AdminDashboard() {
   const [showShiftReconciliation, setShowShiftReconciliation] = useState(false);
   const [physicalCounts, setPhysicalCounts] = useState<Record<number, number>>({});
   const [reconciliationResult, setReconciliationResult] = useState<any>(null);
+  const [emailReport, setEmailReport] = useState<string>('');
   const [cashBreakdown, setCashBreakdown] = useState({
     cashInTill: '',
     coins: '',
@@ -458,7 +459,7 @@ export function AdminDashboard() {
       
       // If there's an active shift, end it with the reconciliation data
       if (activeShift) {
-        await apiRequest(`/api/shifts/${activeShift.id}/reconcile`, {
+        const shiftResult = await apiRequest(`/api/shifts/${activeShift.id}/reconcile`, {
           method: 'POST',
           body: JSON.stringify({ 
             productCounts, 
@@ -469,6 +470,9 @@ export function AdminDashboard() {
           }),
           headers: { 'Content-Type': 'application/json' }
         });
+        
+        // Return both reconciliation and email report data
+        return { ...reconciliation, emailReport: shiftResult.emailReport };
       }
       
       return reconciliation;
@@ -476,7 +480,12 @@ export function AdminDashboard() {
     onSuccess: (result) => {
       setReconciliationResult(result);
       setIsCountingMode(false);
-      setShowShiftReconciliation(false);
+      
+      // Store email report if available
+      if (result.emailReport) {
+        setEmailReport(result.emailReport);
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shifts/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shifts'] });
@@ -484,7 +493,7 @@ export function AdminDashboard() {
       toast({
         title: activeShift ? "Shift Ended & Reconciliation Complete" : "Shift Reconciliation Complete",
         description: activeShift 
-          ? `Shift ended with ${result.totalDiscrepancies || 0}g total discrepancies.`
+          ? `Shift ended with ${result.totalDiscrepancies || 0}g total discrepancies. Email report generated.`
           : "Inventory discrepancies have been calculated and recorded.",
       });
     },
@@ -715,6 +724,7 @@ export function AdminDashboard() {
     setIsCountingMode(true);
     setPhysicalCounts({});
     setReconciliationResult(null);
+    setEmailReport('');
     setCashBreakdown({
       cashInTill: '',
       coins: '',
@@ -3348,6 +3358,39 @@ export function AdminDashboard() {
                           <div className="text-gray-600">All physical counts match expected on-shelf amounts.</div>
                         </div>
                       )}
+                    </div>
+                  )}
+                  
+                  {/* Email Report Section */}
+                  {emailReport && (
+                    <div className="mt-6 border rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-gray-800">Email Report</h4>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            navigator.clipboard.writeText(emailReport);
+                            toast({
+                              title: "Copied!",
+                              description: "Email report copied to clipboard",
+                            });
+                          }}
+                          className="text-xs"
+                        >
+                          <Copy className="w-3 h-3 mr-1" />
+                          Copy Report
+                        </Button>
+                      </div>
+                      <textarea
+                        readOnly
+                        value={emailReport}
+                        className="w-full h-48 p-3 bg-white border rounded text-sm font-mono text-gray-700 resize-none"
+                        placeholder="Email report will appear here after reconciliation..."
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        This formatted report can be copied and pasted into emails for operational documentation.
+                      </p>
                     </div>
                   )}
                   
