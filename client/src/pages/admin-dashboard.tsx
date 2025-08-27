@@ -3757,10 +3757,6 @@ export function AdminDashboard() {
                 <div className="flex space-x-2">
                   <Button 
                     onClick={() => {
-                      toast({
-                        title: "Orders cleared",
-                        description: "All orders have been archived from the control center."
-                      });
                       clearAllOrdersMutation.mutate();
                     }}
                     variant="destructive"
