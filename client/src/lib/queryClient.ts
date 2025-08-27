@@ -2,7 +2,12 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
+    let text = res.statusText;
+    try {
+      text = await res.text();
+    } catch (e) {
+      // If we can't read the text, use statusText
+    }
     throw new Error(`${res.status}: ${text}`);
   }
 }
@@ -17,7 +22,15 @@ export async function apiRequest(
   });
 
   await throwIfResNotOk(res);
-  return await res.json();
+  
+  // Check if response is JSON
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await res.json();
+  }
+  
+  // If not JSON, return the text response
+  return await res.text();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
