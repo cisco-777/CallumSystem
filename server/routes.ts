@@ -113,29 +113,19 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     }
     report += `\n`;
 
-    // Stock discrepancies section
+    // Stock discrepancies section - Copy exact same logic as Discrepancy Details interface
     report += `STOCK DISCREPANCIES\n`;
-    if (reconciliation && reconciliation.discrepancies) {
-      const discrepancies = reconciliation.discrepancies as any;
-      let hasDiscrepancies = false;
-
-      Object.keys(discrepancies).forEach(productId => {
-        const discrepancy = discrepancies[productId];
-        if (discrepancy && discrepancy.difference !== 0) {
-          hasDiscrepancies = true;
-          const productName = discrepancy.productName;
-          const difference = Math.abs(discrepancy.difference);
-          const discrepancyType = discrepancy.type || (discrepancy.difference > 0 ? 'excess' : 'missing');
-          const unitType = discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g';
-          
-          // Format exactly like interface: "Product Name: Xg missing/excess"
-          report += `${productName}: ${difference}${unitType} ${discrepancyType}\n`;
-        }
+    if (reconciliation && reconciliation.discrepancies && Object.keys(reconciliation.discrepancies).length > 0) {
+      // Use exact same Object.entries logic as interface
+      Object.entries(reconciliation.discrepancies).forEach(([productId, discrepancy]: [string, any]) => {
+        // Copy exact same format logic from interface badge
+        const difference = Math.abs(discrepancy.difference);
+        const unitType = discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g';
+        const discrepancyType = discrepancy.type;
+        
+        // Format exactly like interface: "Product Name: Xg missing/excess"
+        report += `${discrepancy.productName}: ${difference}${unitType} ${discrepancyType}\n`;
       });
-
-      if (!hasDiscrepancies) {
-        report += `No stock discrepancies found\n`;
-      }
     } else {
       report += `No stock discrepancies found\n`;
     }
