@@ -527,6 +527,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
                   <SelectItem value="hybrid" className="mobile-text-sm">Hybrid</SelectItem>
                   <SelectItem value="hash" className="mobile-text-sm">Hash</SelectItem>
                   <SelectItem value="cannabis" className="mobile-text-sm">Cannabis</SelectItem>
+                  <SelectItem value="cali-pax" className="mobile-text-sm">Cali Pax</SelectItem>
+                  <SelectItem value="edibles" className="mobile-text-sm">Edibles</SelectItem>
+                  <SelectItem value="pre-rolls" className="mobile-text-sm">Pre-Rolls</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -558,6 +561,15 @@ export function Dashboard({ onLogout }: DashboardProps) {
                 case 'cannabis':
                   // Include all flower products (no hash)
                   return products.filter((p: Product) => !p.name?.toLowerCase().includes('hash'));
+                case 'cali-pax':
+                  // Include Cali Pax products
+                  return products.filter((p: Product) => p.productType === 'Cali Pax');
+                case 'edibles':
+                  // Include Edibles products
+                  return products.filter((p: Product) => p.productType === 'Edibles');
+                case 'pre-rolls':
+                  // Include Pre-Rolls products
+                  return products.filter((p: Product) => p.productType === 'Pre-Rolls');
                 case 'all':
                 default:
                   // Show all products

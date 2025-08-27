@@ -26,7 +26,7 @@ const unifiedStockFormSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
   description: z.string().optional(),
   category: z.enum(['Sativa', 'Indica', 'Hybrid']),
-  productType: z.enum(['Cannabis', 'Hash']),
+  productType: z.enum(['Cannabis', 'Hash', 'Cali Pax', 'Edibles', 'Pre-Rolls']),
   imageUrl: z.string().optional(),
   productCode: z.string().min(1, 'Product code is required'),
   // Stock Management Fields (admin-only)
@@ -2027,6 +2027,9 @@ export function AdminDashboard() {
                                   <SelectContent>
                                     <SelectItem value="Cannabis">Cannabis</SelectItem>
                                     <SelectItem value="Hash">Hash</SelectItem>
+                                    <SelectItem value="Cali Pax">Cali Pax</SelectItem>
+                                    <SelectItem value="Edibles">Edibles</SelectItem>
+                                    <SelectItem value="Pre-Rolls">Pre-Rolls</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
