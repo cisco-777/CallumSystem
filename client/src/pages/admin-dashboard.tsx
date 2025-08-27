@@ -1013,19 +1013,46 @@ export function AdminDashboard() {
           else if (category.includes('indica')) indicaCount++;
           else hybridCount++;
           
-          // Product type analysis - use exact productType matching
-          if (category.toLowerCase() === 'hash') {
-            hashCount++;
-          } else if (category.toLowerCase() === 'edibles') {
-            ediblesCount++;
-          } else if (category.toLowerCase() === 'pre-rolls') {
-            preRollsCount++;
-          } else if (category.toLowerCase() === 'cali pax') {
-            caliPaxCount++;
-          } else if (category.toLowerCase() === 'cannabis') {
-            cannabisCount++;
+          // Enhanced product type analysis - cross-reference with products data for historical orders
+          let actualProductType = '';
+          
+          // First, try exact productType match (for new orders)
+          if (category === 'hash') {
+            actualProductType = 'hash';
+          } else if (category === 'edibles') {
+            actualProductType = 'edibles';
+          } else if (category === 'pre-rolls') {
+            actualProductType = 'pre-rolls';
+          } else if (category === 'cali pax') {
+            actualProductType = 'cali pax';
+          } else if (category === 'cannabis') {
+            actualProductType = 'cannabis';
           } else {
-            cannabisCount++; // Default to cannabis for unrecognized types
+            // For historical orders, find the product by name to get actual productType
+            const product = Array.isArray(products) ? products.find((p: any) => p.name === item.name) : null;
+            if (product && product.productType) {
+              actualProductType = product.productType.toLowerCase();
+            } else {
+              // Fallback: identify hash products by name for historical data
+              if (item.name && (item.name.toLowerCase().includes('hash') || item.name.toLowerCase().includes('moroccan') || item.name.toLowerCase().includes('dry-shift'))) {
+                actualProductType = 'hash';
+              } else {
+                actualProductType = 'cannabis'; // Default fallback
+              }
+            }
+          }
+          
+          // Count based on actual product type
+          if (actualProductType === 'hash') {
+            hashCount++;
+          } else if (actualProductType === 'edibles') {
+            ediblesCount++;
+          } else if (actualProductType === 'pre-rolls') {
+            preRollsCount++;
+          } else if (actualProductType === 'cali pax') {
+            caliPaxCount++;
+          } else {
+            cannabisCount++; // Cannabis and fallback
           }
           
           // Category counting
@@ -1187,19 +1214,46 @@ export function AdminDashboard() {
             else if (category.includes('indica')) indicaCount++;
             else hybridCount++;
             
-            // Product type preferences - use exact productType matching
-            if (category.toLowerCase() === 'hash') {
-              hashCount++;
-            } else if (category.toLowerCase() === 'edibles') {
-              ediblesCount++;
-            } else if (category.toLowerCase() === 'pre-rolls') {
-              preRollsCount++;
-            } else if (category.toLowerCase() === 'cali pax') {
-              caliPaxCount++;
-            } else if (category.toLowerCase() === 'cannabis') {
-              cannabisCount++;
+            // Enhanced product type preferences - cross-reference with products data for historical orders
+            let actualProductType = '';
+            
+            // First, try exact productType match (for new orders)
+            if (category === 'hash') {
+              actualProductType = 'hash';
+            } else if (category === 'edibles') {
+              actualProductType = 'edibles';
+            } else if (category === 'pre-rolls') {
+              actualProductType = 'pre-rolls';
+            } else if (category === 'cali pax') {
+              actualProductType = 'cali pax';
+            } else if (category === 'cannabis') {
+              actualProductType = 'cannabis';
             } else {
-              cannabisCount++; // Default to cannabis for unrecognized types
+              // For historical orders, find the product by name to get actual productType
+              const product = Array.isArray(products) ? products.find((p: any) => p.name === item.name) : null;
+              if (product && product.productType) {
+                actualProductType = product.productType.toLowerCase();
+              } else {
+                // Fallback: identify hash products by name for historical data
+                if (item.name && (item.name.toLowerCase().includes('hash') || item.name.toLowerCase().includes('moroccan') || item.name.toLowerCase().includes('dry-shift'))) {
+                  actualProductType = 'hash';
+                } else {
+                  actualProductType = 'cannabis'; // Default fallback
+                }
+              }
+            }
+            
+            // Count based on actual product type
+            if (actualProductType === 'hash') {
+              hashCount++;
+            } else if (actualProductType === 'edibles') {
+              ediblesCount++;
+            } else if (actualProductType === 'pre-rolls') {
+              preRollsCount++;
+            } else if (actualProductType === 'cali pax') {
+              caliPaxCount++;
+            } else {
+              cannabisCount++; // Cannabis and fallback
             }
           });
         }
