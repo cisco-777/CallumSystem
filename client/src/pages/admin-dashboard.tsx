@@ -87,6 +87,7 @@ const getFormSchema = (productType: string) => {
 
 export function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState('shift-management');
   const [isSystemWiped, setIsSystemWiped] = useState(false);
   const [showFailsafeDialog, setShowFailsafeDialog] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
@@ -1401,6 +1402,69 @@ export function AdminDashboard() {
           </div>
         </div>
 
+        {/* Navigation Tabs */}
+        <div className="mb-6 sm:mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Admin Pages">
+              <button
+                onClick={() => setCurrentPage('shift-management')}
+                className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm ${
+                  currentPage === 'shift-management'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <ClipboardCheck className="w-4 h-4 inline mr-2" />
+                Shift Management
+              </button>
+              <button
+                onClick={() => setCurrentPage('member-management')}
+                className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm ${
+                  currentPage === 'member-management'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Users className="w-4 h-4 inline mr-2" />
+                Member Management
+              </button>
+              <button
+                onClick={() => setCurrentPage('inventory-stock')}
+                className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm ${
+                  currentPage === 'inventory-stock'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Package className="w-4 h-4 inline mr-2" />
+                Inventory & Stock
+              </button>
+              <button
+                onClick={() => setCurrentPage('analytics-reports')}
+                className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm ${
+                  currentPage === 'analytics-reports'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4 inline mr-2" />
+                Analytics & Reports
+              </button>
+              <button
+                onClick={() => setCurrentPage('financial-management')}
+                className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm ${
+                  currentPage === 'financial-management'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Receipt className="w-4 h-4 inline mr-2" />
+                Financial Management
+              </button>
+            </nav>
+          </div>
+        </div>
+
         {/* Overview Cards */}
         <div id="overview" className="mobile-admin-grid mb-6 sm:mb-8">
           <Card>
@@ -1454,18 +1518,1317 @@ export function AdminDashboard() {
           </Card>
         </div>
 
+        {/* Page Content */}
+        {currentPage === 'shift-management' && (
+          <>
+            {/* Active Shift Display & Controls */}
+            <Card className="mb-6 sm:mb-8">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="flex items-center">
+                    <Timer className="w-5 h-5 mr-2 text-green-600" />
+                    Shift Management
+                  </CardTitle>
+                  {!activeShift && (
+                    <Button
+                      onClick={() => setShowStartShiftDialog(true)}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <PlayCircle className="w-4 h-4 mr-2" />
+                      Start New Shift
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Active Shift Status */}
+                  <div>
+                    {activeShift ? (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold text-green-800">Active Shift</h3>
+                          <Badge className="bg-green-100 text-green-800 border-green-300">ACTIVE</Badge>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-green-700">Shift ID:</span>
+                            <span className="font-medium text-green-800">{activeShift.shiftId}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-green-700">Worker:</span>
+                            <span className="font-medium text-green-800">{activeShift.workerName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-green-700">Start Time:</span>
+                            <span className="font-medium text-green-800">
+                              {new Date(activeShift.startTime).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-green-700">Duration:</span>
+                            <span className="font-medium text-green-800">
+                              {Math.floor((new Date().getTime() - new Date(activeShift.startTime).getTime()) / (1000 * 60))} minutes
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-green-700">Starting Till:</span>
+                            <span className="font-medium text-green-800">€{activeShift.startingTillAmount}</span>
+                          </div>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-green-200 flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowEndShiftDialog(true)}
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            <StopCircle className="w-4 h-4 mr-1" />
+                            End Shift
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                        <Timer className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p className="font-medium">No Active Shift</p>
+                        <p className="text-sm">Click "Start New Shift" to begin tracking orders and inventory.</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Recent Completed Shifts */}
+                  <div>
+                    <h3 className="font-semibold text-gray-800 mb-3">Recent Completed Shifts</h3>
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {Array.isArray(shifts) && shifts
+                        .filter((shift: any) => shift.status === 'completed')
+                        .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
+                        .slice(0, 3)
+                        .map((shift: any) => (
+                          <div key={shift.id} className="border rounded-lg p-3 bg-gray-50">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <span className="font-medium text-sm">{shift.shiftId}</span>
+                                <Badge variant="secondary" className="ml-2 text-xs">COMPLETED</Badge>
+                              </div>
+                              <div className="text-right text-xs text-gray-500">
+                                {new Date(shift.endTime).toLocaleDateString()}
+                              </div>
+                            </div>
+                            <div className="text-xs text-gray-600 space-y-1">
+                              <div>Worker: {shift.workerName}</div>
+                              <div>Duration: {shift.durationMinutes} minutes</div>
+                              {shift.netAmount !== undefined && (
+                                <div className="font-medium text-green-600">
+                                  Net: €{shift.netAmount}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      {(!Array.isArray(shifts) || shifts.filter((s: any) => s.status === 'completed').length === 0) && (
+                        <div className="text-center py-6 text-gray-400">
+                          <Clock className="w-8 h-8 mx-auto mb-2" />
+                          <p className="text-sm">No completed shifts yet</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Order Control Center */}
+            <Card id="order-control" className="mb-8">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Order Control Center</CardTitle>
+                  {activeShift && orders.filter((order: any) => order.shiftId === activeShift.id).length > 0 && (
+                    <Button
+                      onClick={deleteAllOrders}
+                      disabled={deleteAllOrdersMutation.isPending}
+                      size="sm"
+                      variant="destructive"
+                      className="ml-4"
+                    >
+                      {deleteAllOrdersMutation.isPending ? 'Archiving...' : 'Clear All Orders'}
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {!activeShift ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p className="font-medium">No Active Shift</p>
+                      <p className="text-sm">Start a shift to begin taking orders.</p>
+                    </div>
+                  ) : orders.filter((order: any) => order.shiftId === activeShift.id).length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No orders for current shift</p>
+                      <p className="text-sm text-green-600">Active shift: {activeShift.workerName}</p>
+                    </div>
+                  ) : (
+                    orders.filter((order: any) => order.shiftId === activeShift.id).map((order: any) => (
+                      <div key={order.id} className="border rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-semibold text-lg">Order #{order.id}</h3>
+                            <p className="text-sm text-gray-600">Pickup Code: <span className="font-mono font-bold text-blue-600">{order.pickupCode}</span></p>
+                            <p className="text-sm text-gray-500">Total: €{order.totalPrice}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant={order.status === 'pending' ? 'secondary' : 'default'}>
+                              {order.status}
+                            </Badge>
+                            <p className="text-xs text-gray-500 mt-1">{new Date(order.createdAt).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <h4 className="font-medium text-sm mb-2">Items:</h4>
+                          {order.items.map((item: any, index: number) => {
+                            const quantity = order.quantities.find((q: any) => q.productId === item.productId)?.quantity || 1;
+                            return (
+                              <div key={index} className="flex justify-between text-sm">
+                                <span>{item.name}</span>
+                                <span>{quantity}g</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={() => confirmOrder(order.id)}
+                            disabled={order.status === 'completed' || order.status === 'cancelled'}
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            Confirm & Complete
+                          </Button>
+                          <Button
+                            onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                            disabled={order.status === 'completed' || order.status === 'cancelled'}
+                            size="sm"
+                            variant="destructive"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
 
-        {/* Analytics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {/* Membership Approval Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center mobile-text-base">
-                <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
-                Pending Member Approvals
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+        {currentPage === 'member-management' && (
+          <>
+            {/* Membership Approval Section */}
+            <Card className="mb-6 sm:mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                  Pending Member Approvals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pendingMembers.length > 0 ? (
+                  <div className="space-y-2 sm:space-y-3">
+                    {pendingMembers.map((member: any) => (
+                      <div key={member.id} className="flex items-center justify-between mobile-p-2 rounded-lg bg-orange-50 border border-orange-200">
+                        <div className="flex flex-col">
+                          <span className="mobile-text-sm font-medium">
+                            {member.firstName && member.lastName 
+                              ? `${member.firstName} ${member.lastName}` 
+                              : member.email}
+                          </span>
+                          <span className="mobile-text-xs text-gray-500">{member.email}</span>
+                          <span className="mobile-text-xs text-gray-400">
+                            Registered: {new Date(member.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <Button
+                          onClick={() => approveMemberMutation.mutate({ 
+                            userId: member.id, 
+                            approvedBy: 'Admin Panel' 
+                          })}
+                          disabled={approveMemberMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700 text-white mobile-btn-sm"
+                        >
+                          {approveMemberMutation.isPending ? 'Approving...' : 'Approve'}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 sm:py-8 text-blue-600">
+                    <Users className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                    <p className="mobile-text-sm font-medium">All members approved!</p>
+                    <p className="mobile-text-xs text-gray-500">No pending approvals</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Customer Preferences Analytics */}
+            {customerPrefs && (
+              <Card id="customer-preferences" className="mb-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <PieChart className="w-5 h-5 mr-2 text-blue-600" />
+                    Customer Preferences Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Strain Preferences */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                        <Leaf className="w-4 h-4 mr-2" />
+                        Strain Preferences
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Sativa:</span>
+                          <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.sativa}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Indica:</span>
+                          <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.indica}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Hybrid:</span>
+                          <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.hybrid}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Product Type Preferences */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                        <Hash className="w-4 h-4 mr-2" />
+                        Product Type Preferences
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Cannabis:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.cannabis}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Hash:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.hash}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Edibles:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.edibles}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Pre-Rolls:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.preRolls}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Cali Pax:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.caliPax}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Popular Categories */}
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-purple-800 mb-3">Most Popular Categories</h4>
+                      <div className="space-y-2">
+                        {customerPrefs.popularCategories.map((item, index) => (
+                          <div key={index} className="flex justify-between items-center">
+                            <span className="text-sm">{item.category}:</span>
+                            <span className="font-bold text-purple-700">{item.count} orders</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Customer Search Tool */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Search className="w-5 h-5 mr-2 text-gray-600" />
+                  Customer Search & Profiles
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6">
+                  <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Search customers by name or email..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                        }
+                      }}
+                      className="pl-10 pr-4"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                {searchQuery && (
+                  <div className="space-y-6">
+                    {filteredUsers.slice(0, 5).map((user: any) => {
+                      const profile = getCustomerProfile(user.id);
+                      if (!profile) return null;
+                      
+                      return (
+                        <div key={user.id} className="border-2 border-blue-200 rounded-lg p-6 bg-white shadow-sm">
+                          {/* Customer Header */}
+                          <div className="flex justify-between items-start mb-6">
+                            <div>
+                              <h3 className="font-bold text-xl text-blue-800">
+                                {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Anonymous User'}
+                              </h3>
+                              <p className="text-sm text-gray-600 mt-1">{user.email}</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Member since {new Date(user.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className="bg-blue-100 px-3 py-1 rounded-full">
+                                <span className="text-sm font-semibold text-blue-800">
+                                  {profile.orderCount} Completed
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Spending Summary */}
+                          {profile.orderCount > 0 && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                              <h4 className="font-semibold text-green-800 mb-2">💰 Spending Summary</h4>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="text-gray-600">Total Spent:</span>
+                                  <span className="font-bold text-green-700 ml-2">€{profile.totalSpent}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Average Order:</span>
+                                  <span className="font-bold text-green-700 ml-2">€{profile.averageOrderValue}</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {profile.orderCount > 0 ? (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              {/* Strain Preferences */}
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                                  <Leaf className="w-4 h-4 mr-2" />
+                                  Strain Preferences
+                                </h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Sativa:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-blue-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.sativa}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.sativa}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Indica:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-blue-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.indica}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.indica}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Hybrid:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-blue-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.hybrid}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.hybrid}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Product Type Preferences */}
+                              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <h4 className="font-semibold text-purple-800 mb-3 flex items-center">
+                                  <Hash className="w-4 h-4 mr-2" />
+                                  Product Type Preferences
+                                </h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Cannabis:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.cannabis}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.cannabis}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Hash:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.hash}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.hash}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Edibles:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.edibles}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.edibles}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Pre-Rolls:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.preRolls}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.preRolls}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Cali Pax:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.caliPax}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.caliPax}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                              <p className="text-gray-600">This customer hasn't completed any orders yet.</p>
+                            </div>
+                          )}
+                          
+                          {/* Completed Orders Only */}
+                          {profile.recentOrders && profile.recentOrders.length > 0 && (
+                            <div className="mt-6">
+                              <h4 className="font-semibold text-gray-800 mb-3">Recent Completed Orders</h4>
+                              <div className="space-y-3">
+                                {profile.recentOrders.map((order: any) => (
+                                  <div key={order.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                        <span className="font-semibold text-sm">Order #{order.id}</span>
+                                        <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                          {order.status}
+                                        </span>
+                                      </div>
+                                      <div className="text-right">
+                                        <div className="font-bold text-green-700">€{order.totalPrice}</div>
+                                        <div className="text-xs text-gray-500">
+                                          {new Date(order.createdAt).toLocaleDateString()}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-gray-600">
+                                      <span className="font-medium">Items:</span>
+                                      {order.items && order.items.map((item: any, idx: number) => (
+                                        <span key={idx} className="ml-1">
+                                          {item.name}
+                                          {idx < order.items.length - 1 ? ', ' : ''}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Pickup Code: <span className="font-mono font-bold text-blue-600">{order.pickupCode}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    
+                    {filteredUsers.length === 0 && (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">🔍</div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">No customers found</h3>
+                        <p className="text-gray-500">
+                          No customers match "{searchQuery}". Try searching by name or email.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {!searchQuery && (
+                  <div className="text-center py-12">
+                    <Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Customer Search Tool</h3>
+                    <p className="text-gray-500 mb-4">
+                      Search for customers by name or email to view their detailed profiles
+                    </p>
+                    <div className="text-sm text-gray-400">
+                      <p>• View customer preferences and order history</p>
+                      <p>• Analyze spending patterns and product preferences</p>
+                      <p>• Track customer activity and engagement</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {currentPage === 'inventory-stock' && (
+          <>
+            {/* Low Stock Alerts */}
+            <Card className="mb-6 sm:mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-600" />
+                  Low Stock Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analytics.lowStockItems.length > 0 ? (
+                  <div className="space-y-2 sm:space-y-3">
+                    {analytics.lowStockItems.map((item: any, index) => (
+                      <div key={index} className={`flex items-center justify-between mobile-p-2 rounded-lg ${
+                        item.critical ? 'bg-red-50 border border-red-200' : 
+                        item.urgent ? 'bg-yellow-50 border border-yellow-200' : 'bg-orange-50 border border-orange-200'
+                      }`}>
+                        <span className="mobile-text-sm font-medium">{item.name}</span>
+                        <div className="flex items-center space-x-1 sm:space-x-2">
+                          <span className={`mobile-text-xs font-bold ${
+                            item.critical ? 'text-red-700' : 
+                            item.urgent ? 'text-yellow-700' : 'text-orange-700'
+                          }`}>
+                            {item.stock}g
+                          </span>
+                          <Badge variant={item.critical ? "destructive" : item.urgent ? "outline" : "secondary"} className="mobile-text-xs">
+                            {item.critical ? "Critical" : item.urgent ? "Urgent" : "Low"}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 sm:py-8 text-green-600">
+                    <Package className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                    <p className="mobile-text-sm font-medium">All products well stocked!</p>
+                    <p className="mobile-text-xs text-gray-500">No restocking needed</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Dispensary Stock */}
+            <Card id="dispensary-stock">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Dispensary Stock</CardTitle>
+                <Button 
+                  onClick={handleCreateStock}
+                  size="sm" 
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add New Stock Entry
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array.isArray(products) && products.map((product: any) => {
+                    const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
+                    return (
+                      <div key={product.id} className="border rounded-lg p-4 relative">
+                        <div className="absolute top-2 right-2 flex space-x-1">
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditStock(product);
+                            }}
+                            size="sm"
+                            variant="ghost"
+                            className="p-1 h-8 w-8"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProduct(product);
+                            }}
+                            size="sm"
+                            variant="ghost"
+                            className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <h3 className="font-semibold pr-10">{product.name}</h3>
+                        <Badge className="mt-2">{product.category}</Badge>
+                        
+                        {/* Stock Distribution */}
+                        <div className="mt-3 space-y-1">
+                          <p className="text-sm font-medium text-blue-700">
+                            Total: {totalAmount}g
+                          </p>
+                          <div className="text-xs text-gray-600 ml-2">
+                            <p>On shelf: {product.onShelfGrams || 0}g</p>
+                            <p>Internal: {product.internalGrams || 0}g</p>
+                            <p>External: {product.externalGrams || 0}g</p>
+                          </div>
+                        </div>
+                        
+                        {/* Pricing */}
+                        <div className="mt-3 space-y-1">
+                          <p className="text-sm text-green-700">
+                            Shelf: €{product.shelfPrice || product.adminPrice || '0'}/g
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Cost: €{product.costPrice || '0'}/g
+                          </p>
+                        </div>
+                        
+                        {/* Additional Info */}
+                        <div className="mt-3 pt-2 border-t border-gray-200 space-y-1">
+                          <p className="text-xs text-gray-500">
+                            Code: {product.productCode}
+                          </p>
+                          {product.supplier && (
+                            <p className="text-xs text-gray-500">
+                              Supplier: {product.supplier}
+                            </p>
+                          )}
+                          {product.lastUpdated && (
+                            <p className="text-xs text-gray-400">
+                              Updated: {new Date(product.lastUpdated).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {currentPage === 'analytics-reports' && (
+          <>
+            {/* Product Performance */}
+            <Card className="mb-6 sm:mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
+                  Product Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 sm:space-y-4">
+                  {analytics.mostProfitable && analytics.mostProfitable.value > 0 && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg mobile-p-3">
+                      <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Most Profitable Product</h4>
+                      <p className="mobile-text-base font-bold text-green-700">{analytics.mostProfitable.name}</p>
+                      <p className="mobile-text-xs text-green-600 mt-1">
+                        Total revenue from completed orders: €{analytics.mostProfitable.value.toFixed(2)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Revenue Analytics */}
+            <Card id="revenue-analytics" className="mb-6 sm:mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
+                  Revenue Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Total Potential Revenue</h4>
+                    <p className="mobile-text-lg font-bold text-green-700">€{analytics.potentialRevenue}</p>
+                    <p className="mobile-text-xs text-green-600 mt-1">If all current stock sold</p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-blue-800 mb-2">Average Order Value</h4>
+                    <p className="mobile-text-lg font-bold text-blue-700">€{(() => {
+                      const completedOrders = Array.isArray(analyticsOrders) ? analyticsOrders.filter((order: any) => order.status === 'completed') : [];
+                      if (completedOrders.length === 0) return '0';
+                      const totalRevenue = completedOrders.reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || '0'), 0);
+                      return Math.round(totalRevenue / completedOrders.length);
+                    })()}</p>
+                    <p className="mobile-text-xs text-blue-600 mt-1">Based on completed orders</p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-purple-800 mb-2">Stock Turnover Rate</h4>
+                    <p className="mobile-text-lg font-bold text-purple-700">{analytics.averageStock > 0 ? Math.round((orders.length * 10 / analytics.averageStock) * 100) : 0}%</p>
+                    <p className="mobile-text-xs text-purple-600 mt-1">Monthly estimated</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Inventory Overview */}
+            <Card className="mb-6 sm:mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-purple-600" />
+                  Inventory Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-purple-800 mb-2">Total Stock Value</h4>
+                    <p className="mobile-text-lg font-bold text-purple-700">€{analytics.totalStockValue}</p>
+                    <p className="mobile-text-xs text-purple-600 mt-1">Current inventory value</p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-blue-800 mb-2">Total Stock Amount</h4>
+                    <p className="mobile-text-lg font-bold text-blue-700">{analytics.totalStock}g</p>
+                    <p className="mobile-text-xs text-blue-600 mt-1">All products combined</p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Average Stock Per Product</h4>
+                    <p className="mobile-text-lg font-bold text-green-700">{analytics.averageStock}g</p>
+                    <p className="mobile-text-xs text-green-600 mt-1">Average per product</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {currentPage === 'financial-management' && (
+          <>
+            {/* Expenses Log Section */}
+            <Card id="expenses-log" className="mb-8">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center">
+                  <Receipt className="w-5 h-5 mr-2" />
+                  Expenses Log
+                </CardTitle>
+                <Button 
+                  onClick={handleCreateExpense}
+                  size="sm" 
+                  className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Expense
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  if (!Array.isArray(expenses) || !Array.isArray(shifts)) {
+                    return (
+                      <div className="text-center py-8 text-gray-500">
+                        <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>Loading expenses...</p>
+                      </div>
+                    );
+                  }
+
+                  // Get relevant shifts: current active shift + 1 most recent completed shift
+                  const completedShifts = shifts
+                    .filter((shift: any) => shift.status === 'completed')
+                    .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())
+                    .slice(0, 1);
+                  
+                  const relevantShifts = activeShift ? [activeShift, ...completedShifts] : completedShifts;
+                  
+                  if (relevantShifts.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-gray-500">
+                        <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>No shifts available</p>
+                        <p className="text-sm">Start a shift above to begin tracking expenses.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-6">
+                      {relevantShifts.map((shift: any, index: number) => {
+                        const isActiveShift = shift.status === 'active';
+                        const shiftExpenses = expenses.filter((expense: any) => expense.shiftId === shift.id);
+                        const totalExpenses = shiftExpenses.reduce((sum: number, expense: any) => 
+                          sum + parseFloat(expense.amount || 0), 0
+                        );
+
+                        return (
+                          <div key={shift.id} className={`border rounded-lg ${isActiveShift ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-gray-50'}`}>
+                            {/* Shift Header */}
+                            <div className="px-4 py-3 border-b">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <h3 className={`font-semibold ${isActiveShift ? 'text-purple-800' : 'text-gray-800'}`}>
+                                    {isActiveShift ? 'Current Shift Expenses' : 'Previous Shift Expenses'}
+                                  </h3>
+                                  <p className={`text-sm ${isActiveShift ? 'text-purple-600' : 'text-gray-600'}`}>
+                                    {isActiveShift ? `${shift.shiftId} - ${shift.workerName}` : `Worker: ${shift.workerName} • ${new Date(shift.endTime).toLocaleDateString()}`}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <div className={`text-xl font-bold ${isActiveShift ? 'text-purple-700' : 'text-gray-700'}`}>
+                                    €{totalExpenses.toFixed(2)}
+                                  </div>
+                                  <div className={`text-sm ${isActiveShift ? 'text-purple-600' : 'text-gray-600'}`}>
+                                    {shiftExpenses.length} expenses
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Expenses List for this shift */}
+                            <div className="p-4">
+                              {shiftExpenses.length > 0 ? (
+                                <div className="space-y-3">
+                                  {shiftExpenses.map((expense: any) => (
+                                    <div key={expense.id} className="border rounded-lg p-3 bg-white">
+                                      <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                          <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-semibold">{expense.description}</h4>
+                                            <div className="text-right">
+                                              <div className="font-bold text-lg text-green-600">€{expense.amount}</div>
+                                            </div>
+                                          </div>
+                                          
+                                          <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                            <div className="flex items-center">
+                                              <Users className="w-4 h-4 mr-1" />
+                                              {expense.workerName}
+                                            </div>
+                                            <div className="flex items-center">
+                                              <Timer className="w-4 h-4 mr-1" />
+                                              {new Date(expense.expenseDate || expense.createdAt).toLocaleString('en-GB', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                              })}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Only show edit/delete buttons for current shift */}
+                                        {isActiveShift && (
+                                          <div className="flex space-x-2 ml-4">
+                                            <Button
+                                              onClick={() => handleEditExpense(expense)}
+                                              size="sm"
+                                              variant="ghost"
+                                              className="p-1 h-8 w-8"
+                                            >
+                                              <Edit className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                              onClick={() => handleDeleteExpense(expense)}
+                                              size="sm"
+                                              variant="ghost"
+                                              className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-6 text-gray-500">
+                                  <Receipt className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                                  <p className="text-sm">
+                                    {isActiveShift ? 'No expenses logged for current shift yet.' : 'No expenses recorded for this shift.'}
+                                  </p>
+                                  {isActiveShift && (
+                                    <p className="text-xs text-gray-400 mt-1">Click "Add Expense" above to record an expense.</p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* End of Page Content */}
+
+        {/* Stock Entry and Product Form Dialog */}
+        <Dialog open={showStockForm} onOpenChange={setShowStockForm}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <Form {...stockForm}>
+                <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-6">
+                  {/* Basic Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Product Information</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={stockForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Product Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter product name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={stockForm.control}
+                        name="category"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Category *</FormLabel>
+                            <FormControl>
+                              <select 
+                                {...field} 
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <option value="">Select category</option>
+                                <option value="Sativa">Sativa</option>
+                                <option value="Indica">Indica</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="Hash Sativa">Hash Sativa</option>
+                                <option value="Hash Indica">Hash Indica</option>
+                                <option value="Edibles">Edibles</option>
+                                <option value="Pre-Rolls">Pre-Rolls</option>
+                                <option value="Cali Pax">Cali Pax</option>
+                              </select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={stockForm.control}
+                      name="productCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Code</FormLabel>
+                          <FormControl>
+                            <Input placeholder="6-digit code (optional)" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Stock Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Stock Quantities</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <FormField
+                        control={stockForm.control}
+                        name="onShelfGrams"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>On Shelf ({selectedCategory && ['Pre-Rolls', 'Edibles'].includes(selectedCategory) ? 'units' : 'grams'})</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                min="0"
+                                step={selectedCategory && ['Pre-Rolls', 'Edibles'].includes(selectedCategory) ? "1" : "0.1"}
+                                placeholder="0" 
+                                {...field} 
+                                value={field.value || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={stockForm.control}
+                        name="internalGrams"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Internal Storage ({selectedCategory && ['Pre-Rolls', 'Edibles'].includes(selectedCategory) ? 'units' : 'grams'})</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                min="0"
+                                step={selectedCategory && ['Pre-Rolls', 'Edibles'].includes(selectedCategory) ? "1" : "0.1"}
+                                placeholder="0" 
+                                {...field} 
+                                value={field.value || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={stockForm.control}
+                        name="externalGrams"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>External Storage ({selectedCategory && ['Pre-Rolls', 'Edibles'].includes(selectedCategory) ? 'units' : 'grams'})</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                min="0"
+                                step={selectedCategory && ['Pre-Rolls', 'Edibles'].includes(selectedCategory) ? "1" : "0.1"}
+                                placeholder="0" 
+                                {...field} 
+                                value={field.value || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Pricing Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Pricing Information</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <FormField
+                        control={stockForm.control}
+                        name="costPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Cost Price (€)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00" 
+                                {...field} 
+                                value={field.value || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={stockForm.control}
+                        name="adminPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Admin Price (€)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00" 
+                                {...field} 
+                                value={field.value || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={stockForm.control}
+                        name="shelfPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Shelf Price (€)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00" 
+                                {...field} 
+                                value={field.value || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Additional Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Additional Information</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={stockForm.control}
+                        name="supplier"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Supplier</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Supplier name (optional)" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={stockForm.control}
+                        name="productType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Product Type</FormLabel>
+                            <FormControl>
+                              <select 
+                                {...field} 
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <option value="">Select type</option>
+                                <option value="Cannabis">Cannabis</option>
+                                <option value="Hash">Hash</option>
+                                <option value="Edibles">Edibles</option>
+                                <option value="Pre-Rolls">Pre-Rolls</option>
+                                <option value="Cali Pax">Cali Pax</option>
+                              </select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowStockForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createStockMutation.isPending || updateStockMutation.isPending}
+                      className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
+                    >
+                      {editingStock ? 
+                        (updateStockMutation.isPending ? 'Updating...' : 'Update Stock') : 
+                        (createStockMutation.isPending ? 'Creating...' : 'Create Stock Entry')
+                      }
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </DialogContent>
+        </Dialog>
               {pendingMembers.length > 0 ? (
                 <div className="space-y-2 sm:space-y-3">
                   {pendingMembers.map((member: any) => (
