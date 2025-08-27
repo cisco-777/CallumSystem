@@ -141,27 +141,33 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
 
     // Financial summary
     report += `FINANCIAL SUMMARY\n`;
-    report += `Starting till: ₳${shift.startingTillAmount || '0'}\n`;
-    report += `Total sales: ₳${shift.totalSales || '0'}\n`;
-    report += `Total expenses: ₳${shift.totalExpenses || '0'}\n`;
     
-    // Cash breakdown
-    if (reconciliation) {
-      report += `Cash in till: ₳${reconciliation.cashInTill || '0'}\n`;
-      report += `Coins: ${reconciliation.coins || '0'}\n`;
-      report += `Notes: ${reconciliation.notes || '0'}\n`;
-    }
-    
-    report += `Net amount: ₳${shift.netAmount || '0'}\n\n`;
-
-    // Expenses section
+    // Expenses first with individual items
     if (summary.expenses && summary.expenses.length > 0) {
       report += `EXPENSES\n`;
       summary.expenses.forEach((expense: any) => {
-        report += `${expense.description}: ₳${expense.amount} (${expense.workerName})\n`;
+        report += `${expense.description}: ₳${expense.amount}\n`;
       });
-      report += `\n`;
+      report += `Total expenses: ₳${shift.totalExpenses || '0'}\n`;
+    } else {
+      report += `EXPENSES\n`;
+      report += `No expenses recorded\n`;
+      report += `Total expenses: ₳0\n`;
     }
+    report += `\n`;
+    
+    // Financial details in requested order
+    report += `Starting till: ₳${shift.startingTillAmount || '0'}\n`;
+    
+    // Cash breakdown if available
+    if (reconciliation) {
+      report += `Cash in till: ₳${reconciliation.cashInTill || '0'}\n`;
+      report += `Notes: ${reconciliation.notes || '0'}\n`;
+      report += `Coins: ${reconciliation.coins || '0'}\n`;
+    }
+    
+    report += `Total collections: ₳${shift.totalSales || '0'}\n`;
+    report += `Net total: ₳${shift.netAmount || '0'}\n\n`;
 
     return report;
 
