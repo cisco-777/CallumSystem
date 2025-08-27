@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,23 +20,37 @@ import { ObjectUploader } from '@/components/ObjectUploader';
 import type { UploadResult } from '@uppy/core';
 
 
-// Unified form schema that combines product catalog and stock management
-const unifiedStockFormSchema = z.object({
-  // Product Catalog Fields (public, customer-facing)
+// Base form schema for all product types
+const baseStockFormSchema = z.object({
+  // Common fields for all product types
   name: z.string().min(1, 'Product name is required'),
   description: z.string().optional(),
-  category: z.enum(['Sativa', 'Indica', 'Hybrid']),
   productType: z.enum(['Cannabis', 'Hash', 'Cali Pax', 'Edibles', 'Pre-Rolls']),
   imageUrl: z.string().optional(),
   productCode: z.string().min(1, 'Product code is required'),
-  // Stock Management Fields (admin-only)
-  supplier: z.string().min(1, 'Supplier is required'),
   onShelfGrams: z.number().min(0, 'On shelf amount must be positive'),
-  internalGrams: z.number().min(0, 'Internal amount must be positive'),
-  externalGrams: z.number().min(0, 'External amount must be positive'),
   costPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Cost price must be a valid number'),
   shelfPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Shelf price must be a valid number')
 });
+
+// Full form schema for Cannabis, Hash, and Cali Pax
+const fullStockFormSchema = baseStockFormSchema.extend({
+  category: z.enum(['Sativa', 'Indica', 'Hybrid']),
+  supplier: z.string().min(1, 'Supplier is required'),
+  internalGrams: z.number().min(0, 'Internal amount must be positive'),
+  externalGrams: z.number().min(0, 'External amount must be positive')
+});
+
+// Simplified form schema for Pre-Rolls and Edibles
+const simplifiedStockFormSchema = baseStockFormSchema.extend({
+  category: z.enum(['Sativa', 'Indica', 'Hybrid']).optional(),
+  supplier: z.string().optional(),
+  internalGrams: z.number().optional(),
+  externalGrams: z.number().optional()
+});
+
+// Unified form schema that combines both (for backward compatibility)
+const unifiedStockFormSchema = fullStockFormSchema;
 
 // Expense form schema
 const expenseFormSchema = z.object({
@@ -59,6 +73,16 @@ const stockFormSchema = unifiedStockFormSchema;
 
 type UnifiedStockFormData = z.infer<typeof unifiedStockFormSchema>;
 type StockFormData = UnifiedStockFormData; // For backward compatibility
+
+// Helper function to determine if a product type requires simplified form
+const isSimplifiedProductType = (productType: string) => {
+  return productType === 'Pre-Rolls' || productType === 'Edibles';
+};
+
+// Helper function to get appropriate schema based on product type
+const getFormSchema = (productType: string) => {
+  return isSimplifiedProductType(productType) ? simplifiedStockFormSchema : fullStockFormSchema;
+};
 
 
 export function AdminDashboard() {
@@ -92,7 +116,7 @@ export function AdminDashboard() {
 
 
   const stockForm = useForm<UnifiedStockFormData>({
-    resolver: zodResolver(unifiedStockFormSchema),
+    resolver: zodResolver(fullStockFormSchema),
     defaultValues: {
       // Product Catalog fields
       name: '',
@@ -110,6 +134,18 @@ export function AdminDashboard() {
       shelfPrice: '0'
     }
   });
+
+  // Watch product type to dynamically change validation schema
+  const watchedProductType = stockForm.watch('productType');
+  
+  useEffect(() => {
+    const currentSchema = getFormSchema(watchedProductType);
+    stockForm.clearErrors(); // Clear any existing validation errors
+    
+    // Update resolver with new schema
+    const newResolver = zodResolver(currentSchema);
+    stockForm.resolver = newResolver;
+  }, [watchedProductType]);
 
   const expenseForm = useForm<z.infer<typeof expenseFormSchema>>({
     resolver: zodResolver(expenseFormSchema),
@@ -1989,28 +2025,30 @@ export function AdminDashboard() {
                             )}
                           />
                           
-                          <FormField
-                            control={stockForm.control}
-                            name="category"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Category *</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select category" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="Sativa">Sativa</SelectItem>
-                                    <SelectItem value="Indica">Indica</SelectItem>
-                                    <SelectItem value="Hybrid">Hybrid</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                          {!isSimplifiedProductType(watchedProductType) && (
+                            <FormField
+                              control={stockForm.control}
+                              name="category"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Category *</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select category" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="Sativa">Sativa</SelectItem>
+                                      <SelectItem value="Indica">Indica</SelectItem>
+                                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
                           
                           <FormField
                             control={stockForm.control}
@@ -2138,26 +2176,28 @@ export function AdminDashboard() {
                         </h4>
                         <p className="text-sm text-blue-700 mb-4">This information is for admin use only and will not be visible to customers</p>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                          <FormField
-                            control={stockForm.control}
-                            name="supplier"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Supplier *</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="e.g., Green Harvest Co." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        {!isSimplifiedProductType(watchedProductType) && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <FormField
+                              control={stockForm.control}
+                              name="supplier"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Supplier *</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g., Green Harvest Co." {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
                         
                         {/* Stock Distribution */}
                         <div className="space-y-4 mb-6">
                           <h5 className="font-medium text-sm text-blue-700">Stock Distribution (grams)</h5>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className={`grid grid-cols-1 gap-4 ${isSimplifiedProductType(watchedProductType) ? 'md:grid-cols-1' : 'md:grid-cols-3'}`}>
                             <FormField
                               control={stockForm.control}
                               name="onShelfGrams"
@@ -2188,65 +2228,69 @@ export function AdminDashboard() {
                               )}
                             />
                             
-                            <FormField
-                              control={stockForm.control}
-                              name="internalGrams"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Internal Storage</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number" 
-                                      placeholder="0" 
-                                      {...field} 
-                                      value={field.value || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '') {
-                                          field.onChange(0);
-                                        } else {
-                                          const numValue = parseInt(value, 10);
-                                          if (!isNaN(numValue)) {
-                                            field.onChange(numValue);
+                            {!isSimplifiedProductType(watchedProductType) && (
+                              <FormField
+                                control={stockForm.control}
+                                name="internalGrams"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Internal Storage</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        type="number" 
+                                        placeholder="0" 
+                                        {...field} 
+                                        value={field.value || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            field.onChange(0);
+                                          } else {
+                                            const numValue = parseInt(value, 10);
+                                            if (!isNaN(numValue)) {
+                                              field.onChange(numValue);
+                                            }
                                           }
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
                             
-                            <FormField
-                              control={stockForm.control}
-                              name="externalGrams"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>External Storage</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number" 
-                                      placeholder="0" 
-                                      {...field} 
-                                      value={field.value || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '') {
-                                          field.onChange(0);
-                                        } else {
-                                          const numValue = parseInt(value, 10);
-                                          if (!isNaN(numValue)) {
-                                            field.onChange(numValue);
+                            {!isSimplifiedProductType(watchedProductType) && (
+                              <FormField
+                                control={stockForm.control}
+                                name="externalGrams"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>External Storage</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        type="number" 
+                                        placeholder="0" 
+                                        {...field} 
+                                        value={field.value || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            field.onChange(0);
+                                          } else {
+                                            const numValue = parseInt(value, 10);
+                                            if (!isNaN(numValue)) {
+                                              field.onChange(numValue);
+                                            }
                                           }
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
                           </div>
                           
                           {/* Total calculation display */}
