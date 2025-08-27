@@ -994,12 +994,6 @@ export function AdminDashboard() {
     }, 60000);
   };
 
-  const mockOrders = [
-    { id: 1, user: "John D.", item: "Blue Dream", quantity: 1, status: "completed", time: "2 hours ago" },
-    { id: 2, user: "Sarah M.", item: "Wedding Cake", quantity: 2, status: "pending", time: "1 hour ago" },
-    { id: 3, user: "Mike R.", item: "Lemon Haze", quantity: 1, status: "completed", time: "30 mins ago" },
-    { id: 4, user: "Emma L.", item: "Zkittlez", quantity: 3, status: "processing", time: "15 mins ago" }
-  ];
 
   // Calculate customer preferences
   const calculateCustomerPreferences = () => {
@@ -1538,57 +1532,6 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Recent Orders */}
-        <div id="activity" className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">{order.user}</p>
-                      <p className="text-sm text-gray-600">{order.item} x{order.quantity}</p>
-                      <p className="text-xs text-gray-500">{order.time}</p>
-                    </div>
-                    <Badge 
-                      variant={order.status === 'completed' ? 'default' : order.status === 'pending' ? 'secondary' : 'outline'}
-                    >
-                      {order.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Member Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Members</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {users.slice(0, 4).map((user: any) => (
-                  <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">{user.firstName || ''} {user.lastName || ''}</p>
-                      <p className="text-sm text-gray-600">{user.email}</p>
-                      <p className="text-xs text-gray-500">Joined {new Date(user.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <Badge 
-                      variant={user.isOnboarded ? 'default' : 'secondary'}
-                    >
-                      {user.isOnboarded ? 'Active' : 'Pending'}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Customer Preferences Analytics Section */}
         {customerPrefs && (
