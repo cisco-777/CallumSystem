@@ -1127,12 +1127,15 @@ export function AdminDashboard() {
   
   // Enhanced customer search functionality
   const getCustomerProfile = (userId: number) => {
-    const userOrders = analyticsOrders.filter((order: any) => order.userId === userId);
+    // Filter for only completed orders for this user
+    const userOrders = analyticsOrders.filter((order: any) => 
+      order.userId === userId && order.status === 'completed'
+    );
     const user = users.find((u: any) => u.id === userId);
     
     if (!user) return null;
     
-    // Calculate spending summary
+    // Calculate spending summary (only from completed orders)
     const totalSpent = userOrders.reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || '0'), 0);
     const averageOrderValue = userOrders.length > 0 ? Math.round(totalSpent / userOrders.length) : 0;
     
@@ -1657,7 +1660,7 @@ export function AdminDashboard() {
                         <div className="text-right">
                           <div className="bg-blue-100 px-3 py-1 rounded-full">
                             <span className="text-sm font-semibold text-blue-800">
-                              {profile.orderCount} Orders
+                              {profile.orderCount} Completed
                             </span>
                           </div>
                         </div>
@@ -1764,14 +1767,14 @@ export function AdminDashboard() {
                         </div>
                       ) : (
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                          <p className="text-gray-600">This customer hasn't placed any orders yet.</p>
+                          <p className="text-gray-600">This customer hasn't completed any orders yet.</p>
                         </div>
                       )}
                       
-                      {/* Recent Orders */}
+                      {/* Completed Orders Only */}
                       {profile.recentOrders && profile.recentOrders.length > 0 && (
                         <div className="mt-6">
-                          <h4 className="font-semibold text-gray-800 mb-3">Recent Order History</h4>
+                          <h4 className="font-semibold text-gray-800 mb-3">Recent Completed Orders</h4>
                           <div className="space-y-3">
                             {profile.recentOrders.map((order: any) => (
                               <div key={order.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
