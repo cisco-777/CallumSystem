@@ -702,7 +702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pickupCode,
         items: basketItems.map(item => ({
           name: (item as any).product?.name,
-          category: (item as any).product?.category,
+          category: (item as any).product?.productType || (item as any).product?.category,
           productId: item.productId,
           productCode: (item as any).product?.productCode
         })),

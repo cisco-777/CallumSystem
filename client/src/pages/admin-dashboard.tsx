@@ -1013,17 +1013,19 @@ export function AdminDashboard() {
           else if (category.includes('indica')) indicaCount++;
           else hybridCount++;
           
-          // Product type analysis
-          if (category.includes('hash')) {
+          // Product type analysis - use exact productType matching
+          if (category.toLowerCase() === 'hash') {
             hashCount++;
-          } else if (item.name && item.name.toLowerCase().includes('edible')) {
+          } else if (category.toLowerCase() === 'edibles') {
             ediblesCount++;
-          } else if (item.name && item.name.toLowerCase().includes('pre-roll')) {
+          } else if (category.toLowerCase() === 'pre-rolls') {
             preRollsCount++;
-          } else if (item.name && item.name.toLowerCase().includes('cali pax')) {
+          } else if (category.toLowerCase() === 'cali pax') {
             caliPaxCount++;
+          } else if (category.toLowerCase() === 'cannabis') {
+            cannabisCount++;
           } else {
-            cannabisCount++; // Default to cannabis for flower products
+            cannabisCount++; // Default to cannabis for unrecognized types
           }
           
           // Category counting
@@ -1185,17 +1187,19 @@ export function AdminDashboard() {
             else if (category.includes('indica')) indicaCount++;
             else hybridCount++;
             
-            // Product type preferences
-            if (category.includes('hash')) {
+            // Product type preferences - use exact productType matching
+            if (category.toLowerCase() === 'hash') {
               hashCount++;
-            } else if (item.name && item.name.toLowerCase().includes('edible')) {
+            } else if (category.toLowerCase() === 'edibles') {
               ediblesCount++;
-            } else if (item.name && item.name.toLowerCase().includes('pre-roll')) {
+            } else if (category.toLowerCase() === 'pre-rolls') {
               preRollsCount++;
-            } else if (item.name && item.name.toLowerCase().includes('cali pax')) {
+            } else if (category.toLowerCase() === 'cali pax') {
               caliPaxCount++;
+            } else if (category.toLowerCase() === 'cannabis') {
+              cannabisCount++;
             } else {
-              cannabisCount++; // Default to cannabis for flower products
+              cannabisCount++; // Default to cannabis for unrecognized types
             }
           });
         }
