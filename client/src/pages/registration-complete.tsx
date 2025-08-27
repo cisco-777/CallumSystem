@@ -129,7 +129,6 @@ export function RegistrationComplete({ onLoginSuccess, onBackToLanding, userEmai
                   <ul className="text-sm text-orange-700 space-y-1">
                     <li>• Admin will review your membership application</li>
                     <li>• You'll be able to login once approved</li>
-                    <li>• This typically takes 1-2 business days</li>
                   </ul>
                 </div>
               </div>

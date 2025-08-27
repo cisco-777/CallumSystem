@@ -55,7 +55,6 @@ export function PendingApproval({ onLogout, userEmail }: PendingApprovalProps) {
                 <ul className="text-sm text-blue-700 space-y-1">
                   <li>• Admin will review your membership application</li>
                   <li>• You'll receive access once approved</li>
-                  <li>• This typically takes 1-2 business days</li>
                 </ul>
               </div>
 
