@@ -121,16 +121,15 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
 
       Object.keys(discrepancies).forEach(productId => {
         const discrepancy = discrepancies[productId];
-        const product = products.find((p: any) => p.id === parseInt(productId));
-        if (product && discrepancy.difference !== 0) {
+        if (discrepancy && discrepancy.difference !== 0) {
           hasDiscrepancies = true;
-          const unitType = getUnitType(product.productType || 'Cannabis');
-          const productName = discrepancy.productName || product.name;
+          const productName = discrepancy.productName;
           const difference = Math.abs(discrepancy.difference);
-          const overUnder = discrepancy.difference > 0 ? 'over' : 'under';
+          const discrepancyType = discrepancy.type || (discrepancy.difference > 0 ? 'excess' : 'missing');
+          const unitType = discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g';
           
-          // Simple format: "Product Name: Xg over/under"
-          report += `${productName}: ${difference}${unitType === 'grams' ? 'g' : ' units'} ${overUnder}\n`;
+          // Format matching the interface: "Product Name: Xg missing/excess"
+          report += `${productName}: ${difference}${unitType} ${discrepancyType}\n`;
         }
       });
 
