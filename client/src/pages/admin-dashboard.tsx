@@ -1433,8 +1433,7 @@ export function AdminDashboard() {
             
             <Button
               onClick={handleStartShiftReconciliation}
-              disabled={!activeShift}
-              className="bg-orange-600 hover:bg-orange-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-orange-600 hover:bg-orange-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
             >
               <ClipboardCheck className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">End of Shift</span>
@@ -1442,8 +1441,7 @@ export function AdminDashboard() {
             
             <Button
               onClick={handleCreateExpense}
-              disabled={!activeShift}
-              className="bg-purple-600 hover:bg-purple-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-purple-600 hover:bg-purple-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
             >
               <Receipt className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">Expenses Log</span>
