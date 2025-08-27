@@ -115,12 +115,26 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
 
     // Stock discrepancies section
     report += `STOCK DISCREPANCIES\n`;
+    
+    // DEBUG: Log all reconciliation data to see what's available
+    console.log('=== EMAIL REPORT DEBUG ===');
+    console.log('reconciliation object:', JSON.stringify(reconciliation, null, 2));
+    console.log('reconciliation exists:', !!reconciliation);
+    console.log('reconciliation.discrepancies exists:', !!(reconciliation && reconciliation.discrepancies));
+    if (reconciliation && reconciliation.discrepancies) {
+      console.log('discrepancies keys:', Object.keys(reconciliation.discrepancies));
+      console.log('discrepancies data:', JSON.stringify(reconciliation.discrepancies, null, 2));
+    }
+    console.log('=== END EMAIL REPORT DEBUG ===');
+    
     if (reconciliation && reconciliation.discrepancies) {
       const discrepancies = reconciliation.discrepancies as any;
       let hasDiscrepancies = false;
 
       Object.keys(discrepancies).forEach(productId => {
         const discrepancy = discrepancies[productId];
+        console.log(`Processing discrepancy for product ${productId}:`, discrepancy);
+        
         if (discrepancy && discrepancy.difference !== 0) {
           hasDiscrepancies = true;
           const productName = discrepancy.productName;
@@ -128,15 +142,18 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
           const discrepancyType = discrepancy.type || (discrepancy.difference > 0 ? 'excess' : 'missing');
           const unitType = discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g';
           
+          console.log(`Adding to report: ${productName}: ${difference}${unitType} ${discrepancyType}`);
           // Format matching the interface: "Product Name: Xg missing/excess"
           report += `${productName}: ${difference}${unitType} ${discrepancyType}\n`;
         }
       });
 
       if (!hasDiscrepancies) {
+        console.log('No discrepancies found, showing default message');
         report += `No stock discrepancies found\n`;
       }
     } else {
+      console.log('No reconciliation or discrepancies data available');
       report += `No stock discrepancies found\n`;
     }
     report += `\n`;
