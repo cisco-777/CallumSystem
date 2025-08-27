@@ -5,6 +5,51 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Middleware to check user authentication and membership status
+  const requireApprovedMembership = async (req: any, res: any, next: any) => {
+    try {
+      // Check if this is an admin request
+      const isAdmin = req.headers['x-admin'] === 'true';
+      if (isAdmin) {
+        return next(); // Allow admin access
+      }
+
+      // For demo/testing - allow access if no user ID provided (maintains backward compatibility)
+      const userId = req.headers['x-user-id'];
+      if (!userId) {
+        return next();
+      }
+
+      // Get user from database
+      const user = await storage.getUser(parseInt(userId));
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      // Check membership status
+      if (user.membershipStatus === 'pending') {
+        return res.status(403).json({ 
+          message: "Your membership is awaiting admin approval. Please wait for approval before accessing the catalog.",
+          status: "pending"
+        });
+      }
+
+      // Check if membership has expired
+      if (user.expiryDate && new Date(user.expiryDate) < new Date()) {
+        return res.status(403).json({ 
+          message: "Your membership has expired. Please contact admin for renewal.",
+          status: "expired"
+        });
+      }
+
+      // Allow access for approved members
+      next();
+    } catch (error) {
+      console.error('Membership check error:', error);
+      res.status(500).json({ message: "Server error checking membership status" });
+    }
+  };
+  
   // Auth routes
   app.post("/api/auth/check-email", async (req, res) => {
     try {
@@ -23,6 +68,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!user || !user.password || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Check if this is admin login (skip membership checks for admin)
+      if (email !== "admin123@gmail.com") {
+        // Check membership status for non-admin users
+        if (user.membershipStatus === 'pending') {
+          return res.status(403).json({ 
+            message: "Your membership is awaiting admin approval. Please wait for approval before accessing the catalog.",
+            status: "pending"
+          });
+        }
+        
+        // Check if membership has expired
+        if (user.expiryDate && new Date(user.expiryDate) < new Date()) {
+          // Update status to expired if not already
+          if (user.membershipStatus !== 'expired') {
+            await storage.updateUser(user.id, { membershipStatus: 'expired' });
+          }
+          return res.status(403).json({ 
+            message: "Your membership has expired. Please contact admin for renewal.",
+            status: "expired"
+          });
+        }
       }
 
       const { password: _, ...userWithoutPassword } = user;
@@ -124,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Product routes
-  app.get("/api/products", async (req, res) => {
+  app.get("/api/products", requireApprovedMembership, async (req, res) => {
     try {
       const products = await storage.getProducts();
       res.json(products);
@@ -236,7 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Basket routes
-  app.get("/api/basket", async (req, res) => {
+  app.get("/api/basket", requireApprovedMembership, async (req, res) => {
     try {
       const userId = 1; // Would get from session/token in real app
       const basketItems = await storage.getBasketItems(userId);
@@ -246,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/basket", async (req, res) => {
+  app.post("/api/basket", requireApprovedMembership, async (req, res) => {
     try {
       const userId = 1; // Would get from session/token in real app
       const { productId, quantity = 1 } = req.body;
@@ -257,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/basket/:id", async (req, res) => {
+  app.delete("/api/basket/:id", requireApprovedMembership, async (req, res) => {
     try {
       const itemId = parseInt(req.params.id);
       await storage.removeFromBasket(itemId);
@@ -279,7 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Donation route
-  app.post("/api/donate", async (req, res) => {
+  app.post("/api/donate", requireApprovedMembership, async (req, res) => {
     try {
       const userId = 1; // Would get from session/token in real app
       const basketItems = await storage.getBasketItems(userId);

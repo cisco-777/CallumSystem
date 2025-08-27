@@ -9,8 +9,9 @@ import { Dashboard } from "@/pages/dashboard";
 import { AdminDashboard } from "@/pages/admin-dashboard";
 import { FakeAdminDemo } from "@/pages/fake-admin-demo";
 import { MemberDashboard } from "@/pages/member-dashboard";
+import { PendingApproval } from "@/pages/pending-approval";
 
-type AppState = 'landing' | 'auth' | 'dashboard' | 'admin' | 'fake-demo' | 'member-dashboard';
+type AppState = 'landing' | 'auth' | 'dashboard' | 'admin' | 'fake-demo' | 'member-dashboard' | 'pending-approval';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('landing');
@@ -23,8 +24,16 @@ function App() {
       return;
     }
 
-    // Check URL for admin access
+    // Check URL parameters
     const urlParams = new URLSearchParams(window.location.search);
+    
+    // Check for pending approval status
+    if (urlParams.get('status') === 'pending') {
+      setAppState('pending-approval');
+      return;
+    }
+
+    // Check URL for admin access
     if (urlParams.get('admin') === 'true') {
       const adminData = localStorage.getItem('msc-admin');
       if (adminData) {
@@ -74,6 +83,7 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('msc-user');
+    localStorage.removeItem('msc-pending-user');
     setUser(null);
     setAppState('landing');
   };
@@ -111,6 +121,16 @@ function App() {
           
           {appState === 'member-dashboard' && (
             <MemberDashboard />
+          )}
+          
+          {appState === 'pending-approval' && (
+            <PendingApproval 
+              onLogout={handleLogout}
+              userEmail={(() => {
+                const pendingUser = localStorage.getItem('msc-pending-user');
+                return pendingUser ? JSON.parse(pendingUser).email : undefined;
+              })()}
+            />
           )}
         </div>
         <Toaster />

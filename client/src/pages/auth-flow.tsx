@@ -107,7 +107,32 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
         onSuccess();
       }
     },
-    onError: () => {
+    onError: (error: any) => {
+      // Check if this is a membership status error
+      if (error?.response?.status === 403) {
+        const errorData = error.response?.data;
+        if (errorData?.status === 'pending') {
+          // Store user data for the pending approval page
+          localStorage.setItem('msc-pending-user', JSON.stringify({ email }));
+          toast({
+            title: "Membership Pending",
+            description: errorData.message || "Your membership is awaiting admin approval.",
+            variant: "destructive",
+          });
+          // Redirect to pending approval state
+          window.location.href = '/?status=pending';
+          return;
+        }
+        if (errorData?.status === 'expired') {
+          toast({
+            title: "Membership Expired",
+            description: errorData.message || "Your membership has expired. Please contact admin for renewal.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+      
       toast({
         title: "Invalid Credentials",
         description: "Please check your email and password.",
