@@ -146,8 +146,8 @@ async function generateShiftEmailReport(shiftId: number, storage: any): Promise<
     // Cash breakdown
     if (reconciliation) {
       report += `Cash in till: ₳${reconciliation.cashInTill || '0'}\n`;
-      report += `Coins: ${reconciliation.coins || '0'} count\n`;
-      report += `Notes: ${reconciliation.notes || '0'} count\n`;
+      report += `Coins: ${reconciliation.coins || '0'}\n`;
+      report += `Notes: ${reconciliation.notes || '0'}\n`;
     }
     
     report += `Net amount: ₳${shift.netAmount || '0'}\n\n`;
