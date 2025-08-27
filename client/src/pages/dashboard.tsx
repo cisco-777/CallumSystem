@@ -18,87 +18,6 @@ import lemonHazeImg from '@assets/Lemon Haze_1751388449553.jpeg';
 import weddingCakeImg from '@assets/Wedding Cake_1751388449551.jpg';
 import moroccanHashImg from '@assets/morrocan-hash_1752966399715.jpg';
 import dryShiftHashImg from '@assets/Hash dry-shift_1752966399715.jpg';
-// QR Code component as inline SVG - Complete with all corner squares
-const QRCodeSVG = () => (
-  <svg width="120" height="120" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
-    <rect width="150" height="150" fill="white"/>
-    
-    {/* Top-left corner square */}
-    <rect x="10" y="10" width="35" height="35" fill="black"/>
-    <rect x="15" y="15" width="25" height="25" fill="white"/>
-    <rect x="20" y="20" width="15" height="15" fill="black"/>
-    
-    {/* Top-right corner square */}
-    <rect x="105" y="10" width="35" height="35" fill="black"/>
-    <rect x="110" y="15" width="25" height="25" fill="white"/>
-    <rect x="115" y="20" width="15" height="15" fill="black"/>
-    
-    {/* Bottom-left corner square */}
-    <rect x="10" y="105" width="35" height="35" fill="black"/>
-    <rect x="15" y="110" width="25" height="25" fill="white"/>
-    <rect x="20" y="115" width="15" height="15" fill="black"/>
-    
-    {/* Bottom-right corner square - FIXED */}
-    <rect x="105" y="105" width="35" height="35" fill="black"/>
-    <rect x="110" y="110" width="25" height="25" fill="white"/>
-    <rect x="115" y="115" width="15" height="15" fill="black"/>
-    
-    {/* Timing patterns - top */}
-    <rect x="50" y="10" width="5" height="5" fill="black"/>
-    <rect x="60" y="10" width="5" height="5" fill="black"/>
-    <rect x="70" y="10" width="5" height="5" fill="black"/>
-    <rect x="80" y="10" width="5" height="5" fill="black"/>
-    <rect x="90" y="10" width="5" height="5" fill="black"/>
-    
-    {/* Timing patterns - left */}
-    <rect x="10" y="50" width="5" height="5" fill="black"/>
-    <rect x="10" y="60" width="5" height="5" fill="black"/>
-    <rect x="10" y="70" width="5" height="5" fill="black"/>
-    <rect x="10" y="80" width="5" height="5" fill="black"/>
-    <rect x="10" y="90" width="5" height="5" fill="black"/>
-    
-    {/* Data modules */}
-    <rect x="50" y="50" width="5" height="5" fill="black"/>
-    <rect x="55" y="50" width="5" height="5" fill="black"/>
-    <rect x="65" y="50" width="5" height="5" fill="black"/>
-    <rect x="75" y="50" width="5" height="5" fill="black"/>
-    <rect x="50" y="55" width="5" height="5" fill="black"/>
-    <rect x="60" y="55" width="5" height="5" fill="black"/>
-    <rect x="70" y="55" width="5" height="5" fill="black"/>
-    <rect x="80" y="55" width="5" height="5" fill="black"/>
-    <rect x="50" y="65" width="5" height="5" fill="black"/>
-    <rect x="65" y="65" width="5" height="5" fill="black"/>
-    <rect x="80" y="65" width="5" height="5" fill="black"/>
-    <rect x="55" y="70" width="5" height="5" fill="black"/>
-    <rect x="65" y="70" width="5" height="5" fill="black"/>
-    <rect x="75" y="70" width="5" height="5" fill="black"/>
-    <rect x="50" y="80" width="5" height="5" fill="black"/>
-    <rect x="60" y="80" width="5" height="5" fill="black"/>
-    <rect x="70" y="80" width="5" height="5" fill="black"/>
-    <rect x="80" y="80" width="5" height="5" fill="black"/>
-    
-    {/* Additional data pattern for completeness */}
-    <rect x="90" y="50" width="5" height="5" fill="black"/>
-    <rect x="95" y="55" width="5" height="5" fill="black"/>
-    <rect x="85" y="60" width="5" height="5" fill="black"/>
-    <rect x="90" y="65" width="5" height="5" fill="black"/>
-    <rect x="95" y="70" width="5" height="5" fill="black"/>
-    
-    {/* Bottom timing patterns */}
-    <rect x="50" y="140" width="5" height="5" fill="black"/>
-    <rect x="60" y="140" width="5" height="5" fill="black"/>
-    <rect x="70" y="140" width="5" height="5" fill="black"/>
-    <rect x="80" y="140" width="5" height="5" fill="black"/>
-    <rect x="90" y="140" width="5" height="5" fill="black"/>
-    
-    {/* Right timing patterns */}
-    <rect x="140" y="50" width="5" height="5" fill="black"/>
-    <rect x="140" y="60" width="5" height="5" fill="black"/>
-    <rect x="140" y="70" width="5" height="5" fill="black"/>
-    <rect x="140" y="80" width="5" height="5" fill="black"/>
-    <rect x="140" y="90" width="5" height="5" fill="black"/>
-  </svg>
-);
 
 interface DashboardProps {
   onLogout: () => void;
@@ -214,7 +133,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
       setShowBasket(false);
       toast({
         title: "Order Completed!",
-        description: "Please proceed to the counter and show your QR code to our staff member for collection.",
+        description: data.message || `Please proceed to the counter with code ${data.pickupCode || 'your pickup code'} for collection.`,
         duration: 8000,
       });
     }
@@ -493,18 +412,6 @@ export function Dashboard({ onLogout }: DashboardProps) {
           )}
         </div>
 
-        {/* QR Code Section */}
-        <div id="qr-code" className="mb-6 sm:mb-8 text-center">
-          <div className="inline-block bg-white rounded-xl shadow-lg border-2 border-green-200 mobile-p-4">
-            <h3 className="mobile-text-base font-semibold text-gray-800 mb-3">Your Member QR Code</h3>
-            <div className="mb-3">
-              <div className="inline-block border-2 border-gray-200 rounded-lg p-2">
-                <QRCodeSVG />
-              </div>
-            </div>
-            <p className="mobile-text-sm text-gray-600">Present this code at the counter for collection</p>
-          </div>
-        </div>
 
         {/* Category Selection and Products Display */}
         <div id="product-selection" className={`${isDemoMember ? 'mt-4' : 'mt-0'} mb-6 sm:mb-8`}>

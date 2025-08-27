@@ -12,7 +12,6 @@ import {
   BarChart3, 
   Users, 
   Package,
-  QrCode,
   Calendar,
   Bell,
   TrendingUp,
@@ -33,7 +32,6 @@ export function RightNavigation({ type, onLogout, onShowBasket, basketCount = 0 
 
   const memberNavItems = [
     { icon: Home, label: 'Overview', scrollTo: 'overview' },
-    { icon: QrCode, label: 'QR Code', scrollTo: 'qr-code' },
     { icon: ShoppingBag, label: 'Product Selection', scrollTo: 'product-selection' },
     { icon: LogOut, label: 'Logout', action: 'logout' }
   ];

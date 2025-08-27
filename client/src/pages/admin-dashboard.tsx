@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, QrCode, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -1294,14 +1294,6 @@ export function AdminDashboard() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            
-            <Button
-              onClick={() => toast({ title: "QR Scanner", description: "QR code scanning functionality will be available soon." })}
-              className="bg-green-600 hover:bg-green-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
-            >
-              <QrCode className="w-4 h-4 mr-2" />
-              <span className="mobile-text-sm">Scan QR Code</span>
-            </Button>
             
             <Button
               onClick={handleStartShiftReconciliation}
