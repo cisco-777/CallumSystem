@@ -3851,24 +3851,34 @@ export function AdminDashboard() {
 
             {/* Expenses organized by shifts */}
             <div className="space-y-6">
-              {/* Get unique shifts that have expenses or active shift */}
+              {/* Get only current shift and most recent previous shift with expenses */}
               {(() => {
-                const expenseShifts = Array.isArray(shifts) ? shifts.filter((shift: any) => {
+                const shiftsWithExpenses = [];
+                
+                // Add current/active shift if it exists (even if no expenses yet)
+                if (activeShift) {
+                  shiftsWithExpenses.push(activeShift);
+                }
+                
+                // Add the most recent completed shift that has expenses
+                const completedShifts = Array.isArray(shifts) ? shifts
+                  .filter((shift: any) => shift.endTime) // Only completed shifts
+                  .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime()) // Sort by end time descending
+                  : [];
+                
+                // Find the most recent completed shift that has expenses
+                const mostRecentWithExpenses = completedShifts.find((shift: any) => {
                   const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
                     expense.shiftId === shift.id
                   ) : [];
-                  return shiftExpenses.length > 0 || (!shift.endTime && activeShift?.id === shift.id);
-                }) : [];
-
-                // Sort to show active shift first, then by end time descending
-                expenseShifts.sort((a: any, b: any) => {
-                  if (!a.endTime && b.endTime) return -1; // Active shift first
-                  if (a.endTime && !b.endTime) return 1;
-                  if (!a.endTime && !b.endTime) return 0;
-                  return new Date(b.endTime).getTime() - new Date(a.endTime).getTime();
+                  return shiftExpenses.length > 0;
                 });
+                
+                if (mostRecentWithExpenses) {
+                  shiftsWithExpenses.push(mostRecentWithExpenses);
+                }
 
-                if (expenseShifts.length === 0) {
+                if (shiftsWithExpenses.length === 0) {
                   return (
                     <Card>
                       <CardContent className="text-center py-12">
@@ -3880,7 +3890,7 @@ export function AdminDashboard() {
                   );
                 }
 
-                return expenseShifts.map((shift: any, index: number) => {
+                return shiftsWithExpenses.map((shift: any, index: number) => {
                   const isActiveShift = !shift.endTime && activeShift?.id === shift.id;
                   const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
                     expense.shiftId === shift.id
