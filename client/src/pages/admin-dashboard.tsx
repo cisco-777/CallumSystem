@@ -2196,7 +2196,9 @@ export function AdminDashboard() {
                         
                         {/* Stock Distribution */}
                         <div className="space-y-4 mb-6">
-                          <h5 className="font-medium text-sm text-blue-700">Stock Distribution (grams)</h5>
+                          <h5 className="font-medium text-sm text-blue-700">
+                            Stock Distribution ({isSimplifiedProductType(watchedProductType) ? 'units' : 'grams'})
+                          </h5>
                           <div className={`grid grid-cols-1 gap-4 ${isSimplifiedProductType(watchedProductType) ? 'md:grid-cols-1' : 'md:grid-cols-3'}`}>
                             <FormField
                               control={stockForm.control}
@@ -2296,14 +2298,16 @@ export function AdminDashboard() {
                           {/* Total calculation display */}
                           <div className="p-3 bg-blue-100 rounded-lg border border-blue-200">
                             <p className="text-sm font-medium text-blue-800">
-                              Total Stock Amount: {(stockForm.watch('onShelfGrams') || 0) + (stockForm.watch('internalGrams') || 0) + (stockForm.watch('externalGrams') || 0)}g
+                              Total Stock Amount: {(stockForm.watch('onShelfGrams') || 0) + (stockForm.watch('internalGrams') || 0) + (stockForm.watch('externalGrams') || 0)}{isSimplifiedProductType(watchedProductType) ? ' units' : 'g'}
                             </p>
                           </div>
                         </div>
                         
                         {/* Pricing */}
                         <div className="space-y-4">
-                          <h5 className="font-medium text-sm text-blue-700">Pricing (€ per gram)</h5>
+                          <h5 className="font-medium text-sm text-blue-700">
+                            Pricing (€ per {isSimplifiedProductType(watchedProductType) ? 'unit' : 'gram'})
+                          </h5>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                               control={stockForm.control}
