@@ -3149,132 +3149,6 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Expense Form Dialog */}
-        <Dialog open={showExpenseForm} onOpenChange={setShowExpenseForm}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-purple-800 flex items-center">
-                <Receipt className="w-5 h-5 mr-2" />
-                {editingExpense ? 'Edit Expense' : 'Add New Expense'}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <Form {...expenseForm}>
-              <form onSubmit={expenseForm.handleSubmit(onSubmitExpense)} className="space-y-4">
-                <FormField
-                  control={expenseForm.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description/Reason *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={expenseForm.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount (€) *</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm font-medium">€</span>
-                          <Input 
-                            type="number"
-                            step="0.01"
-                            className="pl-8"
-                            {...field} 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={expenseForm.control}
-                  name="workerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Worker Name *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end space-x-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowExpenseForm(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createExpenseMutation.isPending || updateExpenseMutation.isPending}
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    {editingExpense ? 
-                      (updateExpenseMutation.isPending ? 'Updating...' : 'Update Expense') : 
-                      (createExpenseMutation.isPending ? 'Adding...' : 'Add Expense')
-                    }
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Delete Expense Confirmation Dialog */}
-        <AlertDialog open={showDeleteExpenseDialog} onOpenChange={setShowDeleteExpenseDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Expense</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this expense entry?
-                <br /><br />
-                <strong>Description:</strong> {deletingExpense?.description}
-                <br />
-                <strong>Amount:</strong> £{deletingExpense?.amount}
-                <br />
-                <strong>Worker:</strong> {deletingExpense?.workerName}
-                <br /><br />
-                This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel 
-                onClick={() => {
-                  setShowDeleteExpenseDialog(false);
-                  setDeletingExpense(null);
-                }}
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={confirmDeleteExpense}
-                disabled={deleteExpenseMutation.isPending}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                {deleteExpenseMutation.isPending ? 'Deleting...' : 'Delete Expense'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
         {/* Dispensary Stock */}
         <Card id="dispensary-stock">
@@ -3402,264 +3276,6 @@ export function AdminDashboard() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* End of Shift Reconciliation Dialog */}
-        <Dialog open={showShiftReconciliation} onOpenChange={setShowShiftReconciliation}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-orange-800 flex items-center">
-                <Timer className="w-5 h-5 mr-2" />
-                End of Shift - Inventory Reconciliation
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-6">
-              {isCountingMode ? (
-                // Physical Counting Mode
-                <div>
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-                    <h3 className="font-semibold text-orange-800 mb-2">Physical Stock Count</h3>
-                    <p className="text-sm text-orange-700">
-                      Weigh and enter the actual amount of each product currently on the shelf. 
-                      Do not include internal or external storage amounts.
-                    </p>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Array.isArray(products) && products.map((product: any) => (
-                      <div key={product.id} className="border rounded-lg p-4 bg-white">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h4 className="font-semibold">{product.name}</h4>
-                            <Badge className="mt-1">{product.category}</Badge>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Physical Count ({product.productType && ['Pre-Rolls', 'Edibles'].includes(product.productType) ? 'units' : 'grams'} on shelf)
-                          </label>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="1"
-                            placeholder="0"
-                            value={physicalCounts[product.id] || ''}
-                            onChange={(e) => handlePhysicalCountChange(product.id, parseInt(e.target.value) || 0)}
-                            className="w-full"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Cash Breakdown Section */}
-                  <div className="mt-8 pt-6 border-t">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                      <h3 className="font-semibold text-green-800 mb-2">Cash Breakdown</h3>
-                      <p className="text-sm text-green-700">
-                        Enter the cash amounts counted at the end of your shift.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Cash in Till (€)
-                        </label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          value={cashBreakdown.cashInTill}
-                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, cashInTill: e.target.value }))}
-                          className="w-full"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Coins (count)
-                        </label>
-                        <Input
-                          type="number"
-                          step="1"
-                          min="0"
-                          placeholder="0"
-                          value={cashBreakdown.coins}
-                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, coins: e.target.value }))}
-                          className="w-full"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Notes (count)
-                        </label>
-                        <Input
-                          type="number"
-                          step="1"
-                          min="0"
-                          placeholder="0"
-                          value={cashBreakdown.notes}
-                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, notes: e.target.value }))}
-                          className="w-full"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowShiftReconciliation(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleSubmitCounts}
-                      disabled={submitShiftReconciliationMutation.isPending || Object.keys(physicalCounts).length === 0}
-                      className="bg-orange-600 hover:bg-orange-700 text-white"
-                    >
-                      {submitShiftReconciliationMutation.isPending ? 'Processing...' : 'Submit Counts'}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                // Results Display Mode
-                <div>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                    <h3 className="font-semibold text-green-800 mb-2">Reconciliation Complete</h3>
-                    <p className="text-sm text-green-700">
-                      Shift reconciliation completed at {new Date().toLocaleString()}
-                    </p>
-                  </div>
-                  
-                  {reconciliationResult && (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-orange-600">
-                                {reconciliationResult.totalDiscrepancies || 0}g
-                              </div>
-                              <div className="text-sm text-gray-600">Total Discrepancies</div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-red-600">
-                                {Object.values(reconciliationResult.discrepancies || {}).filter((d: any) => d.type === 'missing').length}
-                              </div>
-                              <div className="text-sm text-gray-600">Products with Missing Stock</div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-blue-600">
-                                {Object.values(reconciliationResult.discrepancies || {}).filter((d: any) => d.type === 'excess').length}
-                              </div>
-                              <div className="text-sm text-gray-600">Products with Excess Stock</div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                      
-                      {Object.keys(reconciliationResult.discrepancies || {}).length > 0 && (
-                        <div>
-                          <h4 className="font-semibold mb-3">Discrepancy Details</h4>
-                          <div className="space-y-3">
-                            {Object.entries(reconciliationResult.discrepancies || {}).map(([productId, discrepancy]: [string, any]) => (
-                              <div key={productId} className={`border rounded-lg p-4 ${
-                                discrepancy.type === 'missing' ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'
-                              }`}>
-                                <div className="flex justify-between items-center">
-                                  <div>
-                                    <div className="font-medium">{discrepancy.productName}</div>
-                                    <div className="text-sm text-gray-600">
-                                      Physical count: {discrepancy.actual}{discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g'}
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <Badge className={discrepancy.type === 'missing' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}>
-                                      {Math.abs(discrepancy.difference)}{discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g'} {discrepancy.type}
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {Object.keys(reconciliationResult.discrepancies || {}).length === 0 && (
-                        <div className="text-center py-8">
-                          <div className="text-green-600 text-lg font-semibold mb-2">Perfect Match!</div>
-                          <div className="text-gray-600">All physical counts match expected on-shelf amounts.</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {/* Email Report Section */}
-                  {emailReport && (
-                    <div className="mt-6 border rounded-lg p-4 bg-gray-50">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-gray-800">Email Report</h4>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            navigator.clipboard.writeText(emailReport);
-                            toast({
-                              title: "Copied!",
-                              description: "Email report copied to clipboard",
-                            });
-                          }}
-                          className="text-xs"
-                        >
-                          <Copy className="w-3 h-3 mr-1" />
-                          Copy Report
-                        </Button>
-                      </div>
-                      <textarea
-                        readOnly
-                        value={emailReport}
-                        className="w-full h-48 p-3 bg-white border rounded text-sm font-mono text-gray-700 resize-none"
-                        placeholder="Email report will appear here after reconciliation..."
-                      />
-                      <p className="text-xs text-gray-500 mt-2">
-                        This formatted report can be copied and pasted into emails for operational documentation.
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowShiftReconciliation(false)}
-                    >
-                      Close
-                    </Button>
-                    <Button
-                      onClick={handleNewShiftReconciliation}
-                      className="bg-orange-600 hover:bg-orange-700 text-white"
-                    >
-                      New Reconciliation
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
 
           </TabsContent>
           
@@ -4305,6 +3921,394 @@ export function AdminDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Global Dialogs - Available from all tabs */}
+        
+        {/* Expense Form Dialog */}
+        <Dialog open={showExpenseForm} onOpenChange={setShowExpenseForm}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-purple-800 flex items-center">
+                <Receipt className="w-5 h-5 mr-2" />
+                {editingExpense ? 'Edit Expense' : 'Add New Expense'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Form {...expenseForm}>
+              <form onSubmit={expenseForm.handleSubmit(onSubmitExpense)} className="space-y-4">
+                <FormField
+                  control={expenseForm.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description/Reason *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={expenseForm.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount (€) *</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm font-medium">€</span>
+                          <Input 
+                            type="number"
+                            step="0.01"
+                            className="pl-8"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={expenseForm.control}
+                  name="workerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Worker Name *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowExpenseForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={createExpenseMutation.isPending || updateExpenseMutation.isPending}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    {editingExpense ? 
+                      (updateExpenseMutation.isPending ? 'Updating...' : 'Update Expense') : 
+                      (createExpenseMutation.isPending ? 'Adding...' : 'Add Expense')
+                    }
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Expense Confirmation Dialog */}
+        <AlertDialog open={showDeleteExpenseDialog} onOpenChange={setShowDeleteExpenseDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Expense</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this expense entry?
+                <br /><br />
+                <strong>Description:</strong> {deletingExpense?.description}
+                <br />
+                <strong>Amount:</strong> €{deletingExpense?.amount}
+                <br />
+                <strong>Worker:</strong> {deletingExpense?.workerName}
+                <br /><br />
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                onClick={() => {
+                  setShowDeleteExpenseDialog(false);
+                  setDeletingExpense(null);
+                }}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteExpense}
+                disabled={deleteExpenseMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {deleteExpenseMutation.isPending ? 'Deleting...' : 'Delete Expense'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* End of Shift Reconciliation Dialog */}
+        <Dialog open={showShiftReconciliation} onOpenChange={setShowShiftReconciliation}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-orange-800 flex items-center">
+                <Timer className="w-5 h-5 mr-2" />
+                End of Shift - Inventory Reconciliation
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {isCountingMode ? (
+                // Physical Counting Mode
+                <div>
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+                    <h3 className="font-semibold text-orange-800 mb-2">Physical Stock Count</h3>
+                    <p className="text-sm text-orange-700">
+                      Weigh and enter the actual amount of each product currently on the shelf. 
+                      Do not include internal or external storage amounts.
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Array.isArray(products) && products.map((product: any) => (
+                      <div key={product.id} className="border rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold">{product.name}</h4>
+                            <Badge className="mt-1">{product.category}</Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700">
+                            Physical Count ({product.productType && ['Pre-Rolls', 'Edibles'].includes(product.productType) ? 'units' : 'grams'} on shelf)
+                          </label>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="0"
+                            value={physicalCounts[product.id] || ''}
+                            onChange={(e) => handlePhysicalCountChange(product.id, parseInt(e.target.value) || 0)}
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Cash Breakdown Section */}
+                  <div className="mt-8 pt-6 border-t">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                      <h3 className="font-semibold text-green-800 mb-2">Cash Breakdown</h3>
+                      <p className="text-sm text-green-700">
+                        Enter the cash amounts counted at the end of your shift.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                          Cash in Till (€)
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={cashBreakdown.cashInTill}
+                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, cashInTill: e.target.value }))}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                          Coins (count)
+                        </label>
+                        <Input
+                          type="number"
+                          step="1"
+                          min="0"
+                          placeholder="0"
+                          value={cashBreakdown.coins}
+                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, coins: e.target.value }))}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                          Notes (count)
+                        </label>
+                        <Input
+                          type="number"
+                          step="1"
+                          min="0"
+                          placeholder="0"
+                          value={cashBreakdown.notes}
+                          onChange={(e) => setCashBreakdown(prev => ({ ...prev, notes: e.target.value }))}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowShiftReconciliation(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSubmitCounts}
+                      disabled={submitShiftReconciliationMutation.isPending || Object.keys(physicalCounts).length === 0}
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      {submitShiftReconciliationMutation.isPending ? 'Processing...' : 'Submit Counts'}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Results Display Mode
+                <div>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <h3 className="font-semibold text-green-800 mb-2">Reconciliation Complete</h3>
+                    <p className="text-sm text-green-700">
+                      Shift reconciliation completed at {new Date().toLocaleString()}
+                    </p>
+                  </div>
+                  
+                  {reconciliationResult && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-orange-600">
+                                {reconciliationResult.totalDiscrepancies || 0}g
+                              </div>
+                              <div className="text-sm text-gray-600">Total Discrepancies</div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-red-600">
+                                {Object.values(reconciliationResult.discrepancies || {}).filter((d: any) => d.type === 'missing').length}
+                              </div>
+                              <div className="text-sm text-gray-600">Products with Missing Stock</div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-blue-600">
+                                {Object.values(reconciliationResult.discrepancies || {}).filter((d: any) => d.type === 'excess').length}
+                              </div>
+                              <div className="text-sm text-gray-600">Products with Excess Stock</div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                      
+                      {Object.keys(reconciliationResult.discrepancies || {}).length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-3">Discrepancy Details</h4>
+                          <div className="space-y-3">
+                            {Object.entries(reconciliationResult.discrepancies || {}).map(([productId, discrepancy]: [string, any]) => (
+                              <div key={productId} className={`border rounded-lg p-4 ${
+                                discrepancy.type === 'missing' ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'
+                              }`}>
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <div className="font-medium">{discrepancy.productName}</div>
+                                    <div className="text-sm text-gray-600">
+                                      Physical count: {discrepancy.actual}{discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g'}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <Badge className={discrepancy.type === 'missing' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}>
+                                      {Math.abs(discrepancy.difference)}{discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g'} {discrepancy.type}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {Object.keys(reconciliationResult.discrepancies || {}).length === 0 && (
+                        <div className="text-center py-8">
+                          <div className="text-green-600 text-lg font-semibold mb-2">Perfect Match!</div>
+                          <div className="text-gray-600">All physical counts match expected on-shelf amounts.</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Email Report Section */}
+                  {emailReport && (
+                    <div className="mt-6 border rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-gray-800">Email Report</h4>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            navigator.clipboard.writeText(emailReport);
+                            toast({
+                              title: "Copied!",
+                              description: "Email report copied to clipboard",
+                            });
+                          }}
+                          className="text-xs"
+                        >
+                          <Copy className="w-3 h-3 mr-1" />
+                          Copy Report
+                        </Button>
+                      </div>
+                      <textarea
+                        readOnly
+                        value={emailReport}
+                        className="w-full h-48 p-3 bg-white border rounded text-sm font-mono text-gray-700 resize-none"
+                        placeholder="Email report will appear here after reconciliation..."
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        This formatted report can be copied and pasted into emails for operational documentation.
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowShiftReconciliation(false)}
+                    >
+                      Close
+                    </Button>
+                    <Button
+                      onClick={handleNewShiftReconciliation}
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      New Reconciliation
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
       </div>
     </div>
