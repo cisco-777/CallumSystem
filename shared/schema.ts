@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   address: text("address"),
   profileImageUrl: text("profile_image_url"),
   idImageUrl: text("id_image_url"),
+  idBackImageUrl: text("id_back_image_url"), // Optional back of ID document
   isOnboarded: boolean("is_onboarded").default(false),
   onboardingData: jsonb("onboarding_data"),
   createdAt: timestamp("created_at").defaultNow(),

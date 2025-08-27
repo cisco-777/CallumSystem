@@ -32,6 +32,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
     address: '',
     profileImage: null as File | null,
     idImage: null as File | null,
+    idBackImage: null as File | null, // Optional back of ID document
     medicalConditions: '',
     preferredProducts: '',
     referralSource: '',
@@ -262,7 +263,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
     completeOnboardingMutation.mutate();
   };
 
-  const handleFileUpload = (field: 'profileImage' | 'idImage') => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (field: 'profileImage' | 'idImage' | 'idBackImage') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setOnboardingData(prev => ({ ...prev, [field]: file }));
@@ -468,7 +469,7 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
                         id="profile-upload"
                       />
                       <label htmlFor="profile-upload" className="cursor-pointer text-sm text-gray-600 hover:text-gray-900">
-                        {onboardingData.profileImage ? onboardingData.profileImage.name : 'Upload Profile Photo'}
+                        {onboardingData.profileImage ? onboardingData.profileImage.name : 'Upload Selfie'}
                       </label>
                     </div>
 
@@ -483,6 +484,20 @@ export function AuthFlow({ onBack, onSuccess }: AuthFlowProps) {
                       />
                       <label htmlFor="id-upload" className="cursor-pointer text-sm text-gray-600 hover:text-gray-900">
                         {onboardingData.idImage ? onboardingData.idImage.name : 'Upload ID Document'}
+                      </label>
+                    </div>
+
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      <Camera className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload('idBackImage')}
+                        className="hidden"
+                        id="id-back-upload"
+                      />
+                      <label htmlFor="id-back-upload" className="cursor-pointer text-sm text-gray-600 hover:text-gray-900">
+                        {onboardingData.idBackImage ? onboardingData.idBackImage.name : 'Upload ID Document (Back)'}
                       </label>
                     </div>
                   </div>
