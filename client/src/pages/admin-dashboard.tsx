@@ -699,7 +699,8 @@ export function AdminDashboard() {
   const clearAllOrdersMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('/api/orders/clear-all', {
-        method: 'POST'
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
       });
     },
     onSuccess: () => {
