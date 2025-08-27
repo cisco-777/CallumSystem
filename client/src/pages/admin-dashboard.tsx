@@ -3232,13 +3232,13 @@ export function AdminDashboard() {
 
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Coins (£)
+                          Coins (count)
                         </label>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="1"
                           min="0"
-                          placeholder="0.00"
+                          placeholder="0"
                           value={cashBreakdown.coins}
                           onChange={(e) => setCashBreakdown(prev => ({ ...prev, coins: e.target.value }))}
                           className="w-full"
@@ -3247,13 +3247,13 @@ export function AdminDashboard() {
 
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-2">
-                          Notes (£)
+                          Notes (count)
                         </label>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="1"
                           min="0"
-                          placeholder="0.00"
+                          placeholder="0"
                           value={cashBreakdown.notes}
                           onChange={(e) => setCashBreakdown(prev => ({ ...prev, notes: e.target.value }))}
                           className="w-full"
