@@ -5,13 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History } from 'lucide-react';
 import { RightNavigation } from '@/components/right-navigation';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -86,6 +87,7 @@ const getFormSchema = (productType: string) => {
 
 
 export function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState('shift-management');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSystemWiped, setIsSystemWiped] = useState(false);
   const [showFailsafeDialog, setShowFailsafeDialog] = useState(false);
@@ -666,6 +668,51 @@ export function AdminDashboard() {
       toast({
         title: "Error",
         description: error.message || "Failed to end shift. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Order management mutations
+  const cancelOrderMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      return await apiRequest(`/api/orders/${orderId}/cancel`, {
+        method: 'PATCH'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      toast({
+        title: "Order Cancelled",
+        description: "Order has been cancelled successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel order.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const clearAllOrdersMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('/api/orders/clear-all', {
+        method: 'POST'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      toast({
+        title: "Orders Cleared",
+        description: "All orders have been archived from the control center.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to clear orders.",
         variant: "destructive",
       });
     }
@@ -1454,9 +1501,184 @@ export function AdminDashboard() {
           </Card>
         </div>
 
+        {/* Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8">
+            <TabsTrigger value="shift-management">Shift Management</TabsTrigger>
+            <TabsTrigger value="orders-members">Orders & Members</TabsTrigger>
+            <TabsTrigger value="stock-inventory">Stock & Inventory</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="expenses">Expenses</TabsTrigger>
+          </TabsList>
 
-        {/* Analytics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          {/* Shift Management Tab */}
+          <TabsContent value="shift-management">
+            {/* Active Shift Status */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="w-5 h-5 mr-2 text-blue-600" />
+                  Current Shift Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+                  {activeShift ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <Badge className="bg-green-100 text-green-800 border-green-300">
+                            <PlayCircle className="w-3 h-3 mr-1" />
+                            ACTIVE
+                          </Badge>
+                          <span className="font-medium text-blue-700">Worker: {activeShift.workerName}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-sm text-blue-600">
+                          <div className="font-medium">Shift ID</div>
+                          <div>{activeShift.shiftId}</div>
+                        </div>
+                        <div className="text-sm text-blue-600">
+                          <div className="font-medium">Started</div>
+                          <div>{new Date(activeShift.startTime).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}</div>
+                        </div>
+                        <div className="text-sm text-blue-600">
+                          <div className="font-medium">Duration</div>
+                          <div>{Math.floor((new Date().getTime() - new Date(activeShift.startTime).getTime()) / (1000 * 60))} minutes</div>
+                        </div>
+                      </div>
+                      
+                      {/* Real-time shift totals */}
+                      <div className="pt-3 border-t border-blue-200">
+                        <h4 className="font-medium text-blue-700 mb-2">Current Shift Collections</h4>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <span className="text-green-600 font-medium">
+                              Sales: €{(() => {
+                                const shiftOrders = Array.isArray(orders) ? orders.filter((order: any) => 
+                                  order.status === "completed" &&
+                                  new Date(order.createdAt) >= new Date(activeShift.startTime)
+                                ) : [];
+                                return shiftOrders.reduce((sum: number, order: any) => 
+                                  sum + parseFloat(order.totalPrice || "0"), 0
+                                ).toFixed(2);
+                              })()}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-blue-600 font-medium">
+                              Orders: {Array.isArray(orders) ? orders.filter((order: any) => 
+                                order.status === "completed" &&
+                                new Date(order.createdAt) >= new Date(activeShift.startTime)
+                              ).length : 0}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-purple-600 font-medium">
+                              Avg: €{(() => {
+                                const shiftOrders = Array.isArray(orders) ? orders.filter((order: any) => 
+                                  order.status === "completed" &&
+                                  new Date(order.createdAt) >= new Date(activeShift.startTime)
+                                ) : [];
+                                if (shiftOrders.length === 0) return '0.00';
+                                const total = shiftOrders.reduce((sum: number, order: any) => 
+                                  sum + parseFloat(order.totalPrice || "0"), 0
+                                );
+                                return (total / shiftOrders.length).toFixed(2);
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <div className="flex items-center justify-center mb-3">
+                        <Badge className="bg-gray-100 text-gray-600 border-gray-300">
+                          <PauseCircle className="w-3 h-3 mr-1" />
+                          NO ACTIVE SHIFT
+                        </Badge>
+                      </div>
+                      <p className="text-gray-600 mb-4">Start a new shift to begin tracking sales and activities</p>
+                      <Button onClick={handleStartShift} className="bg-blue-600 hover:bg-blue-700">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Start New Shift
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Shift History */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <History className="w-5 h-5 mr-2 text-purple-600" />
+                  Recent Shift History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {Array.isArray(shifts) && shifts.length > 0 ? (
+                  <div className="space-y-4">
+                    {shifts.slice(0, 5).map((shift: any) => (
+                      <div key={shift.id} className="border rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <Badge 
+                                className={shift.endTime ? 'bg-gray-100 text-gray-800 border-gray-300' : 'bg-green-100 text-green-800 border-green-300'}
+                              >
+                                {shift.endTime ? 'COMPLETED' : 'ACTIVE'}
+                              </Badge>
+                              <span className="font-medium text-gray-800">{shift.shiftId}</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <div className="text-gray-600">Worker: {shift.workerName}</div>
+                                <div className="text-gray-600">Started: {new Date(shift.startTime).toLocaleString()}</div>
+                                {shift.endTime && (
+                                  <div className="text-gray-600">Ended: {new Date(shift.endTime).toLocaleString()}</div>
+                                )}
+                              </div>
+                              <div>
+                                {shift.totalSales !== undefined && (
+                                  <div className="text-green-700 font-medium">Sales: €{shift.totalSales}</div>
+                                )}
+                                {shift.orderCount !== undefined && (
+                                  <div className="text-blue-700">Orders: {shift.orderCount}</div>
+                                )}
+                                {shift.averageOrderValue !== undefined && (
+                                  <div className="text-purple-700">Avg: €{shift.averageOrderValue}</div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No shift history available.</p>
+                    <p className="text-sm">Completed shifts will appear here.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Analytics Grid for Membership and Alerts - shared across all pages */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Membership Approval Section */}
           <Card>
             <CardHeader>
@@ -3476,6 +3698,558 @@ export function AdminDashboard() {
           </DialogContent>
         </Dialog>
 
+          </TabsContent>
+          
+          {/* Orders & Members Tab */}
+          <TabsContent value="orders-members">
+            {/* Order Control Center */}
+            <Card id="order-control-center" className="mb-8">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Order Control Center</CardTitle>
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={() => {
+                      toast({
+                        title: "Orders cleared",
+                        description: "All orders have been archived from the control center."
+                      });
+                      clearAllOrdersMutation.mutate();
+                    }}
+                    variant="destructive"
+                    size="sm"
+                    disabled={clearAllOrdersMutation.isPending}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {clearAllOrdersMutation.isPending ? 'Clearing...' : 'Clear All Orders'}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {Array.isArray(orders) && orders.length > 0 ? (
+                    orders.filter((order: any) => !order.archivedFromAdmin).map((order: any) => (
+                      <div key={order.id} className="border rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <Badge 
+                                variant={order.status === 'pending' ? 'default' : order.status === 'completed' ? 'secondary' : 'outline'}
+                                className={order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : order.status === 'completed' ? 'bg-green-100 text-green-800 border-green-300' : ''}
+                              >
+                                {order.status.toUpperCase()}
+                              </Badge>
+                              <span className="font-mono text-sm text-blue-700">#{order.pickupCode}</span>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <div className="text-sm">
+                                <strong>Customer:</strong> {users.find((u: any) => u.id === order.userId)?.firstName || 'Unknown'} {users.find((u: any) => u.id === order.userId)?.lastName || ''}
+                              </div>
+                              <div className="text-sm">
+                                <strong>Items:</strong> {order.items && order.items.map((item: any) => item.name).join(', ')}
+                              </div>
+                              <div className="text-sm font-medium text-green-700">
+                                <strong>Total:</strong> €{order.totalPrice}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Ordered: {new Date(order.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex space-x-2 ml-4">
+                            {order.status === 'pending' && (
+                              <>
+                                <Button
+                                  onClick={() => cancelOrderMutation.mutate(order.id)}
+                                  size="sm"
+                                  variant="destructive"
+                                  disabled={cancelOrderMutation.isPending}
+                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                >
+                                  {cancelOrderMutation.isPending ? 'Canceling...' : 'Cancel'}
+                                </Button>
+                                <Button
+                                  onClick={() => confirmOrderMutation.mutate(order.id)}
+                                  size="sm"
+                                  disabled={confirmOrderMutation.isPending}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  {confirmOrderMutation.isPending ? 'Confirming...' : 'Confirm/Complete'}
+                                </Button>
+                              </>
+                            )}
+                            {order.status === 'completed' && (
+                              <Badge className="bg-green-100 text-green-800 border-green-300">
+                                Completed
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No active orders in queue.</p>
+                      <p className="text-sm">New orders will appear here for processing.</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Stock & Inventory Tab */}
+          <TabsContent value="stock-inventory">
+            {/* Dispensary Stock */}
+            <Card id="dispensary-stock">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Dispensary Stock</CardTitle>
+                <Button 
+                  onClick={handleCreateStock}
+                  size="sm" 
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add New Stock Entry
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array.isArray(products) && products.map((product: any) => {
+                    const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
+                    return (
+                      <div key={product.id} className="border rounded-lg p-4 relative">
+                        <div className="absolute top-2 right-2 flex space-x-1">
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditStock(product);
+                            }}
+                            size="sm"
+                            variant="ghost"
+                            className="p-1 h-8 w-8"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProduct(product);
+                            }}
+                            size="sm"
+                            variant="ghost"
+                            className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <h3 className="font-semibold pr-10">{product.name}</h3>
+                        <Badge className="mt-2">{product.category}</Badge>
+                        
+                        {/* Stock Distribution */}
+                        <div className="mt-3 space-y-1">
+                          <p className="text-sm font-medium text-blue-700">
+                            Total: {totalAmount}g
+                          </p>
+                          <div className="text-xs text-gray-600 ml-2">
+                            <p>On shelf: {product.onShelfGrams || 0}g</p>
+                            <p>Internal: {product.internalGrams || 0}g</p>
+                            <p>External: {product.externalGrams || 0}g</p>
+                          </div>
+                        </div>
+                        
+                        {/* Pricing */}
+                        <div className="mt-3 space-y-1">
+                          <p className="text-sm text-green-700">
+                            Shelf: €{product.shelfPrice || product.adminPrice || '0'}/g
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Cost: €{product.costPrice || '0'}/g
+                          </p>
+                        </div>
+                        
+                        {/* Additional Info */}
+                        <div className="mt-3 pt-2 border-t border-gray-200 space-y-1">
+                          <p className="text-xs text-gray-500">
+                            Code: {product.productCode}
+                          </p>
+                          {product.supplier && (
+                            <p className="text-xs text-gray-500">
+                              Supplier: {product.supplier}
+                            </p>
+                          )}
+                          {product.lastUpdated && (
+                            <p className="text-xs text-gray-400">
+                              Updated: {new Date(product.lastUpdated).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            {/* Revenue Analytics */}
+            <Card id="revenue-analytics" className="mb-6 sm:mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
+                  Revenue Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Total Potential Revenue</h4>
+                    <p className="mobile-text-lg font-bold text-green-700">€{analytics.potentialRevenue}</p>
+                    <p className="mobile-text-xs text-green-600 mt-1">If all current stock sold</p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-blue-800 mb-2">Average Order Value</h4>
+                    <p className="mobile-text-lg font-bold text-blue-700">€{(() => {
+                      const completedOrders = Array.isArray(analyticsOrders) ? analyticsOrders.filter((order: any) => order.status === 'completed') : [];
+                      if (completedOrders.length === 0) return '0';
+                      const totalRevenue = completedOrders.reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || '0'), 0);
+                      return Math.round(totalRevenue / completedOrders.length);
+                    })()}</p>
+                    <p className="mobile-text-xs text-blue-600 mt-1">Based on completed orders</p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg mobile-p-3">
+                    <h4 className="mobile-text-sm font-semibold text-purple-800 mb-2">Stock Turnover Rate</h4>
+                    <p className="mobile-text-lg font-bold text-purple-700">{analytics.averageStock > 0 ? Math.round((orders.length * 10 / analytics.averageStock) * 100) : 0}%</p>
+                    <p className="mobile-text-xs text-purple-600 mt-1">Monthly estimated</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Customer Preferences Analytics Section */}
+            {customerPrefs && (
+              <Card id="customer-preferences" className="mb-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <PieChart className="w-5 h-5 mr-2 text-blue-600" />
+                    Customer Preferences Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Strain Preferences */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                        <Leaf className="w-4 h-4 mr-2" />
+                        Strain Preferences
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Sativa:</span>
+                          <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.sativa}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Indica:</span>
+                          <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.indica}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Hybrid:</span>
+                          <span className="font-bold text-blue-700">{customerPrefs.strainPreferences.hybrid}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Product Type Preferences */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                        <Hash className="w-4 h-4 mr-2" />
+                        Product Type Preferences
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Cannabis:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.cannabis}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Hash:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.hash}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Edibles:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.edibles}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Pre-Rolls:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.preRolls}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Cali Pax:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.caliPax}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Popular Categories */}
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-purple-800 mb-3">Most Popular Categories</h4>
+                      <div className="space-y-2">
+                        {customerPrefs.popularCategories.map((item, index) => (
+                          <div key={index} className="flex justify-between items-center">
+                            <span className="text-sm">{item.category}:</span>
+                            <span className="font-bold text-purple-700">{item.count} orders</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Customer Search Tool */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Search className="w-5 h-5 mr-2 text-gray-600" />
+                  Customer Search & Profiles
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6">
+                  <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Search customers by name or email..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                        }
+                      }}
+                      className="pl-10 pr-4"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                {searchQuery && (
+                  <div className="space-y-6">
+                    {filteredUsers.slice(0, 5).map((user: any) => {
+                      const profile = getCustomerProfile(user.id);
+                      if (!profile) return null;
+                      
+                      return (
+                        <div key={user.id} className="border-2 border-blue-200 rounded-lg p-6 bg-white shadow-sm">
+                          {/* Customer Header */}
+                          <div className="flex justify-between items-start mb-6">
+                            <div>
+                              <h3 className="font-bold text-xl text-blue-800">
+                                {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Anonymous User'}
+                              </h3>
+                              <p className="text-sm text-gray-600 mt-1">{user.email}</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Member since {new Date(user.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className="bg-blue-100 px-3 py-1 rounded-full">
+                                <span className="text-sm font-semibold text-blue-800">
+                                  {profile.orderCount} Completed
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Customer Summary */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                              <h4 className="font-semibold text-green-800 mb-3">Spending Summary</h4>
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Total Spent:</span>
+                                  <span className="font-bold text-green-700">€{profile.totalSpent.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Orders:</span>
+                                  <span className="font-medium">{profile.orderCount}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Average Order:</span>
+                                  <span className="font-medium">€{profile.averageOrderValue}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                              <h4 className="font-semibold text-purple-800 mb-3">Product Preferences</h4>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="flex justify-between">
+                                  <span>Cannabis:</span>
+                                  <span className="font-bold">{profile.preferences.cannabis}%</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Hash:</span>
+                                  <span className="font-bold">{profile.preferences.hash}%</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Edibles:</span>
+                                  <span className="font-bold">{profile.preferences.edibles}%</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Pre-Rolls:</span>
+                                  <span className="font-bold">{profile.preferences.preRolls}%</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Recent Orders */}
+                          <div>
+                            <h4 className="font-semibold text-gray-800 mb-3">Recent Orders</h4>
+                            {profile.recentOrders.length > 0 ? (
+                              <div className="space-y-2">
+                                {profile.recentOrders.map((order: any) => (
+                                  <div key={order.id} className="bg-gray-50 border rounded p-3 text-sm">
+                                    <div className="flex justify-between items-start">
+                                      <div>
+                                        <div className="font-mono text-blue-600">#{order.pickupCode}</div>
+                                        <div className="text-gray-600 mt-1">
+                                          {order.items && order.items.map((item: any) => item.name).join(', ')}
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <div className="font-semibold text-green-700">€{order.totalPrice}</div>
+                                        <div className="text-xs text-gray-500">
+                                          {new Date(order.createdAt).toLocaleDateString()}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-sm">No recent orders</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Expenses Tab */}
+          <TabsContent value="expenses">
+            {/* Expenses Management */}
+            <Card id="expenses-management" className="mb-8">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center">
+                  <Receipt className="w-5 h-5 mr-2 text-purple-600" />
+                  Expenses Management
+                </CardTitle>
+                <Button 
+                  onClick={handleCreateExpense}
+                  size="sm" 
+                  className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add New Expense
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {Array.isArray(expenses) && expenses.length > 0 ? (
+                    expenses.map((expense: any) => (
+                      <div key={expense.id} className="border rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <Badge className="bg-purple-100 text-purple-800 border-purple-300">
+                                EXPENSE
+                              </Badge>
+                              <span className="font-medium text-gray-800">{expense.description}</span>
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium text-red-700">
+                                Amount: €{expense.amount}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Worker: {expense.workerName}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Created: {new Date(expense.createdAt).toLocaleString()}
+                              </div>
+                              {expense.shiftId && (
+                                <div className="text-xs text-blue-600">
+                                  Shift ID: {expense.shiftId}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex space-x-2 ml-4">
+                            <Button
+                              onClick={() => {
+                                setEditingExpense(expense);
+                                expenseForm.reset({
+                                  description: expense.description,
+                                  amount: expense.amount.toString(),
+                                  workerName: expense.workerName
+                                });
+                                setShowExpenseForm(true);
+                              }}
+                              size="sm"
+                              variant="outline"
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setDeletingExpense(expense);
+                                setShowDeleteExpenseDialog(true);
+                              }}
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No expenses recorded yet.</p>
+                      <p className="text-sm">Add expenses to track operational costs.</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
       </div>
     </div>
