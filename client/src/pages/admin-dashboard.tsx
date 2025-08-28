@@ -2059,13 +2059,9 @@ export function AdminDashboard() {
                 <div className="space-y-4">
                   {Array.isArray(orders) && orders.length > 0 ? (
                     orders.filter((order: any) => 
-                      order.archivedFromAdmin !== true && (
-                        // Show orders from current shift OR orders without shift assignment OR all pending orders
-                        !activeShift || 
-                        order.shiftId === activeShift.id || 
-                        order.shiftId === null ||
-                        order.status === 'pending'
-                      )
+                      order.archivedFromAdmin !== true && 
+                      activeShift && 
+                      new Date(order.createdAt) >= new Date(activeShift.startTime)
                     ).map((order: any) => (
                       <div key={order.id} className="border rounded-lg p-4 bg-white">
                         <div className="flex justify-between items-start mb-2">
