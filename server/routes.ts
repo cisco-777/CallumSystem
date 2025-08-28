@@ -947,6 +947,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual order creation endpoint
+  app.post("/api/orders/manual", async (req, res) => {
+    try {
+      const { items } = req.body;
+      
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ message: "Items array is required" });
+      }
+
+      // Validate all items have valid productId and quantity
+      for (const item of items) {
+        if (!item.productId || item.productId <= 0 || !item.quantity || item.quantity <= 0) {
+          return res.status(400).json({ message: "All items must have valid productId and quantity" });
+        }
+      }
+
+      // Generate random 4-digit pickup code
+      const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      // Get product details and calculate total price
+      const products = await storage.getProducts();
+      let totalPrice = 0;
+      const orderItems = [];
+      const orderQuantities = [];
+
+      for (const item of items) {
+        const product = products.find(p => p.id === item.productId);
+        if (!product) {
+          return res.status(400).json({ message: `Product with ID ${item.productId} not found` });
+        }
+
+        // Check if sufficient stock is available
+        const availableStock = product.onShelfGrams || 0;
+        if (availableStock < item.quantity) {
+          return res.status(400).json({ 
+            message: `Insufficient stock for ${product.name}. Available: ${availableStock}g, Requested: ${item.quantity}g` 
+          });
+        }
+
+        // Calculate price (use shelfPrice if available, otherwise adminPrice, or productCode last 2 digits)
+        let price = 0;
+        if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
+          price = parseFloat(product.shelfPrice);
+        } else if (product.adminPrice && parseFloat(product.adminPrice) > 0) {
+          price = parseFloat(product.adminPrice);
+        } else {
+          const productCode = product.productCode || '';
+          price = parseInt(productCode.slice(-2)) || 10;
+        }
+
+        totalPrice += price * item.quantity;
+
+        orderItems.push({
+          name: product.name,
+          category: product.productType || product.category,
+          productId: product.id,
+          productCode: product.productCode
+        });
+
+        orderQuantities.push({
+          productId: product.id,
+          quantity: item.quantity
+        });
+      }
+      
+      // Get active shift to link order
+      const activeShift = await storage.getActiveShift();
+      
+      // Prepare order data (no userId for manual orders - they are admin-created)
+      const orderData = {
+        userId: null, // Manual orders don't have associated users
+        pickupCode,
+        items: orderItems,
+        quantities: orderQuantities,
+        totalPrice: totalPrice.toString(),
+        shiftId: activeShift?.id || null,
+        status: 'completed' // Manual orders are immediately completed and reduce stock
+      };
+
+      // Create order record
+      const order = await storage.createOrder(orderData);
+
+      // Immediately reduce stock for manual orders
+      await storage.confirmOrderAndReduceStock(order.id);
+      
+      res.json({ 
+        success: true, 
+        pickupCode,
+        order: {
+          ...order,
+          status: 'completed'
+        },
+        totalPrice: totalPrice.toString(),
+        items: orderItems,
+        quantities: orderQuantities,
+        message: `Manual order created successfully with pickup code ${pickupCode}. Stock has been updated.`
+      });
+    } catch (error) {
+      console.error("Manual order creation error:", error);
+      res.status(500).json({ message: "Failed to create manual order", error: String(error) });
+    }
+  });
+
   // Seed some initial products
   app.post("/api/seed-products", async (req, res) => {
     try {
