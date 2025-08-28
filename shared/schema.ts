@@ -150,6 +150,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   approvedBy: true,
   renewalCount: true,
   lastActive: true,
+  role: true,
+  isOnboarded: true,
 });
 
 export const insertProductSchema = createInsertSchema(products).pick({

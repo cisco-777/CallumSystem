@@ -85,7 +85,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
     }
   };
 
-  const { data: products = [] } = useQuery({
+  const { data: products = [] } = useQuery<Product[]>({
     queryKey: ['/api/products']
   });
 
