@@ -19,6 +19,10 @@ function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Seed admin on app start to ensure it exists in production
+    fetch('/api/seed-admin', { method: 'POST' })
+      .catch(console.error);
+
     // Check URL for fake admin demo
     if (window.location.pathname === '/demo/fake-admin') {
       setAppState('fake-demo');
@@ -80,8 +84,11 @@ function App() {
   };
 
   const handleAuthSuccess = () => {
-    // Seed products when user first logs in
-    fetch('/api/seed-products', { method: 'POST' })
+    // Seed admin and products when user first logs in
+    Promise.all([
+      fetch('/api/seed-admin', { method: 'POST' }),
+      fetch('/api/seed-products', { method: 'POST' })
+    ])
       .then(() => {
         setAppState('dashboard');
       })

@@ -1108,6 +1108,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Seed some initial products
+  // Seed admin user if it doesn't exist
+  app.post("/api/seed-admin", async (req, res) => {
+    try {
+      console.log("Checking for admin user...");
+      const adminUser = await storage.getUserByEmail("admin123@gmail.com");
+      
+      if (!adminUser) {
+        console.log("Creating admin123@gmail.com user...");
+        await storage.createUser({
+          email: "admin123@gmail.com",
+          password: "admin123",
+          firstName: "Admin",
+          lastName: "User",
+          role: "superadmin",
+          isOnboarded: true,
+          membershipStatus: "approved"
+        });
+        console.log("Admin user created successfully");
+        res.json({ message: "Admin user created" });
+      } else {
+        console.log("Admin user already exists");
+        res.json({ message: "Admin user already exists" });
+      }
+    } catch (error) {
+      console.error("Error seeding admin:", error);
+      res.status(500).json({ message: "Failed to seed admin", error: String(error) });
+    }
+  });
+
   app.post("/api/seed-products", async (req, res) => {
     try {
       console.log("Seeding products...");
