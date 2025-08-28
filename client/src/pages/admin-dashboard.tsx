@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History, LogOut } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -87,6 +88,7 @@ const getFormSchema = (productType: string) => {
 
 
 export function AdminDashboard() {
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('shift-management');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSystemWiped, setIsSystemWiped] = useState(false);
@@ -116,6 +118,12 @@ export function AdminDashboard() {
   const [showEndShiftDialog, setShowEndShiftDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('msc-admin-authenticated');
+    setLocation('/admin-login');
+  };
 
 
   const stockForm = useForm<UnifiedStockFormData>({
@@ -1439,6 +1447,14 @@ export function AdminDashboard() {
             >
               <Receipt className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">Expenses Log</span>
+            </Button>
+
+            <Button
+              onClick={handleLogout}
+              className="bg-gray-600 hover:bg-gray-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              <span className="mobile-text-sm">Logout</span>
             </Button>
           </div>
         </div>
