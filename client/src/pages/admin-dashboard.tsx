@@ -2425,136 +2425,6 @@ export function AdminDashboard() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Manual Order Form Dialog */}
-        <Dialog open={showManualOrderForm} onOpenChange={setShowManualOrderForm}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center text-green-700">
-                <Plus className="w-5 h-5 mr-2" />
-                Create Manual Order
-              </DialogTitle>
-            </DialogHeader>
-            
-            <Form {...manualOrderForm}>
-              <form onSubmit={manualOrderForm.handleSubmit(onSubmitManualOrder)} className="space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">
-                    <strong>Quick Order Entry:</strong> Select products and quantities for customers who know what they want. 
-                    Stock will be automatically reduced and the order will be linked to the active shift.
-                  </p>
-                </div>
-
-                {manualOrderForm.watch('items')?.map((item, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-medium text-gray-800">Item #{index + 1}</h4>
-                      {manualOrderForm.watch('items')?.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeOrderItem(index)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={manualOrderForm.control}
-                        name={`items.${index}.productId`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Product *</FormLabel>
-                            <FormControl>
-                              <Select
-                                value={field.value?.toString() || ''}
-                                onValueChange={(value) => field.onChange(parseInt(value))}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a product" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {products.map((product: any) => (
-                                    <SelectItem key={product.id} value={product.id.toString()}>
-                                      {product.name} - €{product.shelfPrice || product.adminPrice}/g ({product.onShelfGrams || 0}g available)
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={manualOrderForm.control}
-                        name={`items.${index}.quantity`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Quantity (grams) *</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min="1"
-                                step="1"
-                                placeholder="0"
-                                {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                ))}
-
-                <div className="flex justify-between items-center">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addOrderItem}
-                    className="flex items-center"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Another Item
-                  </Button>
-                  
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-green-700">
-                      Total: €{calculateOrderTotal().toFixed(2)}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {manualOrderForm.watch('items')?.length || 0} item(s)
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-3 pt-4 border-t">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowManualOrderForm(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createManualOrderMutation.isPending || calculateOrderTotal() === 0}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    {createManualOrderMutation.isPending ? 'Creating...' : 'Create Order'}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
 
           </TabsContent>
           
@@ -4038,6 +3908,137 @@ export function AdminDashboard() {
                 </Form>
               )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manual Order Form Dialog */}
+        <Dialog open={showManualOrderForm} onOpenChange={setShowManualOrderForm}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-green-700">
+                <Plus className="w-5 h-5 mr-2" />
+                Create Manual Order
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Form {...manualOrderForm}>
+              <form onSubmit={manualOrderForm.handleSubmit(onSubmitManualOrder)} className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    <strong>Quick Order Entry:</strong> Select products and quantities for customers who know what they want. 
+                    Stock will be automatically reduced and the order will be linked to the active shift.
+                  </p>
+                </div>
+
+                {manualOrderForm.watch('items')?.map((item, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium text-gray-800">Item #{index + 1}</h4>
+                      {manualOrderForm.watch('items')?.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeOrderItem(index)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={manualOrderForm.control}
+                        name={`items.${index}.productId`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Product *</FormLabel>
+                            <FormControl>
+                              <Select
+                                value={field.value?.toString() || ''}
+                                onValueChange={(value) => field.onChange(parseInt(value))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a product" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {products.map((product: any) => (
+                                    <SelectItem key={product.id} value={product.id.toString()}>
+                                      {product.name} - €{product.shelfPrice || product.adminPrice}/g ({product.onShelfGrams || 0}g available)
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={manualOrderForm.control}
+                        name={`items.${index}.quantity`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Quantity (grams) *</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1"
+                                step="1"
+                                placeholder="0"
+                                {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex justify-between items-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addOrderItem}
+                    className="flex items-center"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Another Item
+                  </Button>
+                  
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-green-700">
+                      Total: €{calculateOrderTotal().toFixed(2)}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {manualOrderForm.watch('items')?.length || 0} item(s)
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowManualOrderForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={createManualOrderMutation.isPending || calculateOrderTotal() === 0}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {createManualOrderMutation.isPending ? 'Creating...' : 'Create Order'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
 
