@@ -1647,7 +1647,7 @@ export function AdminDashboard() {
             <h1 className="mobile-h1 font-bold text-gray-900">Admin Dashboard</h1>
             <p className="mobile-text-sm text-gray-600 mt-1">Demo Social Club Management</p>
           </div>
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
             <AlertDialog open={showFailsafeDialog} onOpenChange={setShowFailsafeDialog}>
               <AlertDialogTrigger asChild>
                 <Button className="bg-red-600 hover:bg-red-700 text-white font-bold mobile-btn-md mobile-touch-target w-full sm:w-auto">
@@ -1702,7 +1702,15 @@ export function AdminDashboard() {
               <span className="mobile-text-sm">Expenses Log</span>
             </Button>
 
-            
+            {isSuperAdmin && (
+              <Button
+                onClick={() => setShowManagementModal(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                <span className="mobile-text-sm">Management</span>
+              </Button>
+            )}
 
             <Button
               onClick={handleLogout}
@@ -1769,14 +1777,45 @@ export function AdminDashboard() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6 sm:mb-8">
-            <TabsTrigger value="shift-management">Shift Management</TabsTrigger>
-            <TabsTrigger value="orders-members">Orders</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="stock-inventory">Stock & Inventory</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          </TabsList>
+          <div className="mb-6 sm:mb-8">
+            {/* Mobile: Horizontal Scrollable Tabs */}
+            <div className="block sm:hidden">
+              <div className="overflow-x-auto scrollbar-hide">
+                <TabsList className="inline-flex w-max min-w-full">
+                  <TabsTrigger value="shift-management" className="whitespace-nowrap px-3 py-2 text-sm">
+                    Shift Mgmt
+                  </TabsTrigger>
+                  <TabsTrigger value="orders-members" className="whitespace-nowrap px-3 py-2 text-sm">
+                    Orders
+                  </TabsTrigger>
+                  <TabsTrigger value="members" className="whitespace-nowrap px-3 py-2 text-sm">
+                    Members
+                  </TabsTrigger>
+                  <TabsTrigger value="stock-inventory" className="whitespace-nowrap px-3 py-2 text-sm">
+                    Stock
+                  </TabsTrigger>
+                  <TabsTrigger value="analytics" className="whitespace-nowrap px-3 py-2 text-sm">
+                    Analytics
+                  </TabsTrigger>
+                  <TabsTrigger value="expenses" className="whitespace-nowrap px-3 py-2 text-sm">
+                    Expenses
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
+            
+            {/* Desktop: Grid Layout */}
+            <div className="hidden sm:block">
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="shift-management">Shift Management</TabsTrigger>
+                <TabsTrigger value="orders-members">Orders</TabsTrigger>
+                <TabsTrigger value="members">Members</TabsTrigger>
+                <TabsTrigger value="stock-inventory">Stock & Inventory</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="expenses">Expenses</TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
 
           {/* Shift Management Tab */}
           <TabsContent value="shift-management">
@@ -2080,7 +2119,7 @@ export function AdminDashboard() {
             <Card id="order-control-center" className="mb-8">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Order Control Center</CardTitle>
-                <div className="flex space-x-2">
+                <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -2091,18 +2130,18 @@ export function AdminDashboard() {
                         description: "Order Control Center has been refreshed.",
                       });
                     }}
-                    className="flex items-center"
+                    className="flex items-center mobile-touch-target"
                   >
                     <RefreshCw className="w-4 h-4 mr-1" />
-                    Refresh
+                    <span className="mobile-text-sm">Refresh</span>
                   </Button>
                   <Button 
                     onClick={handleCreateManualOrder}
                     size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-green-600 hover:bg-green-700 text-white mobile-touch-target"
                   >
                     <Plus className="w-4 h-4 mr-1" />
-                    Add Manual Order
+                    <span className="mobile-text-sm">Add Manual Order</span>
                   </Button>
                   <Button 
                     onClick={() => {
@@ -2111,9 +2150,11 @@ export function AdminDashboard() {
                     variant="destructive"
                     size="sm"
                     disabled={clearAllOrdersMutation.isPending}
-                    className="bg-red-600 hover:bg-red-700"
+                    className="bg-red-600 hover:bg-red-700 mobile-touch-target"
                   >
-                    {clearAllOrdersMutation.isPending ? 'Clearing...' : 'Clear All Orders'}
+                    <span className="mobile-text-sm">
+                      {clearAllOrdersMutation.isPending ? 'Clearing...' : 'Clear All Orders'}
+                    </span>
                   </Button>
                 </div>
               </CardHeader>
@@ -2125,36 +2166,36 @@ export function AdminDashboard() {
                       activeShift && 
                       new Date(order.createdAt) >= new Date(activeShift.startTime)
                     ).map((order: any) => (
-                      <div key={order.id} className="border rounded-lg p-4 bg-white">
-                        <div className="flex justify-between items-start mb-2">
+                      <div key={order.id} className="border rounded-lg mobile-p-2 bg-white">
+                        <div className="flex flex-col space-y-3 sm:flex-row sm:justify-between sm:items-start sm:space-y-0">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
+                            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3 mb-3">
                               <Badge 
                                 variant={order.status === 'pending' ? 'default' : order.status === 'completed' ? 'secondary' : 'outline'}
-                                className={order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : order.status === 'completed' ? 'bg-green-100 text-green-800 border-green-300' : ''}
+                                className={order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-300 w-fit' : order.status === 'completed' ? 'bg-green-100 text-green-800 border-green-300 w-fit' : 'w-fit'}
                               >
                                 {order.status.toUpperCase()}
                               </Badge>
-                              <span className="font-mono text-sm text-blue-700">#{order.pickupCode}</span>
+                              <span className="font-mono mobile-text-sm text-blue-700">#{order.pickupCode}</span>
                             </div>
                             
                             <div className="space-y-2">
-                              <div className="text-sm">
+                              <div className="mobile-text-sm">
                                 <strong>Customer:</strong> {users.find((u: any) => u.id === order.userId)?.firstName || 'Unknown'} {users.find((u: any) => u.id === order.userId)?.lastName || ''}
                               </div>
-                              <div className="text-sm">
+                              <div className="mobile-text-sm">
                                 <strong>Items:</strong> {order.items && order.items.map((item: any) => item.name).join(', ')}
                               </div>
-                              <div className="text-sm font-medium text-green-700">
+                              <div className="mobile-text-sm font-medium text-green-700">
                                 <strong>Total:</strong> €{order.totalPrice}
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="mobile-text-xs text-gray-500">
                                 Ordered: {new Date(order.createdAt).toLocaleString()}
                               </div>
                             </div>
                           </div>
                           
-                          <div className="flex space-x-2 ml-4">
+                          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:ml-4">
                             {order.status === 'pending' && (
                               <>
                                 <Button
@@ -2162,22 +2203,26 @@ export function AdminDashboard() {
                                   size="sm"
                                   variant="destructive"
                                   disabled={cancelOrderMutation.isPending}
-                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                  className="bg-red-600 hover:bg-red-700 text-white mobile-touch-target w-full sm:w-auto"
                                 >
-                                  {cancelOrderMutation.isPending ? 'Canceling...' : 'Cancel'}
+                                  <span className="mobile-text-sm">
+                                    {cancelOrderMutation.isPending ? 'Canceling...' : 'Cancel'}
+                                  </span>
                                 </Button>
                                 <Button
                                   onClick={() => confirmOrderMutation.mutate(order.id)}
                                   size="sm"
                                   disabled={confirmOrderMutation.isPending}
-                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  className="bg-green-600 hover:bg-green-700 text-white mobile-touch-target w-full sm:w-auto"
                                 >
-                                  {confirmOrderMutation.isPending ? 'Confirming...' : 'Confirm/Complete'}
+                                  <span className="mobile-text-sm">
+                                    {confirmOrderMutation.isPending ? 'Confirming...' : 'Confirm/Complete'}
+                                  </span>
                                 </Button>
                               </>
                             )}
                             {order.status === 'completed' && (
-                              <Badge className="bg-green-100 text-green-800 border-green-300">
+                              <Badge className="bg-green-100 text-green-800 border-green-300 w-fit">
                                 Completed
                               </Badge>
                             )}
@@ -2202,7 +2247,7 @@ export function AdminDashboard() {
             {/* Pending Member Approvals */}
             <Card className="mb-8">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                   <CardTitle className="flex items-center mobile-text-base">
                     <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
                     Pending Member Approvals
@@ -2217,10 +2262,10 @@ export function AdminDashboard() {
                         description: "Pending approvals list has been refreshed.",
                       });
                     }}
-                    className="flex items-center"
+                    className="flex items-center mobile-touch-target w-full sm:w-auto"
                   >
                     <RefreshCw className="w-4 h-4 mr-1" />
-                    Refresh
+                    <span className="mobile-text-sm">Refresh</span>
                   </Button>
                 </div>
               </CardHeader>
@@ -2228,7 +2273,7 @@ export function AdminDashboard() {
                 {pendingMembers.length > 0 ? (
                   <div className="space-y-2 sm:space-y-3">
                     {pendingMembers.map((member: any) => (
-                      <div key={member.id} className="flex items-center justify-between mobile-p-2 rounded-lg bg-orange-50 border border-orange-200">
+                      <div key={member.id} className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mobile-p-2 rounded-lg bg-orange-50 border border-orange-200">
                         <div className="flex flex-col">
                           <span className="mobile-text-sm font-medium">
                             {member.firstName && member.lastName 
@@ -2246,9 +2291,11 @@ export function AdminDashboard() {
                             approvedBy: 'Admin Panel' 
                           })}
                           disabled={approveMemberMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700 text-white mobile-btn-sm"
+                          className="bg-green-600 hover:bg-green-700 text-white mobile-btn-sm mobile-touch-target w-full sm:w-auto"
                         >
-                          {approveMemberMutation.isPending ? 'Approving...' : 'Approve'}
+                          <span className="mobile-text-sm">
+                            {approveMemberMutation.isPending ? 'Approving...' : 'Approve'}
+                          </span>
                         </Button>
                       </div>
                     ))}
@@ -2655,56 +2702,60 @@ export function AdminDashboard() {
 
             {/* Dispensary Stock */}
             <Card id="dispensary-stock">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Dispensary Stock</CardTitle>
+              <CardHeader className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                <CardTitle className="mobile-text-lg">Dispensary Stock</CardTitle>
                 <Button 
                   onClick={handleCreateStock}
                   size="sm" 
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 mobile-touch-target w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4" />
-                  Add New Stock Entry
+                  <span className="mobile-text-sm">Add New Stock Entry</span>
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="mobile-card-grid">
                   {Array.isArray(products) && products.map((product: any) => {
                     const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
                     return (
-                      <div key={product.id} className="border rounded-lg p-4 relative">
-                        <div className="absolute top-2 right-2 flex space-x-1">
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditStock(product);
-                            }}
-                            size="sm"
-                            variant="ghost"
-                            className="p-1 h-8 w-8"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteProduct(product);
-                            }}
-                            size="sm"
-                            variant="ghost"
-                            className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                      <div key={product.id} className="border rounded-lg mobile-p-2 relative">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1 pr-2">
+                            <h3 className="font-semibold mobile-text-base">{product.name}</h3>
+                            <Badge className="mt-2 mobile-text-xs">{product.category}</Badge>
+                          </div>
+                          <div className="flex space-x-1">
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditStock(product);
+                              }}
+                              size="sm"
+                              variant="ghost"
+                              className="p-1 h-8 w-8 mobile-touch-target"
+                            >
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteProduct(product);
+                              }}
+                              size="sm"
+                              variant="ghost"
+                              className="p-1 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 mobile-touch-target"
+                            >
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <h3 className="font-semibold pr-10">{product.name}</h3>
-                        <Badge className="mt-2">{product.category}</Badge>
                         
                         {/* Stock Distribution */}
-                        <div className="mt-3 space-y-1">
-                          <p className="text-sm font-medium text-blue-700">
+                        <div className="space-y-2">
+                          <p className="mobile-text-sm font-medium text-blue-700">
                             Total: {totalAmount}g
                           </p>
-                          <div className="text-xs text-gray-600 ml-2">
+                          <div className="mobile-text-xs text-gray-600 ml-2 space-y-1">
                             <p>On shelf: {product.onShelfGrams || 0}g</p>
                             <p>Internal: {product.internalGrams || 0}g</p>
                             <p>External: {product.externalGrams || 0}g</p>
@@ -2713,26 +2764,26 @@ export function AdminDashboard() {
                         
                         {/* Pricing */}
                         <div className="mt-3 space-y-1">
-                          <p className="text-sm text-green-700">
+                          <p className="mobile-text-sm text-green-700">
                             Shelf: €{product.shelfPrice || product.adminPrice || '0'}/g
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="mobile-text-sm text-gray-600">
                             Cost: €{product.costPrice || '0'}/g
                           </p>
                         </div>
                         
                         {/* Additional Info */}
                         <div className="mt-3 pt-2 border-t border-gray-200 space-y-1">
-                          <p className="text-xs text-gray-500">
+                          <p className="mobile-text-xs text-gray-500">
                             Code: {product.productCode}
                           </p>
                           {product.supplier && (
-                            <p className="text-xs text-gray-500">
+                            <p className="mobile-text-xs text-gray-500">
                               Supplier: {product.supplier}
                             </p>
                           )}
                           {product.lastUpdated && (
-                            <p className="text-xs text-gray-400">
+                            <p className="mobile-text-xs text-gray-400">
                               Updated: {new Date(product.lastUpdated).toLocaleDateString()}
                             </p>
                           )}

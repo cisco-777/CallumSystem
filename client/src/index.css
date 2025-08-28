@@ -169,6 +169,17 @@
 
   /* Mobile overflow handling */
   .mobile-scroll { @apply overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300; }
+  
+  /* Hide scrollbar for mobile tabs */
+  .scrollbar-hide {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 
   /* CSS Grid Layout for Perfect Dashboard Centering */
   .dashboard-grid-layout {
