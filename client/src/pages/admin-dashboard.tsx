@@ -2076,6 +2076,21 @@ export function AdminDashboard() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Order Control Center</CardTitle>
                 <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+                      toast({
+                        title: "Refreshed",
+                        description: "Order Control Center has been refreshed.",
+                      });
+                    }}
+                    className="flex items-center"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Refresh
+                  </Button>
                   <Button 
                     onClick={handleCreateManualOrder}
                     size="sm"
