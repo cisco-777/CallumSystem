@@ -1593,6 +1593,11 @@ export function AdminDashboard() {
   const filteredUsers = users.filter((user: any) => {
     if (!searchQuery.trim()) return false;
     
+    // Exclude admin accounts from customer search
+    if (user.role === 'admin' || user.role === 'superadmin' || user.email === 'admin123@gmail.com') {
+      return false;
+    }
+    
     const query = searchQuery.toLowerCase().trim();
     const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
     const email = (user.email || '').toLowerCase();
