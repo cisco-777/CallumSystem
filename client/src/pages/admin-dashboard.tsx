@@ -20,6 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ObjectUploader } from '@/components/ObjectUploader';
 import type { UploadResult } from '@uppy/core';
+import { useAdminUser } from '@/hooks/useAdminUser';
 
 
 // Base form schema for all product types
@@ -73,6 +74,19 @@ const startShiftFormSchema = z.object({
 // Keep old schema for backward compatibility
 const stockFormSchema = unifiedStockFormSchema;
 
+// Admin creation form schema
+const adminCreationFormSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string(),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  workerName: z.string().min(1, 'Worker name is required')
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
 type UnifiedStockFormData = z.infer<typeof unifiedStockFormSchema>;
 type StockFormData = UnifiedStockFormData; // For backward compatibility
 
@@ -90,6 +104,7 @@ const getFormSchema = (productType: string) => {
 export function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('shift-management');
+  const { adminUser, isSuperAdmin } = useAdminUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSystemWiped, setIsSystemWiped] = useState(false);
   const [showFailsafeDialog, setShowFailsafeDialog] = useState(false);
@@ -116,6 +131,8 @@ export function AdminDashboard() {
   const [deletingExpense, setDeletingExpense] = useState<any>(null);
   const [showStartShiftDialog, setShowStartShiftDialog] = useState(false);
   const [showEndShiftDialog, setShowEndShiftDialog] = useState(false);
+  const [showManagementModal, setShowManagementModal] = useState(false);
+  const [showAdminCreationForm, setShowAdminCreationForm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -158,6 +175,18 @@ export function AdminDashboard() {
     const newResolver = zodResolver(currentSchema);
     stockForm.resolver = newResolver;
   }, [watchedProductType]);
+
+  const adminCreationForm = useForm<z.infer<typeof adminCreationFormSchema>>({
+    resolver: zodResolver(adminCreationFormSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      firstName: '',
+      lastName: '',
+      workerName: ''
+    }
+  });
 
   const expenseForm = useForm<z.infer<typeof expenseFormSchema>>({
     resolver: zodResolver(expenseFormSchema),
@@ -227,6 +256,12 @@ export function AdminDashboard() {
   const { data: membershipStats } = useQuery({
     queryKey: ['/api/membership/statistics'],
     queryFn: () => apiRequest('/api/membership/statistics')
+  });
+
+  const { data: adminAccounts = [] } = useQuery({
+    queryKey: ['/api/admin/list'],
+    queryFn: () => apiRequest('/api/admin/list'),
+    enabled: showManagementModal && isSuperAdmin
   });
 
   // Membership management mutations
@@ -727,6 +762,63 @@ export function AdminDashboard() {
       });
     }
   });
+
+  // Admin management mutations
+  const createAdminMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof adminCreationFormSchema>) => {
+      const { confirmPassword, ...adminData } = data;
+      return await apiRequest('/api/admin/create', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          ...adminData,
+          role: 'admin'
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/list'] });
+      setShowAdminCreationForm(false);
+      adminCreationForm.reset();
+      toast({
+        title: "Admin Created",
+        description: "New admin account has been created successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create admin account. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const deleteAdminMutation = useMutation({
+    mutationFn: async (adminId: number) => {
+      return await apiRequest(`/api/admin/${adminId}`, {
+        method: 'DELETE'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/list'] });
+      toast({
+        title: "Admin Deleted",
+        description: "Admin account has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete admin account. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const onSubmitAdminCreation = (data: z.infer<typeof adminCreationFormSchema>) => {
+    createAdminMutation.mutate(data);
+  };
 
   const handleDeleteProduct = (product: any) => {
     setDeletingProduct(product);
@@ -1449,6 +1541,16 @@ export function AdminDashboard() {
               <Receipt className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">Expenses Log</span>
             </Button>
+
+            {isSuperAdmin && (
+              <Button
+                onClick={() => setShowManagementModal(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                <span className="mobile-text-sm">Management</span>
+              </Button>
+            )}
 
             <Button
               onClick={handleLogout}
@@ -3494,6 +3596,201 @@ export function AdminDashboard() {
                     </Button>
                   </div>
                 </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Management Modal */}
+        <Dialog open={showManagementModal} onOpenChange={setShowManagementModal}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-indigo-800">
+                Admin Account Management
+              </DialogTitle>
+              <p className="text-sm text-gray-600">Create and manage admin accounts for the cannabis dispensary system</p>
+            </DialogHeader>
+            <div className="p-4">
+              {!showAdminCreationForm ? (
+                <div className="space-y-6">
+                  {/* Admin Creation Section */}
+                  <div className="text-center py-6 border-b">
+                    <Settings className="w-12 h-12 text-indigo-500 mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Admin Account Management</h3>
+                    <p className="text-gray-600 mb-4">Create new admin accounts and manage existing ones</p>
+                    <Button 
+                      onClick={() => setShowAdminCreationForm(true)}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create New Admin Account
+                    </Button>
+                  </div>
+
+                  {/* Existing Admin Accounts */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Existing Admin Accounts</h4>
+                    {adminAccounts.filter((admin: any) => admin.role === 'admin').length > 0 ? (
+                      <div className="space-y-3">
+                        {adminAccounts.filter((admin: any) => admin.role === 'admin').map((admin: any) => (
+                          <div key={admin.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                <Users className="w-5 h-5 text-indigo-600" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {admin.firstName} {admin.lastName}
+                                </div>
+                                <div className="text-sm text-gray-600">{admin.email}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="secondary">Admin</Badge>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                disabled={deleteAdminMutation.isPending}
+                                onClick={() => {
+                                  if (window.confirm(`Are you sure you want to delete admin account for ${admin.firstName} ${admin.lastName}?`)) {
+                                    deleteAdminMutation.mutate(admin.id);
+                                  }
+                                }}
+                              >
+                                {deleteAdminMutation.isPending ? 'Deleting...' : 'Delete'}
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        <p>No admin accounts created yet.</p>
+                        <p className="text-sm">Create your first admin account above.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Admin Creation Form */
+                <Form {...adminCreationForm}>
+                  <form onSubmit={adminCreationForm.handleSubmit(onSubmitAdminCreation)} className="space-y-6">
+                    <div className="text-center mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Admin Account</h3>
+                      <p className="text-gray-600">Fill in the details to create a new admin account</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={adminCreationForm.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter first name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={adminCreationForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter last name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={adminCreationForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Address *</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="Enter email address" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={adminCreationForm.control}
+                      name="workerName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Worker Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter worker display name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={adminCreationForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password *</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Enter password (min 8 chars)" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={adminCreationForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirm Password *</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Confirm password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-4 border-t">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowAdminCreationForm(false);
+                          adminCreationForm.reset();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createAdminMutation.isPending}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                      >
+                        {createAdminMutation.isPending ? 'Creating...' : 'Create Admin Account'}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               )}
             </div>
           </DialogContent>

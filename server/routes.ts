@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
@@ -498,6 +499,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching users:', error);
       res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  // Admin Management Routes (superadmin only)
+  app.get("/api/admin/list", async (req, res) => {
+    const isAdmin = req.headers['x-admin'] === 'true';
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    try {
+      const adminUsers = await storage.getAdminUsers();
+      // Remove passwords from response
+      const safeAdminUsers = adminUsers.map(user => {
+        const { password, ...safeUser } = user;
+        return safeUser;
+      });
+      res.json(safeAdminUsers);
+    } catch (error) {
+      console.error('Error fetching admin users:', error);
+      res.status(500).json({ error: 'Failed to fetch admin users' });
+    }
+  });
+
+  app.post("/api/admin/create", async (req, res) => {
+    const isAdmin = req.headers['x-admin'] === 'true';
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    try {
+      const { email, password, firstName, lastName, workerName, role = 'admin' } = req.body;
+
+      // Validate required fields
+      if (!email || !password || !firstName || !lastName || !workerName) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
+
+      // Hash password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Create admin user
+      const newAdmin = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role,
+        // Store worker name in a custom field or use firstName/lastName combination
+        phoneNumber: workerName, // Temporary field usage for worker name
+        isOnboarded: true,
+        membershipStatus: 'approved'
+      });
+
+      const { password: _, ...safeUser } = newAdmin;
+      res.json({ user: safeUser });
+    } catch (error) {
+      console.error('Error creating admin user:', error);
+      res.status(500).json({ error: 'Failed to create admin user' });
+    }
+  });
+
+  app.delete("/api/admin/:adminId", async (req, res) => {
+    const isAdmin = req.headers['x-admin'] === 'true';
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    try {
+      const adminId = parseInt(req.params.adminId);
+      
+      // Get the admin user to check if it exists and isn't superadmin
+      const adminUser = await storage.getUser(adminId);
+      if (!adminUser) {
+        return res.status(404).json({ error: 'Admin user not found' });
+      }
+
+      if (adminUser.role === 'superadmin') {
+        return res.status(403).json({ error: 'Cannot delete superadmin account' });
+      }
+
+      await storage.deleteUser(adminId);
+      res.json({ message: 'Admin user deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting admin user:', error);
+      res.status(500).json({ error: 'Failed to delete admin user' });
     }
   });
 

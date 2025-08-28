@@ -39,6 +39,8 @@ export interface IStorage {
   getUserRole(email: string): Promise<string | null>;
   isUserSuperAdmin(email: string): Promise<boolean>;
   isUserAdmin(email: string): Promise<boolean>;
+  getAdminUsers(): Promise<User[]>;
+  deleteUser(id: number): Promise<void>;
   
   // Membership management operations
   getPendingMembers(): Promise<User[]>;
@@ -160,6 +162,24 @@ export class DatabaseStorage implements IStorage {
   async isUserAdmin(email: string): Promise<boolean> {
     const role = await this.getUserRole(email);
     return role === 'admin' || role === 'superadmin';
+  }
+
+  async getAdminUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(sql`${users.role} = 'admin' OR ${users.role} = 'superadmin'`)
+      .orderBy(desc(users.createdAt));
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    // First remove all related data for this user
+    await db.delete(basketItems).where(eq(basketItems.userId, id));
+    await db.delete(donations).where(eq(donations.userId, id));
+    await db.delete(orders).where(eq(orders.userId, id));
+    
+    // Then delete the user
+    await db.delete(users).where(eq(users.id, id));
   }
 
   // Membership management operations
