@@ -2902,6 +2902,29 @@ export function AdminDashboard() {
               </Card>
             )}
 
+            {/* Product Performance */}
+            <Card className="mb-6 sm:mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
+                  Product Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 sm:space-y-4">
+                  {analytics.mostProfitable && analytics.mostProfitable.value > 0 && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg mobile-p-3">
+                      <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Most Profitable Product</h4>
+                      <p className="mobile-text-base font-bold text-green-700">{analytics.mostProfitable.name}</p>
+                      <p className="mobile-text-xs text-green-600 mt-1">
+                        Total revenue from completed orders: €{analytics.mostProfitable.value.toFixed(2)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
           </TabsContent>
           
           {/* Expenses Tab */}
