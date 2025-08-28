@@ -1,6 +1,6 @@
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import beachImage from '@assets/Marbella_1750505556334.jpg';
+import beachImage from '@assets/pexels-jarcou-1884417.jpg';
 import marinaImage from '@assets/pexels-arvid-knutsen-1892648-3511307.jpg';
 
 interface LandingPageProps {
