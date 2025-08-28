@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import multer from "multer";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { seedDatabase } from "./seed";
 
 const app = express();
 app.use(express.json());
@@ -67,6 +68,11 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
+
+  // Seed database before starting server
+  console.log("🚀 Initializing database...");
+  await seedDatabase();
+  console.log("📡 Database initialization complete, starting server...");
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
