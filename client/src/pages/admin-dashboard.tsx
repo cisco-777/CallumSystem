@@ -1542,7 +1542,7 @@ export function AdminDashboard() {
               <span className="mobile-text-sm">Expenses Log</span>
             </Button>
 
-            {!isLoading && isSuperAdmin && (
+            {adminUser?.email === 'admin123@gmail.com' && (
               <Button
                 onClick={() => setShowManagementModal(true)}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
