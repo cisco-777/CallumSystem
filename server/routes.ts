@@ -1145,40 +1145,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (products.length === 0) {
         const seedProducts = [
           { 
-            name: "Zkittlez", 
-            description: "Premium hybrid strain with fruity flavors and balanced effects", 
+            name: "Zkittlez",
+            description: "Premium indoor Indica strain with sweet fruity flavors",
+            imageUrl: "/api/placeholder/300/200",
+            category: "Indica",
+            productType: "Cannabis",
+            productCode: "ZK4312",
+            stockQuantity: 171,
+            adminPrice: "12",
+            supplier: "Premium Growers Ltd",
+            onShelfGrams: 36,
+            internalGrams: 50,
+            externalGrams: 85,
+            costPrice: "8.00",
+            shelfPrice: "12.00"
+          },
+          { 
+            name: "Blue Dream",
+            description: "Popular Sativa-dominant hybrid with blueberry notes",
+            imageUrl: "/api/placeholder/300/200",
             category: "Hybrid",
-            productCode: "ZK4312"
+            productType: "Cannabis",
+            productCode: "BD7010",
+            stockQuantity: 174,
+            adminPrice: "10",
+            supplier: "California Seeds Co",
+            onShelfGrams: 46,
+            internalGrams: 45,
+            externalGrams: 83,
+            costPrice: "7.00",
+            shelfPrice: "10.00"
           },
           { 
-            name: "Blue Dream", 
-            description: "Sativa-dominant hybrid known for its gentle cerebral effects", 
+            name: "Lemon Haze",
+            description: "Energizing Sativa with citrusy lemon aroma",
+            imageUrl: "/api/placeholder/300/200",
             category: "Sativa",
-            productCode: "BD7010"
+            productType: "Cannabis",
+            productCode: "LH2213",
+            stockQuantity: 216,
+            adminPrice: "13",
+            supplier: "Dutch Masters",
+            onShelfGrams: 93,
+            internalGrams: 60,
+            externalGrams: 63,
+            costPrice: "9.00",
+            shelfPrice: "13.00"
           },
           { 
-            name: "Lemon Haze", 
-            description: "Energizing sativa with bright citrus aroma and uplifting effects", 
-            category: "Sativa",
-            productCode: "LH2213"
+            name: "Wedding Cake",
+            description: "Relaxing Indica-dominant hybrid with vanilla undertones",
+            imageUrl: "/api/placeholder/300/200",
+            category: "Hybrid",
+            productType: "Cannabis",
+            productCode: "WC9615",
+            stockQuantity: 262,
+            adminPrice: "15",
+            supplier: "Wedding Growers",
+            onShelfGrams: 142,
+            internalGrams: 70,
+            externalGrams: 50,
+            costPrice: "11.00",
+            shelfPrice: "15.00"
           },
           { 
-            name: "Wedding Cake", 
-            description: "Indica-dominant hybrid with sweet vanilla flavors and relaxing effects", 
+            name: "Moroccan Hash",
+            description: "Traditional hash with earthy flavors",
+            imageUrl: "/api/placeholder/300/200",
             category: "Indica",
-            productCode: "WC9615"
+            productType: "Hash",
+            productCode: "MH5812",
+            stockQuantity: 276,
+            adminPrice: "12",
+            supplier: "Moroccan Imports",
+            onShelfGrams: 166,
+            internalGrams: 40,
+            externalGrams: 70,
+            costPrice: "8.50",
+            shelfPrice: "12.00"
           },
           { 
-            name: "Moroccan Hash", 
-            description: "Traditional hand-pressed hash with earthy, spicy flavors and potent relaxing effects", 
-            category: "Indica",
-            productCode: "MH5812"
-          },
-          { 
-            name: "Dry-Shift Hash", 
-            description: "High-quality sieved hash with clean, pure effects and energizing properties", 
+            name: "Dry-Shift Hash",
+            description: "Premium sativa hash with clean taste",
+            imageUrl: "/api/placeholder/300/200",
             category: "Sativa",
-            productCode: "DS1410"
+            productType: "Hash",
+            productCode: "DS1410",
+            stockQuantity: 235,
+            adminPrice: "10",
+            supplier: "Alpine Hash Co",
+            onShelfGrams: 155,
+            internalGrams: 30,
+            externalGrams: 50,
+            costPrice: "7.50",
+            shelfPrice: "10.00"
           }
         ];
 
