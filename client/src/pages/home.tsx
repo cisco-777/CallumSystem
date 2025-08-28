@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Navigation } from '@/components/navigation';
+import marbellaImage from '@assets/Marbella_1756378363066.jpeg';
 
 export function HomePage() {
   const handleOrderNow = () => {
@@ -12,17 +13,22 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{
+      backgroundImage: `url(${marbellaImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}>
       <Navigation />
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Welcome To Demo Social Club
+        <div className="text-center mb-16 pt-32">
+          <h1 className="text-4xl md:text-5xl font-bold text-black mb-6">
+            Marbella Social Club
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Order your favorite products, check updates, and manage your account — all in one place.
+          <p className="text-xl text-black max-w-3xl mx-auto mb-8">
+            An exclusive community for those who appreciate the finer things in life
           </p>
           <Button
             onClick={handleOrderNow}
