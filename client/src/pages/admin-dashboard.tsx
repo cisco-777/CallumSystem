@@ -1656,58 +1656,6 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        {/* Overview Cards */}
-        <div id="overview" className="mobile-admin-grid mb-6 sm:mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mobile-text-xs font-medium">Total Members</CardTitle>
-              <Users className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="mobile-text-lg font-bold text-blue-700">
-                {membershipStats ? membershipStats.approved + membershipStats.renewed : 0}
-              </div>
-              <p className="mobile-text-xs text-muted-foreground">Approved members</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mobile-text-xs font-medium">Pending Approval</CardTitle>
-              <Clock className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="mobile-text-lg font-bold text-orange-700">
-                {membershipStats ? membershipStats.pending : 0}
-              </div>
-              <p className="mobile-text-xs text-muted-foreground">Awaiting review</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mobile-text-xs font-medium">Active Members</CardTitle>
-              <Activity className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="mobile-text-lg font-bold text-green-700">
-                {membershipStats ? membershipStats.active : 0}
-              </div>
-              <p className="mobile-text-xs text-muted-foreground">Recently active</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mobile-text-xs font-medium">Stock Value</CardTitle>
-              <DollarSign className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="mobile-text-lg font-bold text-purple-700">€{analytics.totalStockValue}</div>
-              <p className="mobile-text-xs text-muted-foreground">Total inventory</p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
