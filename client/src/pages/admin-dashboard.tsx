@@ -122,7 +122,8 @@ export function AdminDashboard() {
   // Logout function
   const handleLogout = () => {
     localStorage.removeItem('msc-admin-authenticated');
-    setLocation('/admin-login');
+    localStorage.removeItem('msc-admin');
+    window.location.href = '/';
   };
 
 
