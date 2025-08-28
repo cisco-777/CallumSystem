@@ -1506,9 +1506,10 @@ export function AdminDashboard() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8">
+          <TabsList className="grid w-full grid-cols-6 mb-6 sm:mb-8">
             <TabsTrigger value="shift-management">Shift Management</TabsTrigger>
-            <TabsTrigger value="orders-members">Orders & Members</TabsTrigger>
+            <TabsTrigger value="orders-members">Orders</TabsTrigger>
+            <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="stock-inventory">Stock & Inventory</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
@@ -3431,6 +3432,11 @@ export function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          {/* Members Tab */}
+          <TabsContent value="members">
+            {/* Empty tab content as requested */}
           </TabsContent>
           
           {/* Stock & Inventory Tab */}
