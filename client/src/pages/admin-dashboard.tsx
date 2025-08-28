@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History, LogOut, Settings } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History, LogOut, Settings, RefreshCw } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -2193,10 +2193,27 @@ export function AdminDashboard() {
             {/* Pending Member Approvals */}
             <Card className="mb-8">
               <CardHeader>
-                <CardTitle className="flex items-center mobile-text-base">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
-                  Pending Member Approvals
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center mobile-text-base">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                    Pending Member Approvals
+                  </CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      queryClient.invalidateQueries({ queryKey: ['/api/membership/pending'] });
+                      toast({
+                        title: "Refreshed",
+                        description: "Pending approvals list has been refreshed.",
+                      });
+                    }}
+                    className="flex items-center"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Refresh
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {pendingMembers.length > 0 ? (
