@@ -181,6 +181,26 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Production database health check endpoint
+  app.get("/api/health/database", async (req, res) => {
+    try {
+      const { testDatabaseConnection } = await import('./db');
+      const isHealthy = await testDatabaseConnection();
+      
+      if (isHealthy) {
+        res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+      } else {
+        res.status(503).json({ status: 'unhealthy', timestamp: new Date().toISOString() });
+      }
+    } catch (error: any) {
+      res.status(503).json({ 
+        status: 'error', 
+        message: error?.message || 'Database health check failed',
+        timestamp: new Date().toISOString() 
+      });
+    }
+  });
+  
   // Auth routes
   app.post("/api/auth/check-email", async (req, res) => {
     try {
@@ -256,18 +276,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/register", async (req, res) => {
     try {
+      console.log('🔵 Registration attempt:', req.body?.email);
       const { email, password } = req.body;
       
       if (!email || !password) {
+        console.log('❌ Missing email or password:', { email: !!email, password: !!password });
         return res.status(400).json({ message: "Email and password are required" });
       }
 
+      console.log('🔍 Checking for existing user:', email);
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
+        console.log('❌ Email already exists:', email);
         return res.status(400).json({ message: "Email already exists" });
       }
 
-      const user = await storage.createUser({
+      console.log('✅ Creating new user:', email);
+      
+      // Add comprehensive error tracking for production
+      const userData = {
         email,
         password,
         firstName: '',
@@ -275,12 +302,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phoneNumber: '',
         dateOfBirth: '',
         address: ''
-      });
+      };
+      
+      console.log('📊 Attempting to create user in database:', email);
+      console.log('📊 Database connection status:', !!process.env.DATABASE_URL);
+      console.log('📊 Insert data:', { ...userData, password: '[REDACTED]' });
+      
+      let user;
+      try {
+        user = await storage.createUser(userData);
+        console.log('✅ Database insert successful:', user.id, email);
+      } catch (dbError: any) {
+        console.error('❌ Database insert failed:', dbError);
+        console.error('📊 DB Error details:', {
+          message: dbError?.message,
+          code: dbError?.code,
+          detail: dbError?.detail,
+          stack: dbError?.stack?.substring(0, 500)
+        });
+        throw dbError;
+      }
+      
+      if (!user || !user.id) {
+        console.error('❌ User creation returned invalid result:', user);
+        throw new Error('User creation failed - no user object returned');
+      }
+      
+      console.log('✅ User created successfully:', user.id, email);
+      
+      // Verify the user was actually saved by reading it back
+      try {
+        const verificationUser = await storage.getUserByEmail(email);
+        if (!verificationUser) {
+          console.error('❌ CRITICAL: User not found after creation - database transaction may have been rolled back');
+          throw new Error('User registration failed - user not persisted in database');
+        }
+        console.log('✅ User verification successful:', verificationUser.id, email);
+      } catch (verifyError) {
+        console.error('❌ User verification failed:', verifyError);
+        throw new Error('User registration failed - unable to verify user persistence');
+      }
 
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to create user" });
+    } catch (error: any) {
+      console.error('❌ Registration failed with error:', {
+        message: error?.message,
+        stack: error?.stack?.substring(0, 1000),
+        name: error?.name,
+        code: error?.code
+      });
+      res.status(500).json({ 
+        message: "Failed to create user",
+        error: process.env.NODE_ENV === 'development' ? error?.message : undefined
+      });
     }
   });
 
