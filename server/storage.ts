@@ -132,11 +132,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
+    try {
+      console.log('📊 Attempting to create user in database:', insertUser.email);
+      console.log('📊 Database connection status:', !!db);
+      console.log('📊 Insert data:', { ...insertUser, password: '[REDACTED]' });
+      
+      const [user] = await db
+        .insert(users)
+        .values(insertUser)
+        .returning();
+        
+      console.log('✅ Database insert successful:', user.id, user.email);
+      return user;
+    } catch (error) {
+      console.error('💥 Database createUser error:', error);
+      console.error('💥 Database error details:', error instanceof Error ? error.message : 'Unknown database error');
+      console.error('💥 Database error code:', (error as any)?.code);
+      console.error('💥 Database error constraint:', (error as any)?.constraint);
+      throw error;
+    }
   }
 
   async updateUser(id: number, updates: Partial<User>): Promise<User> {

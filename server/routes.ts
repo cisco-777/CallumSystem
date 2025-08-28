@@ -256,13 +256,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/register", async (req, res) => {
     try {
+      console.log('🔵 Registration attempt:', req.body?.email);
       const { email, password } = req.body;
       
+      // Validate input
+      if (!email || !password) {
+        console.log('❌ Missing email or password');
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      console.log('🔍 Checking for existing user:', email);
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
+        console.log('❌ Email already exists:', email);
         return res.status(400).json({ message: "Email already exists" });
       }
 
+      console.log('✅ Creating new user:', email);
       const user = await storage.createUser({
         email,
         password,
@@ -273,10 +283,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         address: ''
       });
 
+      console.log('✅ User created successfully:', user.id, email);
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      res.status(500).json({ message: "Failed to create user" });
+      console.error('💥 Registration error:', error);
+      console.error('💥 Error details:', error instanceof Error ? error.message : 'Unknown error');
+      console.error('💥 Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({ 
+        message: "Failed to create user",
+        error: process.env.NODE_ENV === 'development' ? error instanceof Error ? error.message : 'Unknown error' : undefined
+      });
     }
   });
 
