@@ -1422,15 +1422,15 @@ export function AdminDashboard() {
       potentialRevenue += value;
 
       // Low stock alerts with proper thresholds
-      if (stock <= 100) {
-        const isCritical = stock >= 50 && stock <= 70; // Critical range: 50-70g
-        const isUrgent = stock >= 95 && stock <= 100;   // Urgent range: 95-100g
+      if (stock <= 50) {
+        const isCritical = stock <= 25; // Critical for 25g and under
+        const isUrgent = stock > 25 && stock <= 50;   // Urgent for 26-50g
         
         if (isCritical || isUrgent) {
           lowStockItems.push({
             name: product.name,
             stock: stock,
-            critical: isCritical, // Critical for 50-70g, Urgent for 95-100g
+            critical: isCritical, // Critical for 25g and under, Urgent for 26-50g
             urgent: isUrgent
           });
         }
