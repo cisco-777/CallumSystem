@@ -264,19 +264,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // Check for admin credentials
-      if (email === "admin123@gmail.com" && password === "admin123") {
-        res.json({ 
-          success: true, 
-          admin: { 
-            email: "admin123@gmail.com", 
-            role: "admin" 
-          } 
-        });
-      } else {
-        res.status(401).json({ message: "Invalid admin credentials" });
+      // Get user from database
+      const user = await storage.getUserByEmail(email);
+      
+      // Check if user exists and has admin role
+      if (!user || !user.role || (user.role !== 'admin' && user.role !== 'superadmin')) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
       }
+      
+      // For admin123@gmail.com, check hardcoded password for backward compatibility
+      // For other admin users, check database password
+      let isValidPassword = false;
+      if (email === "admin123@gmail.com" && password === "admin123") {
+        isValidPassword = true;
+      } else if (user.password && user.password === password) {
+        isValidPassword = true;
+      }
+      
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+      
+      res.json({ 
+        success: true, 
+        admin: { 
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isSuperAdmin: user.role === 'superadmin'
+        } 
+      });
     } catch (error) {
+      console.error("Admin login error:", error);
       res.status(500).json({ message: "Server error" });
     }
   });

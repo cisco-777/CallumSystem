@@ -24,6 +24,8 @@ export const users = pgTable("users", {
   approvedBy: text("approved_by"), // Admin who approved the membership
   renewalCount: integer("renewal_count").default(0), // Track number of renewals
   lastActive: timestamp("last_active"), // Track member activity for statistics
+  // Role field for admin users (null for regular members, "admin" for regular admin, "superadmin" for superadmin)
+  role: text("role"), // null, "admin", "superadmin"
 });
 
 export const products = pgTable("products", {

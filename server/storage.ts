@@ -35,6 +35,11 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User>;
   
+  // Role-based operations
+  getUserRole(email: string): Promise<string | null>;
+  isUserSuperAdmin(email: string): Promise<boolean>;
+  isUserAdmin(email: string): Promise<boolean>;
+  
   // Membership management operations
   getPendingMembers(): Promise<User[]>;
   getApprovedMembers(): Promise<User[]>;
@@ -139,6 +144,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  // Role-based operations
+  async getUserRole(email: string): Promise<string | null> {
+    const user = await this.getUserByEmail(email);
+    return user?.role || null;
+  }
+
+  async isUserSuperAdmin(email: string): Promise<boolean> {
+    const role = await this.getUserRole(email);
+    return role === 'superadmin';
+  }
+
+  async isUserAdmin(email: string): Promise<boolean> {
+    const role = await this.getUserRole(email);
+    return role === 'admin' || role === 'superadmin';
   }
 
   // Membership management operations
