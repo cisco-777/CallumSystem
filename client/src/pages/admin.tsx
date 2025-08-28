@@ -25,9 +25,13 @@ export function AdminPage() {
             <div className="flex space-x-3">
               {(() => {
                 const adminData = localStorage.getItem('msc-admin-data');
-                const parsedData = adminData ? JSON.parse(adminData) : null;
-                console.log('Admin data for management button:', parsedData);
-                return parsedData && (parsedData.role === 'superadmin' || parsedData.isSuperAdmin === true);
+                if (!adminData) return false;
+                try {
+                  const parsedData = JSON.parse(adminData);
+                  return parsedData.email === 'admin123@gmail.com';
+                } catch {
+                  return false;
+                }
               })() && (
                 <Button
                   onClick={() => {/* Add management modal logic here */}}
