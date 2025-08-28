@@ -132,67 +132,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    console.log('📊 DatabaseStorage.createUser called with:', { email: insertUser.email });
-    
-    try {
-      // Use explicit transaction for production reliability
-      const result = await db.transaction(async (tx) => {
-        console.log('📊 Starting database transaction for user creation');
-        
-        // Double-check for existing user within transaction
-        const [existingUser] = await tx.select().from(users).where(eq(users.email, insertUser.email));
-        if (existingUser) {
-          console.log('❌ User already exists within transaction:', insertUser.email);
-          throw new Error(`User with email ${insertUser.email} already exists`);
-        }
-        
-        console.log('📊 Inserting user into database:', insertUser.email);
-        const insertResult = await tx
-          .insert(users)
-          .values(insertUser)
-          .returning();
-        
-        if (!insertResult || insertResult.length === 0) {
-          console.log('❌ No result returned from insert operation');
-          throw new Error('Failed to create user - no result returned from database insert');
-        }
-        
-        const newUser = insertResult[0];
-        console.log('✅ User inserted successfully:', newUser.id, newUser.email);
-        
-        // Verify the insertion within the same transaction
-        const [verifyUser] = await tx.select().from(users).where(eq(users.id, newUser.id));
-        if (!verifyUser) {
-          console.log('❌ User verification failed within transaction');
-          throw new Error('Failed to verify user creation within transaction');
-        }
-        
-        console.log('✅ User verified within transaction:', verifyUser.id, verifyUser.email);
-        return newUser;
-      });
-      
-      console.log('✅ Transaction completed successfully:', result.id, result.email);
-      return result;
-      
-    } catch (error: any) {
-      console.error('❌ createUser transaction failed:', {
-        message: error?.message,
-        code: error?.code,
-        detail: error?.detail,
-        constraint: error?.constraint,
-        table: error?.table,
-        column: error?.column
-      });
-      
-      // Re-throw with more context for debugging
-      if (error?.message?.includes('already exists')) {
-        throw error; // User-friendly duplicate error
-      } else if (error?.code === '23505') { // PostgreSQL unique violation
-        throw new Error(`User with email ${insertUser.email} already exists`);
-      } else {
-        throw new Error(`Database error during user creation: ${error?.message || 'Unknown error'}`);
-      }
-    }
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
   }
 
   async updateUser(id: number, updates: Partial<User>): Promise<User> {

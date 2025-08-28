@@ -69,24 +69,7 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Enhanced database initialization with production validation
-  console.log("🚀 Database initialization starting...");
-  console.log("🔗 DATABASE_URL exists:", !!process.env.DATABASE_URL);
-  console.log("🔗 Environment:", process.env.NODE_ENV || 'development');
-  
-  // Test database connection before proceeding
-  const { testDatabaseConnection } = await import('./db');
-  const dbConnected = await testDatabaseConnection();
-  if (!dbConnected) {
-    console.error('❌ CRITICAL: Cannot connect to database');
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1); // Exit in production if DB not accessible
-    }
-  }
-  
-  console.log("✅ Database connection pool created");
-  console.log("✅ Drizzle ORM initialized");
-  
+  // Seed database before starting server
   console.log("🚀 Initializing database...");
   await seedDatabase();
   console.log("📡 Database initialization complete, starting server...");
