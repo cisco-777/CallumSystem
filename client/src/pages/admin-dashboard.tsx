@@ -1893,417 +1893,6 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
 
-        {/* Stock Management Modal */}
-        <Dialog open={showStockForm} onOpenChange={setShowStockForm}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-blue-800">
-                {editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="p-2">
-              <Form {...stockForm}>
-                <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-6">
-                      {/* Section 1: Product Catalog Information */}
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <h4 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                          <Package className="w-5 h-5 mr-2" />
-                          Customer Catalog Information
-                        </h4>
-                        <p className="text-sm text-green-700 mb-4">This information will be visible to customers in the product catalog</p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            control={stockForm.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Product Name *</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="e.g., Blue Dream" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={stockForm.control}
-                            name="productCode"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Product Code *</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="Enter product code" 
-                                    {...field} 
-                                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          {!isSimplifiedProductType(watchedProductType) && (
-                            <FormField
-                              control={stockForm.control}
-                              name="category"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Category *</FormLabel>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select category" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      <SelectItem value="Sativa">Sativa</SelectItem>
-                                      <SelectItem value="Indica">Indica</SelectItem>
-                                      <SelectItem value="Hybrid">Hybrid</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          )}
-                          
-                          <FormField
-                            control={stockForm.control}
-                            name="productType"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Product Type *</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select type" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="Cannabis">Cannabis</SelectItem>
-                                    <SelectItem value="Hash">Hash</SelectItem>
-                                    <SelectItem value="Cali Pax">Cali Pax</SelectItem>
-                                    <SelectItem value="Edibles">Edibles</SelectItem>
-                                    <SelectItem value="Pre-Rolls">Pre-Rolls</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={stockForm.control}
-                            name="imageUrl"
-                            render={({ field }) => (
-                              <FormItem className="md:col-span-2">
-                                <FormLabel>Product Image</FormLabel>
-                                <FormControl>
-                                  <div className="space-y-4">
-                                    <ObjectUploader
-                                      maxNumberOfFiles={1}
-                                      maxFileSize={10485760}
-                                      onGetUploadParameters={handleGetUploadParameters}
-                                      onComplete={handleUploadComplete}
-                                      onUploadStart={() => setIsImageUploading(true)}
-                                      buttonClassName="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400"
-                                      allowedFileTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']}
-                                      disabled={isImageUploading}
-                                    >
-                                      {isImageUploading ? '⏳ Uploading Image...' : '📷 Upload Product Image'}
-                                    </ObjectUploader>
-                                    
-                                    {isImageUploading && (
-                                      <div className="mt-4">
-                                        <div className="border rounded-lg p-4 bg-blue-50 flex justify-center items-center">
-                                          <div className="text-blue-600 flex items-center space-x-2">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                                            <span>Processing image...</span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {imagePreview && !isImageUploading && (
-                                      <div className="mt-4">
-                                        <p className="text-sm text-gray-600 mb-2 font-medium">Image Preview:</p>
-                                        <div className="border rounded-lg p-4 bg-gray-50 flex justify-center">
-                                          <img 
-                                            src={imagePreview} 
-                                            alt="Product preview" 
-                                            className="max-w-full max-h-64 w-auto h-auto object-contain rounded shadow-sm border border-gray-200"
-                                            onLoad={() => {
-                                              console.log('Image loaded successfully:', imagePreview);
-                                            }}
-                                            onError={(e) => {
-                                              console.error('Image failed to load:', imagePreview, e);
-                                              setTimeout(() => {
-                                                if (imagePreview) {
-                                                  toast({
-                                                    title: "Image Display Error",
-                                                    description: "Unable to display image preview. Please try uploading again.",
-                                                    variant: "destructive"
-                                                  });
-                                                }
-                                              }, 2000);
-                                            }}
-                                          />
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    <input 
-                                      type="hidden"
-                                      {...field}
-                                      value={field.value || uploadedImageUrl || ''}
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        
-                        <FormField
-                          control={stockForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem className="mt-4">
-                              <FormLabel>Product Description</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Describe the product's characteristics, effects, and flavors..."
-                                  className="min-h-[100px]"
-                                  {...field}
-                                  value={field.value || ''}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      {/* Section 2: Internal Stock Management */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                          <BarChart3 className="w-5 h-5 mr-2" />
-                          Internal Stock Management
-                        </h4>
-                        <p className="text-sm text-blue-700 mb-4">This information is for admin use only and will not be visible to customers</p>
-                        
-                        {!isSimplifiedProductType(watchedProductType) && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <FormField
-                              control={stockForm.control}
-                              name="supplier"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Supplier *</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="e.g., Green Harvest Co." {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        )}
-                        
-                        {/* Stock Distribution */}
-                        <div className="space-y-4 mb-6">
-                          <h5 className="font-medium text-sm text-blue-700">
-                            Stock Distribution ({isSimplifiedProductType(watchedProductType) ? 'units' : 'grams'})
-                          </h5>
-                          <div className={`grid grid-cols-1 gap-4 ${isSimplifiedProductType(watchedProductType) ? 'md:grid-cols-1' : 'md:grid-cols-3'}`}>
-                            <FormField
-                              control={stockForm.control}
-                              name="onShelfGrams"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>On Shelf</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number" 
-                                      placeholder="0" 
-                                      {...field} 
-                                      value={field.value || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '') {
-                                          field.onChange(0);
-                                        } else {
-                                          const numValue = parseInt(value, 10);
-                                          if (!isNaN(numValue)) {
-                                            field.onChange(numValue);
-                                          }
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            {!isSimplifiedProductType(watchedProductType) && (
-                              <FormField
-                                control={stockForm.control}
-                                name="internalGrams"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Internal Storage</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        placeholder="0" 
-                                        {...field} 
-                                        value={field.value || ''}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            field.onChange(0);
-                                          } else {
-                                            const numValue = parseInt(value, 10);
-                                            if (!isNaN(numValue)) {
-                                              field.onChange(numValue);
-                                            }
-                                          }
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            )}
-                            
-                            {!isSimplifiedProductType(watchedProductType) && (
-                              <FormField
-                                control={stockForm.control}
-                                name="externalGrams"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>External Storage</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        placeholder="0" 
-                                        {...field} 
-                                        value={field.value || ''}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            field.onChange(0);
-                                          } else {
-                                            const numValue = parseInt(value, 10);
-                                            if (!isNaN(numValue)) {
-                                              field.onChange(numValue);
-                                            }
-                                          }
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            )}
-                          </div>
-                          
-                          {/* Total calculation display */}
-                          <div className="p-3 bg-blue-100 rounded-lg border border-blue-200">
-                            <p className="text-sm font-medium text-blue-800">
-                              Total Stock Amount: {(stockForm.watch('onShelfGrams') || 0) + (stockForm.watch('internalGrams') || 0) + (stockForm.watch('externalGrams') || 0)}{isSimplifiedProductType(watchedProductType) ? ' units' : 'g'}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {/* Pricing */}
-                        <div className="space-y-4">
-                          <h5 className="font-medium text-sm text-blue-700">
-                            Pricing (€ per {isSimplifiedProductType(watchedProductType) ? 'unit' : 'gram'})
-                          </h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={stockForm.control}
-                              name="costPrice"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Cost Price</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number"
-                                      step="0.01"
-                                      placeholder="0.00" 
-                                      {...field} 
-                                      value={field.value || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        field.onChange(value);
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={stockForm.control}
-                              name="shelfPrice"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Shelf Price</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number"
-                                      step="0.01"
-                                      placeholder="0.00" 
-                                      {...field} 
-                                      value={field.value || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        field.onChange(value);
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-end space-x-2 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowStockForm(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={createStockMutation.isPending || updateStockMutation.isPending}
-                      className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
-                    >
-                      {editingStock ? 
-                        (updateStockMutation.isPending ? 'Updating...' : 'Update Stock') : 
-                        (createStockMutation.isPending ? 'Creating...' : 'Create Stock Entry')
-                      }
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </div>
-          </DialogContent>
-        </Dialog>
 
 
         {/* Start Shift Dialog */}
@@ -3328,6 +2917,418 @@ export function AdminDashboard() {
         </Tabs>
 
         {/* Global Dialogs - Available from all tabs */}
+        
+        {/* Stock Management Modal - GLOBAL */}
+        <Dialog open={showStockForm} onOpenChange={setShowStockForm}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-blue-800">
+                {editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="p-2">
+              <Form {...stockForm}>
+                <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-6">
+                      {/* Section 1: Product Catalog Information */}
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                          <Package className="w-5 h-5 mr-2" />
+                          Customer Catalog Information
+                        </h4>
+                        <p className="text-sm text-green-700 mb-4">This information will be visible to customers in the product catalog</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={stockForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Product Name *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="e.g., Blue Dream" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={stockForm.control}
+                            name="productCode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Product Code *</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Enter product code" 
+                                    {...field} 
+                                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          {!isSimplifiedProductType(watchedProductType) && (
+                            <FormField
+                              control={stockForm.control}
+                              name="category"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Category *</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select category" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="Sativa">Sativa</SelectItem>
+                                      <SelectItem value="Indica">Indica</SelectItem>
+                                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                          
+                          <FormField
+                            control={stockForm.control}
+                            name="productType"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Product Type *</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select type" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="Cannabis">Cannabis</SelectItem>
+                                    <SelectItem value="Hash">Hash</SelectItem>
+                                    <SelectItem value="Cali Pax">Cali Pax</SelectItem>
+                                    <SelectItem value="Edibles">Edibles</SelectItem>
+                                    <SelectItem value="Pre-Rolls">Pre-Rolls</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={stockForm.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-2">
+                                <FormLabel>Product Image</FormLabel>
+                                <FormControl>
+                                  <div className="space-y-4">
+                                    <ObjectUploader
+                                      maxNumberOfFiles={1}
+                                      maxFileSize={10485760}
+                                      onGetUploadParameters={handleGetUploadParameters}
+                                      onComplete={handleUploadComplete}
+                                      onUploadStart={() => setIsImageUploading(true)}
+                                      buttonClassName="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400"
+                                      allowedFileTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']}
+                                      disabled={isImageUploading}
+                                    >
+                                      {isImageUploading ? '⏳ Uploading Image...' : '📷 Upload Product Image'}
+                                    </ObjectUploader>
+                                    
+                                    {isImageUploading && (
+                                      <div className="mt-4">
+                                        <div className="border rounded-lg p-4 bg-blue-50 flex justify-center items-center">
+                                          <div className="text-blue-600 flex items-center space-x-2">
+                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                            <span>Processing image...</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {imagePreview && !isImageUploading && (
+                                      <div className="mt-4">
+                                        <p className="text-sm text-gray-600 mb-2 font-medium">Image Preview:</p>
+                                        <div className="border rounded-lg p-4 bg-gray-50 flex justify-center">
+                                          <img 
+                                            src={imagePreview} 
+                                            alt="Product preview" 
+                                            className="max-w-full max-h-64 w-auto h-auto object-contain rounded shadow-sm border border-gray-200"
+                                            onLoad={() => {
+                                              console.log('Image loaded successfully:', imagePreview);
+                                            }}
+                                            onError={(e) => {
+                                              console.error('Image failed to load:', imagePreview, e);
+                                              setTimeout(() => {
+                                                if (imagePreview) {
+                                                  toast({
+                                                    title: "Image Display Error",
+                                                    description: "Unable to display image preview. Please try uploading again.",
+                                                    variant: "destructive"
+                                                  });
+                                                }
+                                              }, 2000);
+                                            }}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    <input 
+                                      type="hidden"
+                                      {...field}
+                                      value={field.value || uploadedImageUrl || ''}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <FormField
+                          control={stockForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem className="mt-4">
+                              <FormLabel>Product Description</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Describe the product's characteristics, effects, and flavors..."
+                                  className="min-h-[100px]"
+                                  {...field}
+                                  value={field.value || ''}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      {/* Section 2: Internal Stock Management */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                          <BarChart3 className="w-5 h-5 mr-2" />
+                          Internal Stock Management
+                        </h4>
+                        <p className="text-sm text-blue-700 mb-4">This information is for admin use only and will not be visible to customers</p>
+                        
+                        {!isSimplifiedProductType(watchedProductType) && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <FormField
+                              control={stockForm.control}
+                              name="supplier"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Supplier *</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g., Green Harvest Co." {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                        
+                        {/* Stock Distribution */}
+                        <div className="space-y-4 mb-6">
+                          <h5 className="font-medium text-sm text-blue-700">
+                            Stock Distribution ({isSimplifiedProductType(watchedProductType) ? 'units' : 'grams'})
+                          </h5>
+                          <div className={`grid grid-cols-1 gap-4 ${isSimplifiedProductType(watchedProductType) ? 'md:grid-cols-1' : 'md:grid-cols-3'}`}>
+                            <FormField
+                              control={stockForm.control}
+                              name="onShelfGrams"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>On Shelf</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="number" 
+                                      placeholder="0" 
+                                      {...field} 
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === '') {
+                                          field.onChange(0);
+                                        } else {
+                                          const numValue = parseInt(value, 10);
+                                          if (!isNaN(numValue)) {
+                                            field.onChange(numValue);
+                                          }
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            {!isSimplifiedProductType(watchedProductType) && (
+                              <FormField
+                                control={stockForm.control}
+                                name="internalGrams"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Internal Storage</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        type="number" 
+                                        placeholder="0" 
+                                        {...field} 
+                                        value={field.value || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            field.onChange(0);
+                                          } else {
+                                            const numValue = parseInt(value, 10);
+                                            if (!isNaN(numValue)) {
+                                              field.onChange(numValue);
+                                            }
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
+                            
+                            {!isSimplifiedProductType(watchedProductType) && (
+                              <FormField
+                                control={stockForm.control}
+                                name="externalGrams"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>External Storage</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        type="number" 
+                                        placeholder="0" 
+                                        {...field} 
+                                        value={field.value || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            field.onChange(0);
+                                          } else {
+                                            const numValue = parseInt(value, 10);
+                                            if (!isNaN(numValue)) {
+                                              field.onChange(numValue);
+                                            }
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
+                          </div>
+                          
+                          {/* Total calculation display */}
+                          <div className="p-3 bg-blue-100 rounded-lg border border-blue-200">
+                            <p className="text-sm font-medium text-blue-800">
+                              Total Stock Amount: {(stockForm.watch('onShelfGrams') || 0) + (stockForm.watch('internalGrams') || 0) + (stockForm.watch('externalGrams') || 0)}{isSimplifiedProductType(watchedProductType) ? ' units' : 'g'}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Pricing */}
+                        <div className="space-y-4">
+                          <h5 className="font-medium text-sm text-blue-700">
+                            Pricing (€ per {isSimplifiedProductType(watchedProductType) ? 'unit' : 'gram'})
+                          </h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={stockForm.control}
+                              name="costPrice"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Cost Price</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00" 
+                                      {...field} 
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        field.onChange(value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={stockForm.control}
+                              name="shelfPrice"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Shelf Price</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00" 
+                                      {...field} 
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        field.onChange(value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowStockForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createStockMutation.isPending || updateStockMutation.isPending}
+                      className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
+                    >
+                      {editingStock ? 
+                        (updateStockMutation.isPending ? 'Updating...' : 'Update Stock') : 
+                        (createStockMutation.isPending ? 'Creating...' : 'Create Stock Entry')
+                      }
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </DialogContent>
+        </Dialog>
         
         {/* Expense Form Dialog */}
         <Dialog open={showExpenseForm} onOpenChange={setShowExpenseForm}>
