@@ -1542,13 +1542,7 @@ export function AdminDashboard() {
               <span className="mobile-text-sm">Expenses Log</span>
             </Button>
 
-            <Button
-              onClick={() => setShowManagementModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              <span className="mobile-text-sm">Management</span>
-            </Button>
+            
 
             <Button
               onClick={handleLogout}
