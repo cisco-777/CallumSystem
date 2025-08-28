@@ -3389,7 +3389,326 @@ export function AdminDashboard() {
           
           {/* Members Tab */}
           <TabsContent value="members">
-            {/* Empty tab content as requested */}
+            {/* Pending Member Approvals */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-base">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                  Pending Member Approvals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pendingMembers.length > 0 ? (
+                  <div className="space-y-2 sm:space-y-3">
+                    {pendingMembers.map((member: any) => (
+                      <div key={member.id} className="flex items-center justify-between mobile-p-2 rounded-lg bg-orange-50 border border-orange-200">
+                        <div className="flex flex-col">
+                          <span className="mobile-text-sm font-medium">
+                            {member.firstName && member.lastName 
+                              ? `${member.firstName} ${member.lastName}` 
+                              : member.email}
+                          </span>
+                          <span className="mobile-text-xs text-gray-500">{member.email}</span>
+                          <span className="mobile-text-xs text-gray-400">
+                            Registered: {new Date(member.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <Button
+                          onClick={() => approveMemberMutation.mutate({ 
+                            userId: member.id, 
+                            approvedBy: 'Admin Panel' 
+                          })}
+                          disabled={approveMemberMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700 text-white mobile-btn-sm"
+                        >
+                          {approveMemberMutation.isPending ? 'Approving...' : 'Approve'}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 sm:py-8 text-blue-600">
+                    <Users className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
+                    <p className="mobile-text-sm font-medium">All members approved!</p>
+                    <p className="mobile-text-xs text-gray-500">No pending approvals</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Customer Search Tool */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Search className="w-5 h-5 mr-2 text-gray-600" />
+                  Customer Search & Profiles
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6">
+                  <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      placeholder="Search customers by name or email..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                        }
+                      }}
+                      className="pl-10 pr-4"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                {searchQuery && (
+                  <div className="space-y-6">
+                    {filteredUsers.slice(0, 5).map((user: any) => {
+                      const profile = getCustomerProfile(user.id);
+                      if (!profile) return null;
+                      
+                      return (
+                        <div key={user.id} className="border-2 border-blue-200 rounded-lg p-6 bg-white shadow-sm">
+                          {/* Customer Header */}
+                          <div className="flex justify-between items-start mb-6">
+                            <div>
+                              <h3 className="font-bold text-xl text-blue-800">
+                                {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Anonymous User'}
+                              </h3>
+                              <p className="text-sm text-gray-600 mt-1">{user.email}</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Member since {new Date(user.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className="bg-blue-100 px-3 py-1 rounded-full">
+                                <span className="text-sm font-semibold text-blue-800">
+                                  {profile.orderCount} Completed
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Spending Summary */}
+                          {profile.orderCount > 0 && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                              <h4 className="font-semibold text-green-800 mb-2">💰 Spending Summary</h4>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="text-gray-600">Total Spent:</span>
+                                  <span className="font-bold text-green-700 ml-2">€{profile.totalSpent}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Average Order:</span>
+                                  <span className="font-bold text-green-700 ml-2">€{profile.averageOrderValue}</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {profile.orderCount > 0 ? (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              {/* Strain Preferences */}
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                                  <Leaf className="w-4 h-4 mr-2" />
+                                  Strain Preferences
+                                </h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Sativa:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-blue-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.sativa}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.sativa}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Indica:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-blue-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.indica}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.indica}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Hybrid:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-blue-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.hybrid}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.hybrid}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Product Type Preferences */}
+                              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <h4 className="font-semibold text-purple-800 mb-3 flex items-center">
+                                  <Hash className="w-4 h-4 mr-2" />
+                                  Product Type Preferences
+                                </h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Cannabis:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.cannabis}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.cannabis}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Hash:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.hash}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.hash}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Edibles:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.edibles}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.edibles}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Pre-Rolls:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.preRolls}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.preRolls}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Cali Pax:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.caliPax}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.caliPax}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                              <p className="text-gray-600">This customer hasn't completed any orders yet.</p>
+                            </div>
+                          )}
+                          
+                          {/* Completed Orders Only */}
+                          {profile.recentOrders && profile.recentOrders.length > 0 && (
+                            <div className="mt-6">
+                              <h4 className="font-semibold text-gray-800 mb-3">Recent Completed Orders</h4>
+                              <div className="space-y-3">
+                                {profile.recentOrders.map((order: any) => (
+                                  <div key={order.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                        <span className="font-semibold text-sm">Order #{order.id}</span>
+                                        <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                          {order.status}
+                                        </span>
+                                      </div>
+                                      <div className="text-right">
+                                        <div className="font-bold text-green-700">€{order.totalPrice}</div>
+                                        <div className="text-xs text-gray-500">
+                                          {new Date(order.createdAt).toLocaleDateString()}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-gray-600">
+                                      <span className="font-medium">Items:</span>
+                                      {order.items && order.items.map((item: any, idx: number) => (
+                                        <span key={idx} className="ml-1">
+                                          {item.name}
+                                          {idx < order.items.length - 1 ? ', ' : ''}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Pickup Code: <span className="font-mono font-bold text-blue-600">{order.pickupCode}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    
+                    {filteredUsers.length === 0 && (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">🔍</div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">No customers found</h3>
+                        <p className="text-gray-500">
+                          No customers match "{searchQuery}". Try searching by name or email.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {!searchQuery && (
+                  <div className="text-center py-12">
+                    <Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Customer Search Tool</h3>
+                    <p className="text-gray-500 mb-4">
+                      Search for customers by name or email to view their detailed profiles
+                    </p>
+                    <div className="text-sm text-gray-400">
+                      <p>• View customer preferences and order history</p>
+                      <p>• Analyze spending patterns and product preferences</p>
+                      <p>• Track customer activity and engagement</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
           
           {/* Stock & Inventory Tab */}
