@@ -201,6 +201,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
+      // Check if user is banned
+      if (user.isBanned) {
+        return res.status(403).json({ 
+          message: "Your account has been banned. Please contact admin for assistance.",
+          userBanned: true
+        });
+      }
+
       // Check membership status for non-admin users
       if (email !== "admin123@gmail.com") {
         // Update member activity
@@ -503,6 +511,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching users:', error);
       res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  // Ban user endpoint
+  app.put("/api/users/:userId/ban", async (req, res) => {
+    const isAdmin = req.headers['x-admin'] === 'true';
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    
+    try {
+      const userId = parseInt(req.params.userId);
+      const { reason, bannedBy } = req.body;
+      
+      await storage.updateUser(userId, {
+        isBanned: true,
+        bannedBy: bannedBy || 'admin',
+        bannedAt: new Date(),
+        banReason: reason || 'No reason provided'
+      });
+      
+      res.json({ message: 'User banned successfully' });
+    } catch (error) {
+      console.error('Error banning user:', error);
+      res.status(500).json({ error: 'Failed to ban user' });
+    }
+  });
+
+  // Unban user endpoint
+  app.put("/api/users/:userId/unban", async (req, res) => {
+    const isAdmin = req.headers['x-admin'] === 'true';
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      await storage.updateUser(userId, {
+        isBanned: false,
+        bannedBy: null,
+        bannedAt: null,
+        banReason: null
+      });
+      
+      res.json({ message: 'User unbanned successfully' });
+    } catch (error) {
+      console.error('Error unbanning user:', error);
+      res.status(500).json({ error: 'Failed to unban user' });
     }
   });
 

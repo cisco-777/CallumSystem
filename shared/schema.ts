@@ -24,6 +24,11 @@ export const users = pgTable("users", {
   approvedBy: text("approved_by"), // Admin who approved the membership
   renewalCount: integer("renewal_count").default(0), // Track number of renewals
   lastActive: timestamp("last_active"), // Track member activity for statistics
+  // User ban/block functionality
+  isBanned: boolean("is_banned").default(false), // Track if user is banned
+  bannedBy: text("banned_by"), // Admin who banned the user
+  bannedAt: timestamp("banned_at"), // When user was banned
+  banReason: text("ban_reason"), // Reason for ban
   // Role field for admin users (null for regular members, "admin" for regular admin, "superadmin" for superadmin)
   role: text("role"), // null, "admin", "superadmin"
 });
@@ -150,6 +155,10 @@ export const insertUserSchema = createInsertSchema(users).pick({
   approvedBy: true,
   renewalCount: true,
   lastActive: true,
+  isBanned: true,
+  bannedBy: true,
+  bannedAt: true,
+  banReason: true,
   role: true,
   isOnboarded: true,
 });

@@ -882,6 +882,59 @@ export function AdminDashboard() {
     }
   });
 
+  const banUserMutation = useMutation({
+    mutationFn: async ({ userId, reason }: { userId: number; reason: string }) => {
+      return await apiRequest(`/api/users/${userId}/ban`, {
+        method: 'PUT',
+        body: JSON.stringify({ reason, bannedBy: 'Admin Panel' }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin': 'true'
+        }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      toast({
+        title: "User Banned",
+        description: "User has been banned successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to ban user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const unbanUserMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      return await apiRequest(`/api/users/${userId}/unban`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin': 'true'
+        }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      toast({
+        title: "User Unbanned",
+        description: "User has been unbanned successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to unban user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const onSubmitAdminCreation = (data: z.infer<typeof adminCreationFormSchema>) => {
     createAdminMutation.mutate(data);
   };
@@ -2237,12 +2290,46 @@ export function AdminDashboard() {
                                 Member since {new Date(user.createdAt).toLocaleDateString()}
                               </p>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right space-y-2">
                               <div className="bg-blue-100 px-3 py-1 rounded-full">
                                 <span className="text-sm font-semibold text-blue-800">
                                   {profile.orderCount} Completed
                                 </span>
                               </div>
+                              
+                              {/* Membership Status & Expiry */}
+                              <div className="space-y-1">
+                                <div className={`px-2 py-1 rounded text-xs font-medium ${
+                                  user.membershipStatus === 'approved' ? 'bg-green-100 text-green-800' :
+                                  user.membershipStatus === 'expired' ? 'bg-red-100 text-red-800' :
+                                  user.membershipStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {user.membershipStatus?.toUpperCase() || 'UNKNOWN'}
+                                </div>
+                                {user.expiryDate && (
+                                  <div className="text-xs text-gray-600">
+                                    Expires: {new Date(user.expiryDate).toLocaleDateString()}
+                                    <br />
+                                    <span className={`font-medium ${
+                                      new Date(user.expiryDate) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) 
+                                        ? 'text-red-600' : 'text-gray-600'
+                                    }`}>
+                                      ({Math.ceil((new Date(user.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days left)
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Ban Status */}
+                              {user.isBanned && (
+                                <div className="bg-red-100 border border-red-300 px-2 py-1 rounded">
+                                  <span className="text-xs font-medium text-red-800">BANNED</span>
+                                  {user.banReason && (
+                                    <div className="text-xs text-red-600 mt-1">{user.banReason}</div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                           
@@ -2425,6 +2512,41 @@ export function AdminDashboard() {
                               </div>
                             </div>
                           )}
+                          
+                          {/* Ban/Unban Actions */}
+                          <div className="mt-6 pt-6 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                              <h4 className="font-semibold text-gray-800">Account Management</h4>
+                              <div className="flex space-x-2">
+                                {user.isBanned ? (
+                                  <Button
+                                    onClick={() => unbanUserMutation.mutate(user.id)}
+                                    disabled={unbanUserMutation.isPending}
+                                    className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2"
+                                  >
+                                    {unbanUserMutation.isPending ? 'Unbanning...' : 'Unban User'}
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    onClick={() => {
+                                      const reason = prompt('Enter ban reason (optional):') || 'No reason provided';
+                                      banUserMutation.mutate({ userId: user.id, reason });
+                                    }}
+                                    disabled={banUserMutation.isPending}
+                                    className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2"
+                                  >
+                                    {banUserMutation.isPending ? 'Banning...' : 'Ban User'}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            {user.isBanned && user.bannedAt && (
+                              <div className="mt-3 text-xs text-gray-600">
+                                <p>Banned by: {user.bannedBy || 'Unknown'}</p>
+                                <p>Banned on: {new Date(user.bannedAt).toLocaleDateString()}</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
