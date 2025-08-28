@@ -22,14 +22,31 @@ export function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <h1 className="text-xl font-bold text-[#116149]">Demo Social Club - Admin Panel</h1>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              size="sm"
-              className="text-gray-600 border-gray-300 hover:bg-gray-100"
-            >
-              Logout
-            </Button>
+            <div className="flex space-x-3">
+              {(() => {
+                const adminData = localStorage.getItem('msc-admin-data');
+                const parsedData = adminData ? JSON.parse(adminData) : null;
+                return parsedData?.email === 'admin123@gmail.com';
+              })() && (
+                <Button
+                  onClick={() => {/* Add management modal logic here */}}
+                  variant="outline"
+                  size="sm"
+                  className="text-indigo-600 border-indigo-300 hover:bg-indigo-50"
+                >
+                  <Settings className="w-4 h-4 mr-1" />
+                  Management
+                </Button>
+              )}
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="text-gray-600 border-gray-300 hover:bg-gray-100"
+              >
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
