@@ -3465,6 +3465,43 @@ export function AdminDashboard() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {/* Delete Product Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Product</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this product?
+                <br /><br />
+                <strong>Product:</strong> {deletingProduct?.name}
+                <br />
+                <strong>Category:</strong> {deletingProduct?.category}
+                <br />
+                <strong>Code:</strong> {deletingProduct?.productCode}
+                <br /><br />
+                This action cannot be undone and will remove the product from both stock management and customer catalog.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setDeletingProduct(null);
+                }}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteProduct}
+                disabled={deleteStockMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {deleteStockMutation.isPending ? 'Deleting...' : 'Delete Product'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* End of Shift Reconciliation Dialog */}
         <Dialog open={showShiftReconciliation} onOpenChange={setShowShiftReconciliation}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
