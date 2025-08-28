@@ -33,30 +33,21 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
           className="max-w-2xl mx-auto"
         >
           <motion.h1 
-            className="text-5xl md:text-7xl font-light text-black mb-6 tracking-wide drop-shadow-2xl"
-            style={{ textShadow: '2px 2px 4px rgba(255,255,255,0.8)' }}
+            className="text-6xl md:text-8xl font-light text-white mb-8 tracking-wide"
+            style={{ textShadow: '3px 3px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-Marbella
+            Social Club
           </motion.h1>
           
-          <motion.h2 
-            className="text-2xl md:text-3xl font-extralight text-black mb-4 tracking-wider drop-shadow-lg"
-            style={{ textShadow: '1px 1px 3px rgba(255,255,255,0.7)' }}
+          <motion.p 
+            className="text-xl md:text-2xl font-light text-white mb-16 max-w-2xl mx-auto leading-relaxed"
+            style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8), 1px 1px 2px rgba(0,0,0,0.6)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
-          >
-            Social Club
-          </motion.h2>
-          
-          <motion.p 
-            className="text-lg md:text-xl font-light text-black mb-12 max-w-lg mx-auto leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.8 }}
           >
             An exclusive community for those who appreciate the finer things in life
           </motion.p>
