@@ -168,8 +168,8 @@ export function AdminDashboard() {
       onShelfGrams: 0,
       internalGrams: 0,
       externalGrams: 0,
-      costPrice: '0',
-      shelfPrice: '0'
+      costPrice: '',
+      shelfPrice: ''
     }
   });
 
@@ -3268,7 +3268,11 @@ export function AdminDashboard() {
                                       {...field} 
                                       value={field.value || ''}
                                       onChange={(e) => {
-                                        const value = e.target.value;
+                                        let value = e.target.value;
+                                        // Remove leading zeros, but keep decimal values
+                                        if (value && value !== '0' && value !== '0.') {
+                                          value = value.replace(/^0+(?=\d)/, '');
+                                        }
                                         field.onChange(value);
                                       }}
                                     />
@@ -3292,7 +3296,11 @@ export function AdminDashboard() {
                                       {...field} 
                                       value={field.value || ''}
                                       onChange={(e) => {
-                                        const value = e.target.value;
+                                        let value = e.target.value;
+                                        // Remove leading zeros, but keep decimal values
+                                        if (value && value !== '0' && value !== '0.') {
+                                          value = value.replace(/^0+(?=\d)/, '');
+                                        }
                                         field.onChange(value);
                                       }}
                                     />
