@@ -496,7 +496,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="hover:shadow-lg transition-shadow duration-300 cursor-pointer group">
+                    <Card className="hover:shadow-lg transition-shadow duration-300 cursor-pointer group h-full flex flex-col">
                       <CardHeader className="pb-3 sm:pb-4">
                         <div className="w-full h-32 sm:h-48 bg-gray-200 rounded-lg mb-3 sm:mb-4 flex items-center justify-center group-hover:bg-gray-300 transition-colors overflow-hidden">
                           {getProductImage(product.name) ? (
@@ -521,10 +521,12 @@ export function Dashboard({ onLogout }: DashboardProps) {
                           </Badge>
                         )}
                       </CardHeader>
-                      <CardContent>
-                        <CardDescription className="mb-3 sm:mb-4 mobile-text-sm leading-relaxed">
+                      <CardContent className="flex-1 flex flex-col">
+                        <CardDescription className="mb-3 sm:mb-4 mobile-text-sm leading-relaxed h-12 overflow-hidden flex-shrink-0">
                           {product.description || 'Premium selection item'}
                         </CardDescription>
+                        
+                        <div className="flex-1"></div>
                         
                         {/* Quantity Selector */}
                         <div className="flex items-center justify-center mb-3 sm:mb-4 space-x-3">
