@@ -2,7 +2,6 @@ import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import beachImage from '@assets/pexels-jarcou-1884417.jpg';
 import marinaImage from '@assets/pexels-arvid-knutsen-1892648-3511307.jpg';
-import marbellaImage from '@assets/Marbella_1750505556334.jpg';
 
 interface LandingPageProps {
   onToggleChat: () => void;
@@ -14,15 +13,15 @@ export function LandingPage({ onToggleChat }: LandingPageProps) {
       {/* Hero Section 1 - Beach Scene */}
       <section 
         className="min-h-screen flex items-center relative bg-cover bg-center bg-fixed"
-        style={{ backgroundImage: `url(${marbellaImage})` }}
+        style={{ backgroundImage: `url(${beachImage})` }}
       >
         <div className="gradient-overlay absolute inset-0"></div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-inter font-bold text-5xl md:text-7xl text-black mb-6 leading-tight">
+          <h1 className="font-inter font-bold text-5xl md:text-7xl text-white mb-6 leading-tight">
             Elevate Your <br />
             <span className="text-warm-gold">Experience</span>
           </h1>
-          <p className="text-xl md:text-2xl text-black mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-100 mb-8 max-w-3xl mx-auto leading-relaxed">
             Connect with premium cannabis experiences through our intelligent chat platform. 
             Professional guidance, curated recommendations, and elevated conversations.
           </p>
@@ -34,7 +33,7 @@ export function LandingPage({ onToggleChat }: LandingPageProps) {
               <i className="fas fa-comments mr-3"></i>Start Chatting
             </Button>
             <Link href="/main-chat">
-              <Button className="glassmorphism text-black px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 bg-transparent border-black border hover:bg-black hover:text-white">
+              <Button className="glassmorphism text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 bg-transparent border-white border hover:bg-white hover:text-charcoal">
                 <i className="fas fa-arrow-right mr-3"></i>Explore Platform
               </Button>
             </Link>
