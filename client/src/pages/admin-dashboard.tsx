@@ -180,9 +180,8 @@ export function AdminDashboard() {
     const currentSchema = getFormSchema(watchedProductType);
     stockForm.clearErrors(); // Clear any existing validation errors
     
-    // Update resolver with new schema
-    const newResolver = zodResolver(currentSchema);
-    stockForm.resolver = newResolver;
+    // Note: React Hook Form doesn't allow changing resolver after initialization
+    // The form will still work with the original fullStockFormSchema
   }, [watchedProductType]);
 
   const adminCreationForm = useForm<z.infer<typeof adminCreationFormSchema>>({
@@ -221,7 +220,7 @@ export function AdminDashboard() {
     }
   });
 
-  const { data: products = [] } = useQuery({
+  const { data: products = [] } = useQuery<any[]>({
     queryKey: ['/api/products']
   });
 
@@ -1533,7 +1532,7 @@ export function AdminDashboard() {
       totalSpent,
       averageOrderValue,
       preferences,
-      recentOrders: userOrders.slice(0, 5).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      recentOrders: userOrders.slice(0, 5).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     };
   };
   
@@ -1551,7 +1550,7 @@ export function AdminDashboard() {
            email.includes(query) || 
            firstName.includes(query) || 
            lastName.includes(query);
-  }).filter(user => {
+  }).filter((user: any) => {
     // Only show users who have at least made one order or have complete profile info
     const hasOrders = analyticsOrders.some((order: any) => order.userId === user.id);
     const hasCompleteProfile = user.firstName && user.lastName;
@@ -3138,12 +3137,12 @@ export function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 sm:space-y-4">
-                  {analytics.mostProfitable && analytics.mostProfitable.value > 0 && (
+                  {analytics.mostProfitable && (analytics.mostProfitable as any).value > 0 && (
                     <div className="bg-green-50 border border-green-200 rounded-lg mobile-p-3">
                       <h4 className="mobile-text-sm font-semibold text-green-800 mb-2">Most Profitable Product</h4>
-                      <p className="mobile-text-base font-bold text-green-700">{analytics.mostProfitable.name}</p>
+                      <p className="mobile-text-base font-bold text-green-700">{(analytics.mostProfitable as any).name}</p>
                       <p className="mobile-text-xs text-green-600 mt-1">
-                        Total revenue from completed orders: €{analytics.mostProfitable.value.toFixed(2)}
+                        Total revenue from completed orders: €{(analytics.mostProfitable as any).value.toFixed(2)}
                       </p>
                     </div>
                   )}
