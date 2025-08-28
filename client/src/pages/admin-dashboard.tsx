@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History, LogOut, Settings } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History, LogOut, Settings, CheckCircle } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -1892,982 +1892,6 @@ export function AdminDashboard() {
                 )}
               </CardContent>
             </Card>
-
-        {/* Stock Management Modal */}
-        <Dialog open={showStockForm} onOpenChange={setShowStockForm}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-blue-800">
-                {editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="p-2">
-              <Form {...stockForm}>
-                <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-6">
-                      {/* Section 1: Product Catalog Information */}
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <h4 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                          <Package className="w-5 h-5 mr-2" />
-                          Customer Catalog Information
-                        </h4>
-                        <p className="text-sm text-green-700 mb-4">This information will be visible to customers in the product catalog</p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            control={stockForm.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Product Name *</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="e.g., Blue Dream" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={stockForm.control}
-                            name="productCode"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Product Code *</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="Enter product code" 
-                                    {...field} 
-                                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          {!isSimplifiedProductType(watchedProductType) && (
-                            <FormField
-                              control={stockForm.control}
-                              name="category"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Category *</FormLabel>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select category" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      <SelectItem value="Sativa">Sativa</SelectItem>
-                                      <SelectItem value="Indica">Indica</SelectItem>
-                                      <SelectItem value="Hybrid">Hybrid</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          )}
-                          
-                          <FormField
-                            control={stockForm.control}
-                            name="productType"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Product Type *</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select type" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="Cannabis">Cannabis</SelectItem>
-                                    <SelectItem value="Hash">Hash</SelectItem>
-                                    <SelectItem value="Cali Pax">Cali Pax</SelectItem>
-                                    <SelectItem value="Edibles">Edibles</SelectItem>
-                                    <SelectItem value="Pre-Rolls">Pre-Rolls</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={stockForm.control}
-                            name="imageUrl"
-                            render={({ field }) => (
-                              <FormItem className="md:col-span-2">
-                                <FormLabel>Product Image</FormLabel>
-                                <FormControl>
-                                  <div className="space-y-4">
-                                    <ObjectUploader
-                                      maxNumberOfFiles={1}
-                                      maxFileSize={10485760}
-                                      onGetUploadParameters={handleGetUploadParameters}
-                                      onComplete={handleUploadComplete}
-                                      onUploadStart={() => setIsImageUploading(true)}
-                                      buttonClassName="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400"
-                                      allowedFileTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']}
-                                      disabled={isImageUploading}
-                                    >
-                                      {isImageUploading ? '⏳ Uploading Image...' : '📷 Upload Product Image'}
-                                    </ObjectUploader>
-                                    
-                                    {isImageUploading && (
-                                      <div className="mt-4">
-                                        <div className="border rounded-lg p-4 bg-blue-50 flex justify-center items-center">
-                                          <div className="text-blue-600 flex items-center space-x-2">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                                            <span>Processing image...</span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {imagePreview && !isImageUploading && (
-                                      <div className="mt-4">
-                                        <p className="text-sm text-gray-600 mb-2 font-medium">Image Preview:</p>
-                                        <div className="border rounded-lg p-4 bg-gray-50 flex justify-center">
-                                          <img 
-                                            src={imagePreview} 
-                                            alt="Product preview" 
-                                            className="max-w-full max-h-64 w-auto h-auto object-contain rounded shadow-sm border border-gray-200"
-                                            onLoad={() => {
-                                              console.log('Image loaded successfully:', imagePreview);
-                                            }}
-                                            onError={(e) => {
-                                              console.error('Image failed to load:', imagePreview, e);
-                                              setTimeout(() => {
-                                                if (imagePreview) {
-                                                  toast({
-                                                    title: "Image Display Error",
-                                                    description: "Unable to display image preview. Please try uploading again.",
-                                                    variant: "destructive"
-                                                  });
-                                                }
-                                              }, 2000);
-                                            }}
-                                          />
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    <input 
-                                      type="hidden"
-                                      {...field}
-                                      value={field.value || uploadedImageUrl || ''}
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        
-                        <FormField
-                          control={stockForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem className="mt-4">
-                              <FormLabel>Product Description</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Describe the product's characteristics, effects, and flavors..."
-                                  className="min-h-[100px]"
-                                  {...field}
-                                  value={field.value || ''}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      {/* Section 2: Internal Stock Management */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                          <BarChart3 className="w-5 h-5 mr-2" />
-                          Internal Stock Management
-                        </h4>
-                        <p className="text-sm text-blue-700 mb-4">This information is for admin use only and will not be visible to customers</p>
-                        
-                        {!isSimplifiedProductType(watchedProductType) && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <FormField
-                              control={stockForm.control}
-                              name="supplier"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Supplier *</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="e.g., Green Harvest Co." {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        )}
-                        
-                        {/* Stock Distribution */}
-                        <div className="space-y-4 mb-6">
-                          <h5 className="font-medium text-sm text-blue-700">
-                            Stock Distribution ({isSimplifiedProductType(watchedProductType) ? 'units' : 'grams'})
-                          </h5>
-                          <div className={`grid grid-cols-1 gap-4 ${isSimplifiedProductType(watchedProductType) ? 'md:grid-cols-1' : 'md:grid-cols-3'}`}>
-                            <FormField
-                              control={stockForm.control}
-                              name="onShelfGrams"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>On Shelf</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number" 
-                                      placeholder="0" 
-                                      {...field} 
-                                      value={field.value || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '') {
-                                          field.onChange(0);
-                                        } else {
-                                          const numValue = parseInt(value, 10);
-                                          if (!isNaN(numValue)) {
-                                            field.onChange(numValue);
-                                          }
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            {!isSimplifiedProductType(watchedProductType) && (
-                              <FormField
-                                control={stockForm.control}
-                                name="internalGrams"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Internal Storage</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        placeholder="0" 
-                                        {...field} 
-                                        value={field.value || ''}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            field.onChange(0);
-                                          } else {
-                                            const numValue = parseInt(value, 10);
-                                            if (!isNaN(numValue)) {
-                                              field.onChange(numValue);
-                                            }
-                                          }
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            )}
-                            
-                            {!isSimplifiedProductType(watchedProductType) && (
-                              <FormField
-                                control={stockForm.control}
-                                name="externalGrams"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>External Storage</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        placeholder="0" 
-                                        {...field} 
-                                        value={field.value || ''}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            field.onChange(0);
-                                          } else {
-                                            const numValue = parseInt(value, 10);
-                                            if (!isNaN(numValue)) {
-                                              field.onChange(numValue);
-                                            }
-                                          }
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            )}
-                          </div>
-                          
-                          {/* Total calculation display */}
-                          <div className="p-3 bg-blue-100 rounded-lg border border-blue-200">
-                            <p className="text-sm font-medium text-blue-800">
-                              Total Stock Amount: {(stockForm.watch('onShelfGrams') || 0) + (stockForm.watch('internalGrams') || 0) + (stockForm.watch('externalGrams') || 0)}{isSimplifiedProductType(watchedProductType) ? ' units' : 'g'}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {/* Pricing */}
-                        <div className="space-y-4">
-                          <h5 className="font-medium text-sm text-blue-700">
-                            Pricing (€ per {isSimplifiedProductType(watchedProductType) ? 'unit' : 'gram'})
-                          </h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={stockForm.control}
-                              name="costPrice"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Cost Price</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number"
-                                      step="0.01"
-                                      placeholder="0.00" 
-                                      {...field} 
-                                      value={field.value || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        field.onChange(value);
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={stockForm.control}
-                              name="shelfPrice"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Shelf Price</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number"
-                                      step="0.01"
-                                      placeholder="0.00" 
-                                      {...field} 
-                                      value={field.value || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        field.onChange(value);
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-end space-x-2 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowStockForm(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={createStockMutation.isPending || updateStockMutation.isPending}
-                      className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
-                    >
-                      {editingStock ? 
-                        (updateStockMutation.isPending ? 'Updating...' : 'Update Stock') : 
-                        (createStockMutation.isPending ? 'Creating...' : 'Create Stock Entry')
-                      }
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-
-        {/* Start Shift Dialog */}
-        <Dialog open={showStartShiftDialog} onOpenChange={setShowStartShiftDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-green-800 flex items-center">
-                <PlayCircle className="w-5 h-5 mr-2" />
-                Start New Shift
-              </DialogTitle>
-            </DialogHeader>
-            
-            <Form {...startShiftForm}>
-              <form onSubmit={startShiftForm.handleSubmit(onSubmitStartShift)} className="space-y-4">
-                <FormField
-                  control={startShiftForm.control}
-                  name="workerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Worker Name *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter your name"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={startShiftForm.control}
-                  name="startingTillAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Starting Till Amount *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">
-                    <strong>Note:</strong> Only one shift can be active at a time. 
-                    All expenses and sales during your shift will be automatically tracked.
-                  </p>
-                </div>
-
-                <div className="flex justify-end space-x-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowStartShiftDialog(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={startShiftMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    {startShiftMutation.isPending ? 'Starting...' : 'Start Shift'}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-
-        {/* End Shift Confirmation Dialog */}
-        <AlertDialog open={showEndShiftDialog} onOpenChange={setShowEndShiftDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center text-red-700">
-                <StopCircle className="w-5 h-5 mr-2" />
-                End Current Shift
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to end the current shift?
-                <br /><br />
-                {activeShift && (
-                  <>
-                    <strong>Shift ID:</strong> {activeShift.shiftId}
-                    <br />
-                    <strong>Worker:</strong> {activeShift.workerName}
-                    <br />
-                    <strong>Duration:</strong> {Math.floor((new Date().getTime() - new Date(activeShift.startTime).getTime()) / (1000 * 60))} minutes
-                    <br /><br />
-                  </>
-                )}
-                This will calculate all shift totals (sales, expenses, net amount) and prepare data for reconciliation.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel 
-                onClick={() => setShowEndShiftDialog(false)}
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={confirmEndShift}
-                disabled={endShiftMutation.isPending}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                {endShiftMutation.isPending ? 'Ending...' : 'End Shift'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-
-          </TabsContent>
-          
-          {/* Orders & Members Tab */}
-          <TabsContent value="orders-members">
-            {/* Order Control Center */}
-            <Card id="order-control-center" className="mb-8">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Order Control Center</CardTitle>
-                <div className="flex space-x-2">
-                  <Button 
-                    onClick={handleCreateManualOrder}
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Manual Order
-                  </Button>
-                  <Button 
-                    onClick={() => {
-                      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-300"
-                  >
-                    <Activity className="w-4 h-4 mr-1" />
-                    Refresh
-                  </Button>
-                  <Button 
-                    onClick={() => {
-                      clearAllOrdersMutation.mutate();
-                    }}
-                    variant="destructive"
-                    size="sm"
-                    disabled={clearAllOrdersMutation.isPending}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    {clearAllOrdersMutation.isPending ? 'Clearing...' : 'Clear All Orders'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {Array.isArray(orders) && orders.length > 0 ? (
-                    orders.filter((order: any) => 
-                      order.archivedFromAdmin !== true && 
-                      activeShift && 
-                      new Date(order.createdAt) >= new Date(activeShift.startTime)
-                    ).map((order: any) => (
-                      <div key={order.id} className="border rounded-lg p-4 bg-white">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <Badge 
-                                variant={order.status === 'pending' ? 'default' : order.status === 'completed' ? 'secondary' : 'outline'}
-                                className={order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : order.status === 'completed' ? 'bg-green-100 text-green-800 border-green-300' : ''}
-                              >
-                                {order.status.toUpperCase()}
-                              </Badge>
-                              <span className="font-mono text-sm text-blue-700">#{order.pickupCode}</span>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <div className="text-sm">
-                                <strong>Customer:</strong> {users.find((u: any) => u.id === order.userId)?.firstName || 'Unknown'} {users.find((u: any) => u.id === order.userId)?.lastName || ''}
-                              </div>
-                              <div className="text-sm">
-                                <strong>Items:</strong> {order.items && order.items.map((item: any) => item.name).join(', ')}
-                              </div>
-                              <div className="text-sm font-medium text-green-700">
-                                <strong>Total:</strong> €{order.totalPrice}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                Ordered: {new Date(order.createdAt).toLocaleString()}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex space-x-2 ml-4">
-                            {order.status === 'pending' && (
-                              <>
-                                <Button
-                                  onClick={() => cancelOrderMutation.mutate(order.id)}
-                                  size="sm"
-                                  variant="destructive"
-                                  disabled={cancelOrderMutation.isPending}
-                                  className="bg-red-600 hover:bg-red-700 text-white"
-                                >
-                                  {cancelOrderMutation.isPending ? 'Canceling...' : 'Cancel'}
-                                </Button>
-                                <Button
-                                  onClick={() => confirmOrderMutation.mutate(order.id)}
-                                  size="sm"
-                                  disabled={confirmOrderMutation.isPending}
-                                  className="bg-green-600 hover:bg-green-700 text-white"
-                                >
-                                  {confirmOrderMutation.isPending ? 'Confirming...' : 'Confirm/Complete'}
-                                </Button>
-                              </>
-                            )}
-                            {order.status === 'completed' && (
-                              <Badge className="bg-green-100 text-green-800 border-green-300">
-                                Completed
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                      <p>No active orders in queue.</p>
-                      <p className="text-sm">New orders will appear here for processing.</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          {/* Members Tab */}
-          <TabsContent value="members">
-            {/* Pending Member Approvals */}
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="flex items-center mobile-text-base">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
-                  Pending Member Approvals
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {pendingMembers.length > 0 ? (
-                  <div className="space-y-2 sm:space-y-3">
-                    {pendingMembers.map((member: any) => (
-                      <div key={member.id} className="flex items-center justify-between mobile-p-2 rounded-lg bg-orange-50 border border-orange-200">
-                        <div className="flex flex-col">
-                          <span className="mobile-text-sm font-medium">
-                            {member.firstName && member.lastName 
-                              ? `${member.firstName} ${member.lastName}` 
-                              : member.email}
-                          </span>
-                          <span className="mobile-text-xs text-gray-500">{member.email}</span>
-                          <span className="mobile-text-xs text-gray-400">
-                            Registered: {new Date(member.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <Button
-                          onClick={() => approveMemberMutation.mutate({ 
-                            userId: member.id, 
-                            approvedBy: 'Admin Panel' 
-                          })}
-                          disabled={approveMemberMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700 text-white mobile-btn-sm"
-                        >
-                          {approveMemberMutation.isPending ? 'Approving...' : 'Approve'}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6 sm:py-8 text-blue-600">
-                    <Users className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
-                    <p className="mobile-text-sm font-medium">All members approved!</p>
-                    <p className="mobile-text-xs text-gray-500">No pending approvals</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Customer Search Tool */}
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Search className="w-5 h-5 mr-2 text-gray-600" />
-                  Customer Search & Profiles
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-6">
-                  <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      placeholder="Search customers by name or email..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                        }
-                      }}
-                      className="pl-10 pr-4"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                </div>
-                
-                {searchQuery && (
-                  <div className="space-y-6">
-                    {filteredUsers.slice(0, 5).map((user: any) => {
-                      const profile = getCustomerProfile(user.id);
-                      if (!profile) return null;
-                      
-                      return (
-                        <div key={user.id} className="border-2 border-blue-200 rounded-lg p-6 bg-white shadow-sm">
-                          {/* Customer Header */}
-                          <div className="flex justify-between items-start mb-6">
-                            <div>
-                              <h3 className="font-bold text-xl text-blue-800">
-                                {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Anonymous User'}
-                              </h3>
-                              <p className="text-sm text-gray-600 mt-1">{user.email}</p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                Member since {new Date(user.createdAt).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <div className="bg-blue-100 px-3 py-1 rounded-full">
-                                <span className="text-sm font-semibold text-blue-800">
-                                  {profile.orderCount} Completed
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Spending Summary */}
-                          {profile.orderCount > 0 && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                              <h4 className="font-semibold text-green-800 mb-2">💰 Spending Summary</h4>
-                              <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                  <span className="text-gray-600">Total Spent:</span>
-                                  <span className="font-bold text-green-700 ml-2">€{profile.totalSpent}</span>
-                                </div>
-                                <div>
-                                  <span className="text-gray-600">Average Order:</span>
-                                  <span className="font-bold text-green-700 ml-2">€{profile.averageOrderValue}</span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          
-                          {profile.orderCount > 0 ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                              {/* Strain Preferences */}
-                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
-                                  <Leaf className="w-4 h-4 mr-2" />
-                                  Strain Preferences
-                                </h4>
-                                <div className="space-y-2">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm">Sativa:</span>
-                                    <div className="flex items-center">
-                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div 
-                                          className="bg-blue-600 h-2 rounded-full" 
-                                          style={{width: `${profile.preferences.sativa}%`}}
-                                        ></div>
-                                      </div>
-                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.sativa}%</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm">Indica:</span>
-                                    <div className="flex items-center">
-                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div 
-                                          className="bg-blue-600 h-2 rounded-full" 
-                                          style={{width: `${profile.preferences.indica}%`}}
-                                        ></div>
-                                      </div>
-                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.indica}%</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm">Hybrid:</span>
-                                    <div className="flex items-center">
-                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div 
-                                          className="bg-blue-600 h-2 rounded-full" 
-                                          style={{width: `${profile.preferences.hybrid}%`}}
-                                        ></div>
-                                      </div>
-                                      <span className="font-bold text-blue-700 text-sm">{profile.preferences.hybrid}%</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Product Type Preferences */}
-                              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                                <h4 className="font-semibold text-purple-800 mb-3 flex items-center">
-                                  <Hash className="w-4 h-4 mr-2" />
-                                  Product Type Preferences
-                                </h4>
-                                <div className="space-y-2">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm">Cannabis:</span>
-                                    <div className="flex items-center">
-                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div 
-                                          className="bg-purple-600 h-2 rounded-full" 
-                                          style={{width: `${profile.preferences.cannabis}%`}}
-                                        ></div>
-                                      </div>
-                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.cannabis}%</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm">Hash:</span>
-                                    <div className="flex items-center">
-                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div 
-                                          className="bg-purple-600 h-2 rounded-full" 
-                                          style={{width: `${profile.preferences.hash}%`}}
-                                        ></div>
-                                      </div>
-                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.hash}%</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm">Edibles:</span>
-                                    <div className="flex items-center">
-                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div 
-                                          className="bg-purple-600 h-2 rounded-full" 
-                                          style={{width: `${profile.preferences.edibles}%`}}
-                                        ></div>
-                                      </div>
-                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.edibles}%</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm">Pre-Rolls:</span>
-                                    <div className="flex items-center">
-                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div 
-                                          className="bg-purple-600 h-2 rounded-full" 
-                                          style={{width: `${profile.preferences.preRolls}%`}}
-                                        ></div>
-                                      </div>
-                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.preRolls}%</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm">Cali Pax:</span>
-                                    <div className="flex items-center">
-                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div 
-                                          className="bg-purple-600 h-2 rounded-full" 
-                                          style={{width: `${profile.preferences.caliPax}%`}}
-                                        ></div>
-                                      </div>
-                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.caliPax}%</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                              <p className="text-gray-600">This customer hasn't completed any orders yet.</p>
-                            </div>
-                          )}
-                          
-                          {/* Completed Orders Only */}
-                          {profile.recentOrders && profile.recentOrders.length > 0 && (
-                            <div className="mt-6">
-                              <h4 className="font-semibold text-gray-800 mb-3">Recent Completed Orders</h4>
-                              <div className="space-y-3">
-                                {profile.recentOrders.map((order: any) => (
-                                  <div key={order.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                    <div className="flex justify-between items-start mb-2">
-                                      <div>
-                                        <span className="font-semibold text-sm">Order #{order.id}</span>
-                                        <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                          {order.status}
-                                        </span>
-                                      </div>
-                                      <div className="text-right">
-                                        <div className="font-bold text-green-700">€{order.totalPrice}</div>
-                                        <div className="text-xs text-gray-500">
-                                          {new Date(order.createdAt).toLocaleDateString()}
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="text-xs text-gray-600">
-                                      <span className="font-medium">Items:</span>
-                                      {order.items && order.items.map((item: any, idx: number) => (
-                                        <span key={idx} className="ml-1">
-                                          {item.name}
-                                          {idx < order.items.length - 1 ? ', ' : ''}
-                                        </span>
-                                      ))}
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                      Pickup Code: <span className="font-mono font-bold text-blue-600">{order.pickupCode}</span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    
-                    {filteredUsers.length === 0 && (
-                      <div className="text-center py-12">
-                        <div className="text-6xl mb-4">🔍</div>
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">No customers found</h3>
-                        <p className="text-gray-500">
-                          No customers match "{searchQuery}". Try searching by name or email.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {!searchQuery && (
-                  <div className="text-center py-12">
-                    <Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Customer Search Tool</h3>
-                    <p className="text-gray-500 mb-4">
-                      Search for customers by name or email to view their detailed profiles
-                    </p>
-                    <div className="text-sm text-gray-400">
-                      <p>• View customer preferences and order history</p>
-                      <p>• Analyze spending patterns and product preferences</p>
-                      <p>• Track customer activity and engagement</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </TabsContent>
           
           {/* Stock & Inventory Tab */}
@@ -2881,38 +1905,55 @@ export function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {analytics.lowStockItems.length > 0 ? (
-                  <div className="space-y-2 sm:space-y-3">
-                    {analytics.lowStockItems.map((item: any, index) => (
-                      <div key={index} className={`flex items-center justify-between mobile-p-2 rounded-lg ${
-                        item.critical ? 'bg-red-50 border border-red-200' : 
-                        item.urgent ? 'bg-yellow-50 border border-yellow-200' : 'bg-orange-50 border border-orange-200'
-                      }`}>
-                        <span className="mobile-text-sm font-medium">{item.name}</span>
-                        <div className="flex items-center space-x-1 sm:space-x-2">
-                          <span className={`mobile-text-xs font-bold ${
-                            item.critical ? 'text-red-700' : 
-                            item.urgent ? 'text-yellow-700' : 'text-orange-700'
-                          }`}>
-                            {item.stock}g
-                          </span>
-                          <Badge className={`mobile-text-xs ${
-                            item.critical ? 'bg-red-100 text-red-800 border-red-300' : 
-                            item.urgent ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-orange-100 text-orange-800 border-orange-300'
-                          }`}>
-                            {item.critical ? 'Critical' : item.urgent ? 'Urgent' : 'Low'}
-                          </Badge>
+                <div className="space-y-3">
+                  {Array.isArray(products) && (products as any[]).filter((product: any) => {
+                    const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
+                    return totalAmount < 120;
+                  }).map((product: any) => {
+                    const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
+                    const alertLevel = totalAmount < 100 ? 'critical' : 'urgent';
+                    
+                    return (
+                      <div 
+                        key={product.id} 
+                        className={`mobile-p-3 rounded-lg border ${
+                          alertLevel === 'critical' 
+                            ? 'bg-red-50 border-red-200' 
+                            : 'bg-orange-50 border-orange-200'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-semibold mobile-text-sm">{product.name}</h4>
+                            <p className="mobile-text-xs text-gray-600">{product.category}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className={`mobile-text-xs ${
+                              alertLevel === 'critical' 
+                                ? 'bg-red-100 text-red-800' 
+                                : 'bg-orange-100 text-orange-800'
+                            }`}>
+                              {alertLevel === 'critical' ? 'Critical' : 'Urgent'}
+                            </Badge>
+                            <p className="mobile-text-xs mt-1 font-medium">
+                              {totalAmount}g remaining
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6 sm:py-8 text-green-600">
-                    <AlertCircle className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
-                    <p className="mobile-text-sm font-medium">All stock levels healthy!</p>
-                    <p className="mobile-text-xs text-gray-500">No low stock alerts</p>
-                  </div>
-                )}
+                    );
+                  })}
+                  
+                  {Array.isArray(products) && (products as any[]).filter((product: any) => {
+                    const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
+                    return totalAmount < 120;
+                  }).length === 0 && (
+                    <div className="text-center py-6 text-gray-500">
+                      <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                      <p className="mobile-text-sm">All products are well-stocked</p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
@@ -2931,7 +1972,7 @@ export function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Array.isArray(products) && products.map((product: any) => {
+                  {Array.isArray(products) && (products as any[]).map((product: any) => {
                     const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
                     return (
                       <div key={product.id} className="border rounded-lg p-4 relative">
@@ -2967,38 +2008,30 @@ export function AdminDashboard() {
                           <p className="text-sm font-medium text-blue-700">
                             Total: {totalAmount}g
                           </p>
-                          <div className="text-xs text-gray-600 ml-2">
-                            <p>On shelf: {product.onShelfGrams || 0}g</p>
-                            <p>Internal: {product.internalGrams || 0}g</p>
-                            <p>External: {product.externalGrams || 0}g</p>
+                          <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                            <div>On shelf: {product.onShelfGrams || 0}g</div>
+                            <div>Internal: {product.internalGrams || 0}g</div>
+                            <div>External: {product.externalGrams || 0}g</div>
                           </div>
                         </div>
                         
                         {/* Pricing */}
                         <div className="mt-3 space-y-1">
-                          <p className="text-sm text-green-700">
-                            Shelf: €{product.shelfPrice || product.adminPrice || '0'}/g
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Cost: €{product.costPrice || '0'}/g
-                          </p>
+                          <div className="text-sm">
+                            <span className="text-gray-600">Shelf: </span>
+                            <span className="font-medium text-green-700">€{product.shelfPrice || product.adminPrice}</span>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-gray-600">Cost: </span>
+                            <span className="font-medium">€{product.costPrice}</span>
+                          </div>
                         </div>
                         
-                        {/* Additional Info */}
-                        <div className="mt-3 pt-2 border-t border-gray-200 space-y-1">
-                          <p className="text-xs text-gray-500">
-                            Code: {product.productCode}
-                          </p>
-                          {product.supplier && (
-                            <p className="text-xs text-gray-500">
-                              Supplier: {product.supplier}
-                            </p>
-                          )}
-                          {product.lastUpdated && (
-                            <p className="text-xs text-gray-400">
-                              Updated: {new Date(product.lastUpdated).toLocaleDateString()}
-                            </p>
-                          )}
+                        {/* Product Info */}
+                        <div className="mt-3 text-xs text-gray-500 space-y-1">
+                          <div>Code: {product.productCode}</div>
+                          <div>Supplier: {product.supplier}</div>
+                          <div>Updated: {new Date(product.lastUpdated).toLocaleDateString()}</div>
                         </div>
                       </div>
                     );
@@ -3006,7 +2039,6 @@ export function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-
           </TabsContent>
           
           {/* Analytics Tab */}
@@ -3329,6 +2361,85 @@ export function AdminDashboard() {
 
         {/* Global Dialogs - Available from all tabs */}
         
+        {/* Stock Management Modal */}
+        <Dialog open={showStockForm} onOpenChange={setShowStockForm}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-blue-800">
+                {editingStock ? 'Edit Stock Entry' : 'Add New Stock Entry'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="p-2">
+              <Form {...stockForm}>
+                <form onSubmit={stockForm.handleSubmit(onSubmitStock)} className="space-y-6">
+                      {/* Section 1: Product Catalog Information */}
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                          <Package className="w-5 h-5 mr-2" />
+                          Customer Catalog Information
+                        </h4>
+                        <p className="text-sm text-green-700 mb-4">This information will be visible to customers in the product catalog</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={stockForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Product Name *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="e.g., Blue Dream" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={stockForm.control}
+                            name="productCode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Product Code *</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Enter product code" 
+                                    {...field} 
+                                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowStockForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createStockMutation.isPending || updateStockMutation.isPending}
+                      className="bg-[#116149] hover:bg-[#0d4d3a] text-white"
+                    >
+                      {editingStock ? 
+                        (updateStockMutation.isPending ? 'Updating...' : 'Update Stock') : 
+                        (createStockMutation.isPending ? 'Creating...' : 'Create Stock Entry')
+                      }
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Expense Form Dialog */}
         <Dialog open={showExpenseForm} onOpenChange={setShowExpenseForm}>
           <DialogContent className="max-w-md">
