@@ -2333,6 +2333,17 @@ export function AdminDashboard() {
                 <div className="flex space-x-2">
                   <Button 
                     onClick={() => {
+                      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-300"
+                  >
+                    <Activity className="w-4 h-4 mr-1" />
+                    Refresh
+                  </Button>
+                  <Button 
+                    onClick={() => {
                       clearAllOrdersMutation.mutate();
                     }}
                     variant="destructive"
