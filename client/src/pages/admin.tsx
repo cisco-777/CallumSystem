@@ -26,7 +26,7 @@ export function AdminPage() {
               {(() => {
                 const adminData = localStorage.getItem('msc-admin-data');
                 const parsedData = adminData ? JSON.parse(adminData) : null;
-                return parsedData?.email === 'admin123@gmail.com';
+                return parsedData && (parsedData.role === 'admin' || parsedData.role === 'superadmin' || parsedData.isSuperAdmin);
               })() && (
                 <Button
                   onClick={() => {/* Add management modal logic here */}}
