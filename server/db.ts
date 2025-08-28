@@ -11,12 +11,8 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-console.log('🚀 Database initialization starting...');
-console.log('🔗 DATABASE_URL exists:', !!process.env.DATABASE_URL);
-console.log('🔗 Environment:', process.env.NODE_ENV || 'development');
-
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 export const db = drizzle({ client: pool, schema });
-
-console.log('✅ Database connection pool created');
-console.log('✅ Drizzle ORM initialized');
