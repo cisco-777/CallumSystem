@@ -195,6 +195,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
+      
+      // Automatically seed all production data on any login
+      try {
+        const response = await fetch(`${req.protocol}://${req.get('host')}/api/seed-all-data`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        console.log("Auto-seeding completed for production deployment");
+      } catch (seedError) {
+        console.log("Seeding already completed or error:", seedError);
+      }
+      
       const user = await storage.getUserByEmail(email);
       
       if (!user || !user.password || user.password !== password) {
@@ -1134,6 +1146,188 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error seeding admin:", error);
       res.status(500).json({ message: "Failed to seed admin", error: String(error) });
+    }
+  });
+
+  app.post("/api/seed-all-data", async (req, res) => {
+    try {
+      console.log("Seeding ALL production data...");
+      
+      // Seed admin first
+      const adminUser = await storage.getUserByEmail("admin123@gmail.com");
+      if (!adminUser) {
+        const adminData = {
+          email: "admin123@gmail.com",
+          password: "admin123",
+          firstName: "tom",
+          lastName: "tom",
+          phoneNumber: "+341241224",
+          dateOfBirth: "2025-08-06",
+          address: "tom",
+          isOnboarded: true,
+          membershipStatus: "approved" as const,
+          approvalDate: new Date("2025-08-26T21:57:21.551Z"),
+          expiryDate: new Date("2026-08-26T21:57:21.551Z"),
+          approvedBy: "System Migration",
+          renewalCount: 0,
+          role: "superadmin" as const,
+          isBanned: false
+        };
+        await storage.createUser(adminData);
+        console.log("Admin account created");
+      }
+
+      // Seed demo member
+      const demoUser = await storage.getUserByEmail("demo@member.com");
+      if (!demoUser) {
+        const demoData = {
+          email: "demo@member.com",
+          password: "demo123",
+          firstName: "John",
+          lastName: "Doe",
+          phoneNumber: "+44 7700 900123",
+          dateOfBirth: "1990-01-15",
+          address: "123 Demo Street, London, UK",
+          isOnboarded: true,
+          membershipStatus: "approved" as const,
+          approvalDate: new Date("2025-08-26T21:57:21.551Z"),
+          expiryDate: new Date("2026-08-26T21:57:21.551Z"),
+          approvedBy: "System Migration",
+          renewalCount: 0,
+          isBanned: false,
+          lastActive: new Date("2025-08-28T12:12:12.216Z")
+        };
+        await storage.createUser(demoData);
+        console.log("Demo member created");
+      }
+
+      // Seed pending member
+      const pendingUser = await storage.getUserByEmail("Tim123@gmail.com");
+      if (!pendingUser) {
+        const pendingData = {
+          email: "Tim123@gmail.com",
+          password: "tim123",
+          isOnboarded: false,
+          membershipStatus: "pending" as const,
+          renewalCount: 0,
+          isBanned: false
+        };
+        await storage.createUser(pendingData);
+        console.log("Pending member created");
+      }
+
+      // Seed products with complete data
+      const products = await storage.getProducts();
+      if (products.length === 0) {
+        const seedProducts = [
+          { 
+            name: "Zkittlez",
+            description: "Premium indoor Indica strain with sweet fruity flavors",
+            imageUrl: "/api/placeholder/300/200",
+            category: "Indica",
+            productType: "Cannabis",
+            productCode: "ZK4312",
+            stockQuantity: 171,
+            adminPrice: "12",
+            supplier: "Premium Growers Ltd",
+            onShelfGrams: 36,
+            internalGrams: 50,
+            externalGrams: 85,
+            costPrice: "8.00",
+            shelfPrice: "12.00"
+          },
+          { 
+            name: "Blue Dream",
+            description: "Popular Sativa-dominant hybrid with blueberry notes",
+            imageUrl: "/api/placeholder/300/200",
+            category: "Hybrid",
+            productType: "Cannabis",
+            productCode: "BD7010",
+            stockQuantity: 174,
+            adminPrice: "10",
+            supplier: "California Seeds Co",
+            onShelfGrams: 46,
+            internalGrams: 45,
+            externalGrams: 83,
+            costPrice: "7.00",
+            shelfPrice: "10.00"
+          },
+          { 
+            name: "Lemon Haze",
+            description: "Energizing Sativa with citrusy lemon aroma",
+            imageUrl: "/api/placeholder/300/200",
+            category: "Sativa",
+            productType: "Cannabis",
+            productCode: "LH2213",
+            stockQuantity: 216,
+            adminPrice: "13",
+            supplier: "Dutch Masters",
+            onShelfGrams: 93,
+            internalGrams: 60,
+            externalGrams: 63,
+            costPrice: "9.00",
+            shelfPrice: "13.00"
+          },
+          { 
+            name: "Wedding Cake",
+            description: "Relaxing Indica-dominant hybrid with vanilla undertones",
+            imageUrl: "/api/placeholder/300/200",
+            category: "Hybrid",
+            productType: "Cannabis",
+            productCode: "WC9615",
+            stockQuantity: 262,
+            adminPrice: "15",
+            supplier: "Wedding Growers",
+            onShelfGrams: 142,
+            internalGrams: 70,
+            externalGrams: 50,
+            costPrice: "11.00",
+            shelfPrice: "15.00"
+          },
+          { 
+            name: "Moroccan Hash",
+            description: "Traditional hash with earthy flavors",
+            imageUrl: "/api/placeholder/300/200",
+            category: "Indica",
+            productType: "Hash",
+            productCode: "MH5812",
+            stockQuantity: 276,
+            adminPrice: "12",
+            supplier: "Moroccan Imports",
+            onShelfGrams: 166,
+            internalGrams: 40,
+            externalGrams: 70,
+            costPrice: "8.50",
+            shelfPrice: "12.00"
+          },
+          { 
+            name: "Dry-Shift Hash",
+            description: "Premium sativa hash with clean taste",
+            imageUrl: "/api/placeholder/300/200",
+            category: "Sativa",
+            productType: "Hash",
+            productCode: "DS1410",
+            stockQuantity: 235,
+            adminPrice: "10",
+            supplier: "Alpine Hash Co",
+            onShelfGrams: 155,
+            internalGrams: 30,
+            externalGrams: 50,
+            costPrice: "7.50",
+            shelfPrice: "10.00"
+          }
+        ];
+
+        for (const product of seedProducts) {
+          await storage.createProduct(product);
+        }
+        console.log("All products seeded");
+      }
+
+      res.json({ message: "ALL data seeded for production!" });
+    } catch (error) {
+      console.error("Error seeding all data:", error);
+      res.status(500).json({ message: "Failed to seed all data", error: String(error) });
     }
   });
 
