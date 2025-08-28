@@ -26,9 +26,16 @@ export function AdminLoginPage() {
       });
 
       if (response.success && response.admin) {
+        // Debug logging to see what admin data is received
+        console.log('Admin login success - received data:', response.admin);
+        
         // Store admin authentication information
         localStorage.setItem('msc-admin-authenticated', 'true');
         localStorage.setItem('msc-admin-data', JSON.stringify(response.admin));
+        
+        // Verify what was stored
+        console.log('Admin data stored in localStorage:', localStorage.getItem('msc-admin-data'));
+        
         setLocation('/admin');
       } else {
         setError('Invalid admin credentials');
