@@ -451,30 +451,24 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
           {/* Filtered Products Display */}
           {(() => {
-            // Filter products based on selected category with corrected hash logic
+            // Filter products based on selected category - FIXED LOGIC
             const getFilteredProducts = () => {
               switch (selectedCategory) {
                 case 'sativa':
-                  // Include Sativa cannabis + Hash Sativa products
-                  return products.filter((p: Product) => 
-                    p.category === 'Sativa' || 
-                    (p.name?.toLowerCase().includes('hash') && p.category === 'Sativa')
-                  );
+                  // Show ALL products with Sativa category (both Cannabis and Hash)
+                  return products.filter((p: Product) => p.category === 'Sativa');
                 case 'indica':
-                  // Include Indica cannabis + Hash Indica products  
-                  return products.filter((p: Product) => 
-                    p.category === 'Indica' || 
-                    (p.name?.toLowerCase().includes('hash') && p.category === 'Indica')
-                  );
+                  // Show ALL products with Indica category (both Cannabis and Hash)
+                  return products.filter((p: Product) => p.category === 'Indica');
                 case 'hybrid':
-                  // Include Hybrid cannabis products
+                  // Show ALL products with Hybrid category (both Cannabis and Hash)
                   return products.filter((p: Product) => p.category === 'Hybrid');
                 case 'hash':
-                  // Include all hash products
-                  return products.filter((p: Product) => p.name?.toLowerCase().includes('hash'));
+                  // Show ALL products with Hash product type (any category)
+                  return products.filter((p: Product) => p.productType === 'Hash');
                 case 'cannabis':
-                  // Include all flower products (no hash)
-                  return products.filter((p: Product) => !p.name?.toLowerCase().includes('hash'));
+                  // Show ALL products with Cannabis product type (any category)
+                  return products.filter((p: Product) => p.productType === 'Cannabis');
                 case 'cali-pax':
                   // Include Cali Pax products
                   return products.filter((p: Product) => p.productType === 'Cali Pax');
