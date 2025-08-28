@@ -286,16 +286,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
       
-      // Debug logging to see what data is being returned
-      console.log('Admin login - user data:', {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isSuperAdmin: user.role === 'superadmin'
-      });
-
       res.json({ 
         success: true, 
         admin: { 

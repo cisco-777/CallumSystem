@@ -104,7 +104,7 @@ const getFormSchema = (productType: string) => {
 export function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('shift-management');
-  const { adminUser, isSuperAdmin } = useAdminUser();
+  const { adminUser, isSuperAdmin, isLoading } = useAdminUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSystemWiped, setIsSystemWiped] = useState(false);
   const [showFailsafeDialog, setShowFailsafeDialog] = useState(false);
@@ -1542,7 +1542,7 @@ export function AdminDashboard() {
               <span className="mobile-text-sm">Expenses Log</span>
             </Button>
 
-            {isSuperAdmin && (
+            {!isLoading && isSuperAdmin && (
               <Button
                 onClick={() => setShowManagementModal(true)}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"

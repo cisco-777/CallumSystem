@@ -9,12 +9,8 @@ export function useAdminUser() {
   useEffect(() => {
     try {
       const adminData = localStorage.getItem('msc-admin-data');
-      console.log('useAdminUser - raw localStorage data:', adminData);
       if (adminData) {
         const parsedData = JSON.parse(adminData);
-        console.log('useAdminUser - parsed admin data:', parsedData);
-        console.log('useAdminUser - role check:', parsedData.role, '=== superadmin?', parsedData.role === 'superadmin');
-        console.log('useAdminUser - isSuperAdmin from API:', parsedData.isSuperAdmin);
         setAdminUser(parsedData);
       }
     } catch (error) {
