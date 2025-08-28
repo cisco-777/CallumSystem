@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import barcelonaImage from '@assets/Barcelona_1753545946175.jpg';
+import marbellaImage from '@assets/Marbella_1756378363066.jpeg';
 
 interface WelcomeLandingProps {
   onEnter: () => void;
@@ -16,7 +16,7 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
       <div 
         className="absolute inset-0 transition-transform duration-700 ease-out"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('${barcelonaImage}')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('${marbellaImage}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -33,18 +33,18 @@ export function WelcomeLanding({ onEnter }: WelcomeLandingProps) {
           className="max-w-2xl mx-auto"
         >
           <motion.h1 
-            className="text-5xl md:text-7xl font-light text-white mb-6 tracking-wide drop-shadow-2xl"
-            style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}
+            className="text-5xl md:text-7xl font-light text-black mb-6 tracking-wide drop-shadow-2xl"
+            style={{ textShadow: '2px 2px 4px rgba(255,255,255,0.8)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-Demo
+Marbella
           </motion.h1>
           
           <motion.h2 
-            className="text-2xl md:text-3xl font-extralight text-white mb-4 tracking-wider drop-shadow-lg"
-            style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.7)' }}
+            className="text-2xl md:text-3xl font-extralight text-black mb-4 tracking-wider drop-shadow-lg"
+            style={{ textShadow: '1px 1px 3px rgba(255,255,255,0.7)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
@@ -53,7 +53,7 @@ Demo
           </motion.h2>
           
           <motion.p 
-            className="text-lg md:text-xl font-light text-white/80 mb-12 max-w-lg mx-auto leading-relaxed"
+            className="text-lg md:text-xl font-light text-black mb-12 max-w-lg mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.8 }}
