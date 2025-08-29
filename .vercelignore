@@ -1,0 +1,7 @@
+# Don't ignore dist for Vercel
+!dist
+
+# Ignore dev dependencies
+.replit*
+replit*
+.env.development
