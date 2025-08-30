@@ -118,21 +118,25 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await getDb().select().from(users).where(eq(users.id, id));
+    const db = await getDb();
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async getUsers(): Promise<User[]> {
-    return await getDb().select().from(users);
+    const db = await getDb();
+    return await db.select().from(users);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await getDb().select().from(users).where(eq(users.email, email));
+    const db = await getDb();
+    const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await getDb()
+    const db = await getDb();
+    const [user] = await db
       .insert(users)
       .values(insertUser)
       .returning();
@@ -140,7 +144,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: number, updates: Partial<User>): Promise<User> {
-    const [user] = await getDb()
+    const db = await getDb();
+    const [user] = await db
       .update(users)
       .set(updates)
       .where(eq(users.id, id))
@@ -165,7 +170,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAdminUsers(): Promise<User[]> {
-    return await getDb()
+    const db = await getDb();
+    return await db
       .select()
       .from(users)
       .where(sql`${users.role} = 'admin' OR ${users.role} = 'superadmin'`)
@@ -173,18 +179,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUser(id: number): Promise<void> {
+    const db = await getDb();
     // First remove all related data for this user
-    await getDb().delete(basketItems).where(eq(basketItems.userId, id));
-    await getDb().delete(donations).where(eq(donations.userId, id));
-    await getDb().delete(orders).where(eq(orders.userId, id));
+    await db.delete(basketItems).where(eq(basketItems.userId, id));
+    await db.delete(donations).where(eq(donations.userId, id));
+    await db.delete(orders).where(eq(orders.userId, id));
     
     // Then delete the user
-    await getDb().delete(users).where(eq(users.id, id));
+    await db.delete(users).where(eq(users.id, id));
   }
 
   // Membership management operations
   async getPendingMembers(): Promise<User[]> {
-    return await getDb()
+    const db = await getDb();
+    return await db
       .select()
       .from(users)
       .where(eq(users.membershipStatus, 'pending'))
@@ -192,7 +200,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getApprovedMembers(): Promise<User[]> {
-    return await getDb()
+    const db = await getDb();
+    return await db
       .select()
       .from(users)
       .where(eq(users.membershipStatus, 'approved'))
@@ -201,7 +210,8 @@ export class DatabaseStorage implements IStorage {
 
   async getExpiredMembers(): Promise<User[]> {
     const now = new Date();
-    return await getDb()
+    const db = await getDb();
+    return await db
       .select()
       .from(users)
       .where(eq(users.membershipStatus, 'expired'))
@@ -209,7 +219,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRenewedMembers(): Promise<User[]> {
-    return await getDb()
+    const db = await getDb();
+    return await db
       .select()
       .from(users)
       .where(eq(users.membershipStatus, 'renewed'))
@@ -218,7 +229,8 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveMembers(): Promise<User[]> {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    return await getDb()
+    const db = await getDb();
+    return await db
       .select()
       .from(users)
       .where(sql`${users.lastActive} > ${thirtyDaysAgo}`)
@@ -229,7 +241,8 @@ export class DatabaseStorage implements IStorage {
     const approvalDate = new Date();
     const expiryDate = new Date(approvalDate.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year from approval
     
-    const [user] = await getDb()
+    const db = await getDb();
+    const [user] = await db
       .update(users)
       .set({
         membershipStatus: 'approved',
@@ -246,7 +259,8 @@ export class DatabaseStorage implements IStorage {
     const renewalDate = new Date();
     const expiryDate = new Date(renewalDate.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year from renewal
     
-    const [user] = await getDb()
+    const db = await getDb();
+    const [user] = await db
       .update(users)
       .set({
         membershipStatus: 'renewed',
@@ -260,7 +274,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateMemberActivity(userId: number): Promise<void> {
-    await getDb()
+    const db = await getDb();
+    await db
       .update(users)
       .set({
         lastActive: new Date()
@@ -277,33 +292,34 @@ export class DatabaseStorage implements IStorage {
   }> {
     const now = new Date();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const db = await getDb();
 
     // Count pending members (exclude admin accounts)
-    const [{ count: pending }] = await getDb()
+    const [{ count: pending }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
       .where(sql`${users.membershipStatus} = 'pending' AND ${users.email} != 'admin123@gmail.com'`);
 
     // Count approved members (not expired, exclude admin accounts)
-    const [{ count: approved }] = await getDb()
+    const [{ count: approved }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
       .where(sql`${users.membershipStatus} = 'approved' AND ${users.expiryDate} > ${now} AND ${users.email} != 'admin123@gmail.com'`);
 
     // Count expired members (exclude admin accounts)
-    const [{ count: expired }] = await getDb()
+    const [{ count: expired }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
       .where(sql`${users.membershipStatus} = 'approved' AND ${users.expiryDate} <= ${now} AND ${users.email} != 'admin123@gmail.com'`);
 
     // Count renewed members (exclude admin accounts)
-    const [{ count: renewed }] = await getDb()
+    const [{ count: renewed }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
       .where(sql`${users.membershipStatus} = 'renewed' AND ${users.email} != 'admin123@gmail.com'`);
 
     // Count active members (non-expired members only, exclude admin accounts)
-    const [{ count: active }] = await getDb()
+    const [{ count: active }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
       .where(sql`${users.email} != 'admin123@gmail.com' AND ((${users.membershipStatus} = 'approved' AND ${users.expiryDate} > ${now}) OR ${users.membershipStatus} = 'renewed')`);
@@ -322,7 +338,8 @@ export class DatabaseStorage implements IStorage {
     const endTime = shiftEndTime ? new Date(shiftEndTime) : new Date(); // Use current time if shift is ongoing
     
     // Count new registrations during shift timeframe, exclude admin accounts
-    const [{ count: newMembers }] = await getDb()
+    const db = await getDb();
+    const [{ count: newMembers }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
       .where(sql`${users.createdAt} >= ${startTime} AND ${users.createdAt} <= ${endTime} AND ${users.email} != 'admin123@gmail.com'`);
@@ -331,16 +348,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProducts(): Promise<Product[]> {
-    return await getDb().select().from(products).where(eq(products.isActive, true));
+    const db = await getDb();
+    return await db.select().from(products).where(eq(products.isActive, true));
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
-    const [product] = await getDb().select().from(products).where(eq(products.id, id));
+    const db = await getDb();
+    const [product] = await db.select().from(products).where(eq(products.id, id));
     return product || undefined;
   }
 
   async createProduct(productData: any): Promise<Product> {
-    const [product] = await getDb()
+    const db = await getDb();
+    const [product] = await db
       .insert(products)
       .values(productData)
       .returning();
@@ -348,8 +368,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProductStock(id: number, stockData: any): Promise<Product> {
+    const db = await getDb();
     // Get current product to preserve existing values if not provided
-    const [currentProduct] = await getDb().select().from(products).where(eq(products.id, id));
+    const [currentProduct] = await db.select().from(products).where(eq(products.id, id));
     if (!currentProduct) throw new Error("Product not found");
 
     // Calculate new stock values using provided data or current values
@@ -358,7 +379,7 @@ export class DatabaseStorage implements IStorage {
     const newExternalGrams = stockData.externalGrams !== undefined ? stockData.externalGrams : currentProduct.externalGrams || 0;
     const newTotalStock = newOnShelfGrams + newInternalGrams + newExternalGrams;
 
-    const [product] = await getDb()
+    const [product] = await db
       .update(products)
       .set({
         ...stockData,
@@ -372,7 +393,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createStockEntry(stockData: any): Promise<Product> {
-    const [product] = await getDb()
+    const db = await getDb();
+    const [product] = await db
       .insert(products)
       .values({
         ...stockData,
@@ -385,7 +407,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBasketItems(userId: number): Promise<BasketItem[]> {
-    const items = await getDb().select({
+    const db = await getDb();
+    const items = await db.select({
       id: basketItems.id,
       userId: basketItems.userId,
       productId: basketItems.productId,
@@ -410,7 +433,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addToBasket(userId: number, productId: number, quantity: number = 1): Promise<BasketItem> {
-    const [item] = await getDb()
+    const db = await getDb();
+    const [item] = await db
       .insert(basketItems)
       .values({ userId, productId, quantity })
       .returning();
@@ -418,15 +442,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async removeFromBasket(id: number): Promise<void> {
-    await getDb().delete(basketItems).where(eq(basketItems.id, id));
+    const db = await getDb();
+    await db.delete(basketItems).where(eq(basketItems.id, id));
   }
 
   async clearBasket(userId: number): Promise<void> {
-    await getDb().delete(basketItems).where(eq(basketItems.userId, userId));
+    const db = await getDb();
+    await db.delete(basketItems).where(eq(basketItems.userId, userId));
   }
 
   async createDonation(userId: number, items: any[], totalAmount: string): Promise<Donation> {
-    const [donation] = await getDb()
+    const db = await getDb();
+    const [donation] = await db
       .insert(donations)
       .values({ userId, items, totalAmount })
       .returning();
@@ -434,11 +461,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserDonations(userId: number): Promise<Donation[]> {
-    return await getDb().select().from(donations).where(eq(donations.userId, userId));
+    const db = await getDb();
+    return await db.select().from(donations).where(eq(donations.userId, userId));
   }
 
   async createOrder(orderData: InsertOrder): Promise<Order> {
-    const [order] = await getDb()
+    const db = await getDb();
+    const [order] = await db
       .insert(orders)
       .values(orderData)
       .returning();
@@ -446,30 +475,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrder(id: number): Promise<Order | undefined> {
-    const [order] = await getDb().select().from(orders).where(eq(orders.id, id));
+    const db = await getDb();
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
     return order || undefined;
   }
 
   async getOrderByPickupCode(pickupCode: string): Promise<Order | undefined> {
-    const [order] = await getDb().select().from(orders).where(eq(orders.pickupCode, pickupCode));
+    const db = await getDb();
+    const [order] = await db.select().from(orders).where(eq(orders.pickupCode, pickupCode));
     return order || undefined;
   }
 
   async getUserOrders(userId: number): Promise<Order[]> {
-    return await getDb().select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
+    const db = await getDb();
+    return await db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
   }
 
   async getAllOrders(): Promise<Order[]> {
-    return await getDb().select().from(orders).where(eq(orders.archivedFromAdmin, false)).orderBy(desc(orders.createdAt));
+    const db = await getDb();
+    return await db.select().from(orders).where(eq(orders.archivedFromAdmin, false)).orderBy(desc(orders.createdAt));
   }
 
   async getAllOrdersForAnalytics(): Promise<Order[]> {
     // Return all orders including archived ones for analytics calculations
-    return await getDb().select().from(orders).orderBy(desc(orders.createdAt));
+    const db = await getDb();
+    return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
 
   async updateOrderStatus(orderId: number, status: string): Promise<Order> {
-    const [order] = await getDb()
+    const db = await getDb();
+    const [order] = await db
       .update(orders)
       .set({ status })
       .where(eq(orders.id, orderId))
@@ -478,14 +513,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async confirmOrderAndReduceStock(orderId: number): Promise<Order> {
+    const db = await getDb();
     // Get order details
-    const [order] = await getDb().select().from(orders).where(eq(orders.id, orderId));
+    const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
     if (!order) throw new Error("Order not found");
 
     // Validate and reduce stock for each item
     for (const quantity of order.quantities as any[]) {
       // Get current product stock
-      const [product] = await getDb().select().from(products).where(eq(products.id, quantity.productId));
+      const [product] = await db.select().from(products).where(eq(products.id, quantity.productId));
       if (!product) throw new Error(`Product not found: ${quantity.productId}`);
 
       // Check if sufficient shelf stock is available
@@ -499,7 +535,7 @@ export class DatabaseStorage implements IStorage {
       const newTotalStock = newOnShelfGrams + (product.internalGrams || 0) + (product.externalGrams || 0);
 
       // Update product stock quantities
-      await getDb()
+      await db
         .update(products)
         .set({ 
           onShelfGrams: newOnShelfGrams,
@@ -510,7 +546,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Update order status to completed
-    const [updatedOrder] = await getDb()
+    const [updatedOrder] = await db
       .update(orders)
       .set({ status: "completed" })
       .where(eq(orders.id, orderId))
@@ -521,19 +557,22 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAllOrders(): Promise<void> {
     // Archive orders from admin view instead of deleting (preserves analytics data)
-    await getDb().update(orders).set({ archivedFromAdmin: true });
+    const db = await getDb();
+    await db.update(orders).set({ archivedFromAdmin: true });
   }
 
   async deleteProduct(id: number): Promise<void> {
+    const db = await getDb();
     // First remove all basket items for this product
-    await getDb().delete(basketItems).where(eq(basketItems.productId, id));
+    await db.delete(basketItems).where(eq(basketItems.productId, id));
     
     // Then delete the product itself
-    await getDb().delete(products).where(eq(products.id, id));
+    await db.delete(products).where(eq(products.id, id));
   }
 
   async createShiftReconciliation(reconciliationData: InsertShiftReconciliation): Promise<ShiftReconciliation> {
-    const [reconciliation] = await getDb()
+    const db = await getDb();
+    const [reconciliation] = await db
       .insert(shiftReconciliations)
       .values(reconciliationData)
       .returning();
@@ -541,16 +580,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getShiftReconciliations(): Promise<ShiftReconciliation[]> {
-    return await getDb().select().from(shiftReconciliations).orderBy(desc(shiftReconciliations.createdAt));
+    const db = await getDb();
+    return await db.select().from(shiftReconciliations).orderBy(desc(shiftReconciliations.createdAt));
   }
 
   async getShiftReconciliation(id: number): Promise<ShiftReconciliation | undefined> {
-    const [reconciliation] = await getDb().select().from(shiftReconciliations).where(eq(shiftReconciliations.id, id));
+    const db = await getDb();
+    const [reconciliation] = await db.select().from(shiftReconciliations).where(eq(shiftReconciliations.id, id));
     return reconciliation || undefined;
   }
 
   async createExpense(expenseData: InsertExpense): Promise<Expense> {
-    const [expense] = await getDb()
+    const db = await getDb();
+    const [expense] = await db
       .insert(expenses)
       .values(expenseData)
       .returning();
@@ -558,16 +600,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getExpenses(): Promise<Expense[]> {
-    return await getDb().select().from(expenses).orderBy(desc(expenses.createdAt));
+    const db = await getDb();
+    return await db.select().from(expenses).orderBy(desc(expenses.createdAt));
   }
 
   async getExpense(id: number): Promise<Expense | undefined> {
-    const [expense] = await getDb().select().from(expenses).where(eq(expenses.id, id));
+    const db = await getDb();
+    const [expense] = await db.select().from(expenses).where(eq(expenses.id, id));
     return expense || undefined;
   }
 
   async updateExpense(id: number, updates: Partial<Expense>): Promise<Expense> {
-    const [expense] = await getDb()
+    const db = await getDb();
+    const [expense] = await db
       .update(expenses)
       .set(updates)
       .where(eq(expenses.id, id))
@@ -576,12 +621,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteExpense(id: number): Promise<void> {
-    await getDb().delete(expenses).where(eq(expenses.id, id));
+    const db = await getDb();
+    await db.delete(expenses).where(eq(expenses.id, id));
   }
 
   // Shift operations
   async createShift(shiftData: InsertShift): Promise<Shift> {
-    const [shift] = await getDb()
+    const db = await getDb();
+    const [shift] = await db
       .insert(shifts)
       .values(shiftData)
       .returning();
@@ -589,21 +636,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getShifts(): Promise<Shift[]> {
-    return await getDb().select().from(shifts).orderBy(desc(shifts.createdAt));
+    const db = await getDb();
+    return await db.select().from(shifts).orderBy(desc(shifts.createdAt));
   }
 
   async getShift(id: number): Promise<Shift | undefined> {
-    const [shift] = await getDb().select().from(shifts).where(eq(shifts.id, id));
+    const db = await getDb();
+    const [shift] = await db.select().from(shifts).where(eq(shifts.id, id));
     return shift || undefined;
   }
 
   async getActiveShift(): Promise<Shift | undefined> {
-    const [shift] = await getDb().select().from(shifts).where(eq(shifts.status, "active"));
+    const db = await getDb();
+    const [shift] = await db.select().from(shifts).where(eq(shifts.status, "active"));
     return shift || undefined;
   }
 
   async endShift(id: number, totals: { totalSales: string; totalExpenses: string; netAmount: string; stockDiscrepancies: number; reconciliationId?: number; }): Promise<Shift> {
-    const [shift] = await getDb()
+    const db = await getDb();
+    const [shift] = await db
       .update(shifts)
       .set({
         status: "completed",
@@ -621,7 +672,8 @@ export class DatabaseStorage implements IStorage {
 
   // Shift activity operations
   async createShiftActivity(activityData: InsertShiftActivity): Promise<ShiftActivity> {
-    const [activity] = await getDb()
+    const db = await getDb();
+    const [activity] = await db
       .insert(shiftActivities)
       .values(activityData)
       .returning();
@@ -629,7 +681,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getShiftActivities(shiftId: number): Promise<ShiftActivity[]> {
-    return await getDb().select().from(shiftActivities)
+    const db = await getDb();
+    return await db.select().from(shiftActivities)
       .where(eq(shiftActivities.shiftId, shiftId))
       .orderBy(desc(shiftActivities.timestamp));
   }
@@ -637,12 +690,14 @@ export class DatabaseStorage implements IStorage {
   // Enhanced methods with shift tracking
   async getTodaysExpenses(): Promise<Expense[]> {
     const today = new Date().toISOString().split('T')[0];
-    return await getDb().select().from(expenses)
+    const db = await getDb();
+    return await db.select().from(expenses)
       .where(sql`DATE(${expenses.expenseDate}) = ${today}`)
       .orderBy(desc(expenses.createdAt));
   }
 
   async getShiftSummary(shiftId: number): Promise<any> {
+    const db = await getDb();
     // Get shift details
     const shift = await this.getShift(shiftId);
     if (!shift) return null;
@@ -651,12 +706,12 @@ export class DatabaseStorage implements IStorage {
     const activities = await this.getShiftActivities(shiftId);
 
     // Get detailed expenses and orders linked to this shift
-    const shiftExpenses = await getDb().select().from(expenses)
+    const shiftExpenses = await db.select().from(expenses)
       .where(eq(expenses.shiftId, shiftId))
       .orderBy(desc(expenses.createdAt));
 
     // Get orders created during this shift (by time range)
-    const shiftOrders = await getDb().select().from(orders)
+    const shiftOrders = await db.select().from(orders)
       .where(sql`${orders.createdAt} >= ${shift.startTime} AND ${orders.createdAt} <= ${shift.endTime || new Date()}`)
       .orderBy(desc(orders.createdAt));
 
@@ -677,8 +732,9 @@ export class DatabaseStorage implements IStorage {
 
   async cleanupOldShifts(): Promise<void> {
     try {
+      const db = await getDb();
       // Get all completed shifts ordered by newest first
-      const completedShifts = await getDb().select()
+      const completedShifts = await db.select()
         .from(shifts)
         .where(eq(shifts.status, "completed"))
         .orderBy(desc(shifts.endTime));
@@ -689,21 +745,21 @@ export class DatabaseStorage implements IStorage {
         
         for (const shiftToDelete of shiftsToDelete) {
           // Delete all expenses associated with this shift
-          await getDb().delete(expenses)
+          await db.delete(expenses)
             .where(eq(expenses.shiftId, shiftToDelete.id));
           
           // Delete all shift activities
-          await getDb().delete(shiftActivities)
+          await db.delete(shiftActivities)
             .where(eq(shiftActivities.shiftId, shiftToDelete.id));
           
           // Delete reconciliation record if exists
           if (shiftToDelete.reconciliationId) {
-            await getDb().delete(shiftReconciliations)
+            await db.delete(shiftReconciliations)
               .where(eq(shiftReconciliations.id, shiftToDelete.reconciliationId));
           }
           
           // Finally delete the shift record
-          await getDb().delete(shifts)
+          await db.delete(shifts)
             .where(eq(shifts.id, shiftToDelete.id));
         }
         
