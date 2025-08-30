@@ -21,6 +21,13 @@ export async function getDb() {
    // Initialize Pool and Drizzle client
    pool = new Pool({ connectionString: databaseUrl });
    db = drizzle(pool, { schema });
+
+   // Debug: Check what tables exist
+   const result = await pool.query(`
+     SELECT table_name FROM information_schema.tables 
+     WHERE table_schema = 'public'
+   `);
+   console.log("Tables in database:", result.rows);
  }
 
  return db;
