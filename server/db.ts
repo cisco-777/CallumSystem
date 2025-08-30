@@ -1,33 +1,31 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+let pool: any = null;
+let db: any = null;
 
-let pool: Pool | null = null;
-let db: ReturnType<typeof drizzle> | null = null;
-
-function initializeDatabase() {
-  // ✅ Log DATABASE_URL at runtime
-  console.log("DATABASE_URL =", process.env.DATABASE_URL);
-
-  if (!process.env.DATABASE_URL) {
-    throw new Error(
-      "DATABASE_URL must be set. Did you forget to provision a database?",
-    );
-  }
-
+export async function getDb() {
+  // Only initialize once
   if (!pool) {
-    pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  }
+    // Dynamically import packages at runtime
+    const { Pool, neonConfig } = await import("@neondatabase/serverless");
+    const { drizzle } = await import("drizzle-orm/neon-serverless");
 
-  if (!db) {
+    // Set WebSocket constructor
+    neonConfig.webSocketConstructor = ws;
+
+    // Read DATABASE_URL at runtime
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      throw new Error(
+        "DATABASE_URL must be set at runtime. Did you forget to provision a database?"
+      );
+    }
+
+    // Initialize Pool and Drizzle client
+    pool = new Pool({ connectionString: databaseUrl });
     db = drizzle({ client: pool, schema });
   }
 
   return db;
 }
-
-export { initializeDatabase };
-export const getDb = () => initializeDatabase();
