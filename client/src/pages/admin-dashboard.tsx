@@ -33,7 +33,10 @@ const baseStockFormSchema = z.object({
   productCode: z.string().min(1, 'Product code is required'),
   onShelfGrams: z.number().min(0, 'On shelf amount must be positive'),
   costPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Cost price must be a valid number'),
-  shelfPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Shelf price must be a valid number')
+  shelfPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Shelf price must be a valid number'),
+  // Worker signature fields
+  workerName: z.string().min(1, 'Worker name is required'),
+  entryDate: z.string().min(1, 'Entry date is required')
 });
 
 // Full form schema for Cannabis, Hash, and Cali Pax
@@ -169,7 +172,10 @@ export function AdminDashboard() {
       internalGrams: 0,
       externalGrams: 0,
       costPrice: '',
-      shelfPrice: ''
+      shelfPrice: '',
+      // Worker signature fields
+      workerName: '',
+      entryDate: ''
     }
   });
 
@@ -3509,6 +3515,51 @@ export function AdminDashboard() {
                               )}
                             />
                           </div>
+                        </div>
+                      </div>
+                      
+                      {/* Section 4: Worker Signature */}
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h4 className="text-lg font-semibold text-orange-800 mb-4 flex items-center">
+                          <ClipboardCheck className="w-5 h-5 mr-2" />
+                          Worker Signature
+                        </h4>
+                        <p className="text-sm text-orange-700 mb-4">Required for tracking who made changes to inventory</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={stockForm.control}
+                            name="workerName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Worker Name *</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Enter your full name" 
+                                    {...field} 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={stockForm.control}
+                            name="entryDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Entry Date *</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="date" 
+                                    {...field} 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </div>
                       </div>
                       

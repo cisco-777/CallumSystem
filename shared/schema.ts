@@ -53,6 +53,9 @@ export const products = pgTable("products", {
   lastUpdated: timestamp("last_updated").defaultNow(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
+  // Worker signature tracking fields
+  workerName: text("worker_name"), // Worker who created/last modified the product entry
+  entryDate: text("entry_date"), // Date when worker made the entry
 });
 
 export const basketItems = pgTable("basket_items", {
