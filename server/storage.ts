@@ -527,7 +527,11 @@ export class DatabaseStorage implements IStorage {
       // Check if sufficient shelf stock is available
       const availableShelfStock = product.onShelfGrams || 0;
       if (availableShelfStock < quantity.quantity) {
-        throw new Error(`Insufficient shelf stock for ${product.name}. Available: ${availableShelfStock}g, Required: ${quantity.quantity}g`);
+        if (availableShelfStock === 0) {
+          throw new Error(`${product.name} is currently out of stock on shelf. Please restock before processing this order.`);
+        } else {
+          throw new Error(`Insufficient shelf stock for ${product.name}. Available: ${availableShelfStock}g, Required: ${quantity.quantity}g`);
+        }
       }
 
       // Calculate new stock values

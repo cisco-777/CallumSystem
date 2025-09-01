@@ -1050,9 +1050,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Check if sufficient stock is available
         const availableStock = product.onShelfGrams || 0;
         if (availableStock < item.quantity) {
-          return res.status(400).json({ 
-            message: `Insufficient stock for ${product.name}. Available: ${availableStock}g, Requested: ${item.quantity}g` 
-          });
+          if (availableStock === 0) {
+            return res.status(400).json({ 
+              message: `${product.name} is currently out of stock on shelf. Please restock before adding to order.` 
+            });
+          } else {
+            return res.status(400).json({ 
+              message: `Insufficient shelf stock for ${product.name}. Available: ${availableStock}g, Requested: ${item.quantity}g` 
+            });
+          }
         }
 
         // Calculate price (use shelfPrice if available, otherwise adminPrice, or productCode last 2 digits)
