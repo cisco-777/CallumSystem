@@ -56,6 +56,10 @@ export const products = pgTable("products", {
   // Worker signature tracking fields
   workerName: text("worker_name"), // Worker who created/last modified the product entry
   entryDate: text("entry_date"), // Date when worker made the entry
+  // Deal pricing fields (admin only)
+  dealPrice: text("deal_price"), // Special deal price (null if no deal)
+  dealStartDate: text("deal_start_date"), // When deal becomes active
+  dealEndDate: text("deal_end_date"), // When deal expires
 });
 
 export const basketItems = pgTable("basket_items", {

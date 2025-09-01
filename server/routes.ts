@@ -88,9 +88,23 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
                 };
               }
               
-              // Calculate price from product code (last 2 digits) like in donation process
-              const productCode = item.productCode || product.productCode || '';
-              const itemPrice = parseInt(productCode.slice(-2)) || 10;
+              // Calculate price using deal price first, then shelf price, then product code
+              let itemPrice = 10; // fallback price
+              
+              // Check for active deal price first
+              if (product.dealPrice && parseFloat(product.dealPrice) > 0) {
+                itemPrice = parseFloat(product.dealPrice);
+              } 
+              // Then check shelf price
+              else if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
+                itemPrice = parseFloat(product.shelfPrice);
+              }
+              // Fallback to product code pricing (last 2 digits)
+              else {
+                const productCode = item.productCode || product.productCode || '';
+                itemPrice = parseInt(productCode.slice(-2)) || 10;
+              }
+              
               const quantity = quantityData.quantity || 1;
               
               // Add to category totals
@@ -896,10 +910,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate random 4-digit pickup code
       const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
       
-      // Calculate total price using product reference codes (last 2 digits)
+      // Calculate total price using deal price first, then shelf price, then product reference codes
       const totalPrice = basketItems.reduce((sum, item) => {
-        const productCode = (item as any).product?.productCode || '';
-        const price = parseInt(productCode.slice(-2)) || 10;
+        const product = (item as any).product;
+        let price = 10; // fallback price
+        
+        // Check for active deal price first
+        if (product?.dealPrice && parseFloat(product.dealPrice) > 0) {
+          price = parseFloat(product.dealPrice);
+        } 
+        // Then check shelf price
+        else if (product?.shelfPrice && parseFloat(product.shelfPrice) > 0) {
+          price = parseFloat(product.shelfPrice);
+        }
+        // Fallback to product code pricing (last 2 digits)
+        else {
+          const productCode = product?.productCode || '';
+          price = parseInt(productCode.slice(-2)) || 10;
+        }
+        
         return sum + ((item.quantity || 1) * price);
       }, 0).toString();
       
@@ -1083,9 +1112,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Calculate price (use shelfPrice if available, otherwise adminPrice, or productCode last 2 digits)
+        // Calculate price (use deal price first, then shelf price, then admin price, or product code last 2 digits)
         let price = 0;
-        if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
+        if (product.dealPrice && parseFloat(product.dealPrice) > 0) {
+          price = parseFloat(product.dealPrice);
+        } else if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
           price = parseFloat(product.shelfPrice);
         } else if (product.adminPrice && parseFloat(product.adminPrice) > 0) {
           price = parseFloat(product.adminPrice);
