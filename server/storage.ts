@@ -428,6 +428,9 @@ export class DatabaseStorage implements IStorage {
         productCode: products.productCode,
         isActive: products.isActive,
         createdAt: products.createdAt,
+        shelfPrice: products.shelfPrice,
+        dealPrice: products.dealPrice,
+        adminPrice: products.adminPrice,
       }
     })
     .from(basketItems)
