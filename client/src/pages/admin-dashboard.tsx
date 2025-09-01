@@ -98,6 +98,23 @@ const manualOrderFormSchema = z.object({
   })).min(1, 'At least one item is required')
 });
 
+// Stock movement form schema
+const stockMovementFormSchema = z.object({
+  productId: z.number().min(1, 'Please select a product'),
+  fromLocation: z.enum(['internal', 'external', 'shelf'], {
+    required_error: 'Please select source location'
+  }),
+  toLocation: z.enum(['internal', 'external', 'shelf'], {
+    required_error: 'Please select destination location'
+  }),
+  quantity: z.number().min(1, 'Quantity must be at least 1 gram'),
+  workerName: z.string().min(1, 'Worker name is required'),
+  notes: z.string().optional()
+}).refine((data) => data.fromLocation !== data.toLocation, {
+  message: "Source and destination locations cannot be the same",
+  path: ["toLocation"]
+});
+
 type UnifiedStockFormData = z.infer<typeof unifiedStockFormSchema>;
 type StockFormData = UnifiedStockFormData; // For backward compatibility
 
@@ -126,6 +143,7 @@ export function AdminDashboard() {
   const [editingStock, setEditingStock] = useState<any>(null);
   const [deletingProduct, setDeletingProduct] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showStockMovementForm, setShowStockMovementForm] = useState(false);
   const [showShiftReconciliation, setShowShiftReconciliation] = useState(false);
   const [physicalCounts, setPhysicalCounts] = useState<Record<number, number>>({});
   const [reconciliationResult, setReconciliationResult] = useState<any>(null);
@@ -223,6 +241,18 @@ export function AdminDashboard() {
     resolver: zodResolver(manualOrderFormSchema),
     defaultValues: {
       items: [{ productId: 0, quantity: 1 }]
+    }
+  });
+
+  const stockMovementForm = useForm<z.infer<typeof stockMovementFormSchema>>({
+    resolver: zodResolver(stockMovementFormSchema),
+    defaultValues: {
+      productId: 0,
+      fromLocation: 'internal' as const,
+      toLocation: 'shelf' as const,
+      quantity: 1,
+      workerName: '',
+      notes: ''
     }
   });
 
@@ -530,6 +560,43 @@ export function AdminDashboard() {
       toast({
         title: "Error",
         description: error.message || "Failed to create stock entry. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const stockMovementMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof stockMovementFormSchema>) => {
+      // Add Madrid timezone timestamp
+      const madridTime = new Date().toLocaleString("sv-SE", { 
+        timeZone: "Europe/Madrid",
+        hour12: false 
+      });
+      
+      const movementData = {
+        ...data,
+        movementDate: madridTime
+      };
+      
+      return await apiRequest('/api/stock-movements', {
+        method: 'POST',
+        body: JSON.stringify(movementData),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      setShowStockMovementForm(false);
+      stockMovementForm.reset();
+      toast({
+        title: "Stock Moved Successfully",
+        description: "Stock has been moved between storage locations.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Movement Failed",
+        description: error.message || "Failed to move stock. Please try again.",
         variant: "destructive",
       });
     }
@@ -1156,6 +1223,10 @@ export function AdminDashboard() {
     } else {
       createStockMutation.mutate(finalData);
     }
+  };
+
+  const onSubmitStockMovement = (data: z.infer<typeof stockMovementFormSchema>) => {
+    stockMovementMutation.mutate(data);
   };
 
   const handleEditStock = (product: any) => {
@@ -2801,6 +2872,81 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
 
+            {/* Stock Movement/Reload Section */}
+            <Card className="mb-6 sm:mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center mobile-text-lg">
+                  <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                  Stock Reload & Movement
+                </CardTitle>
+                <p className="text-sm text-gray-600 mt-1">
+                  Move stock between internal, external, and shelf locations
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Internal to Shelf Movement */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                      <Package className="w-4 h-4 mr-2" />
+                      Internal → Shelf
+                    </h4>
+                    <p className="text-sm text-blue-700 mb-3">Move stock from internal storage to customer shelf</p>
+                    <Button
+                      onClick={() => {
+                        stockMovementForm.setValue('fromLocation', 'internal');
+                        stockMovementForm.setValue('toLocation', 'shelf');
+                        setShowStockMovementForm(true);
+                      }}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      size="sm"
+                    >
+                      Move to Shelf
+                    </Button>
+                  </div>
+
+                  {/* External to Internal Movement */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                      <Package className="w-4 h-4 mr-2" />
+                      External → Internal
+                    </h4>
+                    <p className="text-sm text-green-700 mb-3">Move stock from external storage to internal</p>
+                    <Button
+                      onClick={() => {
+                        stockMovementForm.setValue('fromLocation', 'external');
+                        stockMovementForm.setValue('toLocation', 'internal');
+                        setShowStockMovementForm(true);
+                      }}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      size="sm"
+                    >
+                      Move to Internal
+                    </Button>
+                  </div>
+
+                  {/* Custom Movement */}
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-purple-800 mb-3 flex items-center">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Custom Movement
+                    </h4>
+                    <p className="text-sm text-purple-700 mb-3">Choose any source and destination locations</p>
+                    <Button
+                      onClick={() => {
+                        stockMovementForm.reset();
+                        setShowStockMovementForm(true);
+                      }}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      size="sm"
+                    >
+                      Custom Move
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
           </TabsContent>
           
           {/* Analytics Tab */}
@@ -4339,6 +4485,205 @@ export function AdminDashboard() {
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
                     {createManualOrderMutation.isPending ? 'Creating...' : 'Create Order'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Stock Movement Dialog */}
+        <Dialog open={showStockMovementForm} onOpenChange={setShowStockMovementForm}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-blue-800">
+                Move Stock Between Locations
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Form {...stockMovementForm}>
+              <form onSubmit={stockMovementForm.handleSubmit(onSubmitStockMovement)} className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    <strong>Stock Movement:</strong> Transfer stock between internal storage, external storage, and customer shelf locations.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={stockMovementForm.control}
+                    name="productId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product *</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value?.toString() || ''}
+                            onValueChange={(value) => field.onChange(parseInt(value))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a product" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products.map((product: any) => (
+                                <SelectItem key={product.id} value={product.id.toString()}>
+                                  {product.name} (Total: {(product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0)}g)
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={stockMovementForm.control}
+                    name="quantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantity (grams) *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="1"
+                            step="1"
+                            placeholder="0"
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value) || 0;
+                              field.onChange(value);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={stockMovementForm.control}
+                    name="fromLocation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>From Location *</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select source location" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="internal">Internal Storage</SelectItem>
+                              <SelectItem value="external">External Storage</SelectItem>
+                              <SelectItem value="shelf">Customer Shelf</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={stockMovementForm.control}
+                    name="toLocation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>To Location *</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select destination location" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="internal">Internal Storage</SelectItem>
+                              <SelectItem value="external">External Storage</SelectItem>
+                              <SelectItem value="shelf">Customer Shelf</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={stockMovementForm.control}
+                  name="workerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Worker Name *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter your full name" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={stockMovementForm.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notes (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Add any notes about this stock movement..." 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Show current stock levels for selected product */}
+                {stockMovementForm.watch('productId') > 0 && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <h4 className="font-medium text-gray-800 mb-2">Current Stock Levels</h4>
+                    {(() => {
+                      const selectedProduct = products.find((p: any) => p.id === stockMovementForm.watch('productId'));
+                      if (!selectedProduct) return null;
+                      return (
+                        <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
+                          <div>Internal: {selectedProduct.internalGrams || 0}g</div>
+                          <div>External: {selectedProduct.externalGrams || 0}g</div>
+                          <div>Shelf: {selectedProduct.onShelfGrams || 0}g</div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowStockMovementForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={stockMovementMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {stockMovementMutation.isPending ? 'Moving...' : 'Move Stock'}
                   </Button>
                 </div>
               </form>

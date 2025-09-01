@@ -818,6 +818,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stock movement routes
+  app.post('/api/stock-movements', async (req, res) => {
+    try {
+      const movementData = req.body;
+      const movement = await storage.createStockMovement(movementData);
+      res.json(movement);
+    } catch (error) {
+      console.error('Create stock movement error:', error);
+      res.status(500).json({ message: 'Failed to create stock movement' });
+    }
+  });
+
+  app.get('/api/stock-movements', async (req, res) => {
+    try {
+      const movements = await storage.getStockMovements();
+      res.json(movements);
+    } catch (error) {
+      console.error('Get stock movements error:', error);
+      res.status(500).json({ message: 'Failed to fetch stock movements' });
+    }
+  });
+
   // Basket routes
   app.get("/api/basket/:userId", async (req, res) => {
     try {

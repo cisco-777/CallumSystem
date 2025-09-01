@@ -144,6 +144,19 @@ export const shiftActivities = pgTable("shift_activities", {
   metadata: jsonb("metadata"), // Additional data specific to activity type
 });
 
+// Stock movements table for tracking transfers between storage locations
+export const stockMovements = pgTable("stock_movements", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").references(() => products.id).notNull(),
+  fromLocation: text("from_location").notNull(), // 'internal', 'external', 'shelf'
+  toLocation: text("to_location").notNull(), // 'internal', 'external', 'shelf'
+  quantity: integer("quantity").notNull(), // Amount moved in grams
+  workerName: text("worker_name").notNull(), // Worker who performed the move
+  movementDate: text("movement_date").notNull(), // Date/time of movement (UTC+2 Madrid timezone)
+  notes: text("notes"), // Optional notes about the movement
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,

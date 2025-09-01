@@ -8,6 +8,7 @@ import {
   expenses,
   shifts,
   shiftActivities,
+  stockMovements,
   type User,
   type InsertUser,
   type Product,
@@ -66,6 +67,10 @@ export interface IStorage {
   updateProductStock(id: number, stockData: any): Promise<Product>;
   createStockEntry(stockData: any): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
+  
+  // Stock movement operations
+  createStockMovement(movementData: any): Promise<any>;
+  getStockMovements(): Promise<any[]>;
   
   // Basket operations
   getBasketItems(userId: number): Promise<BasketItem[]>;
@@ -572,6 +577,90 @@ export class DatabaseStorage implements IStorage {
     
     // Then delete the product itself
     await db.delete(products).where(eq(products.id, id));
+  }
+
+  async createStockMovement(movementData: any): Promise<any> {
+    const db = await getDb();
+    
+    // Validate that the source location has enough stock
+    const [product] = await db.select().from(products).where(eq(products.id, movementData.productId));
+    if (!product) {
+      throw new Error('Product not found');
+    }
+    
+    const currentStock = {
+      internal: product.internalGrams || 0,
+      external: product.externalGrams || 0,
+      shelf: product.onShelfGrams || 0
+    };
+    
+    if (currentStock[movementData.fromLocation] < movementData.quantity) {
+      throw new Error(`Insufficient stock in ${movementData.fromLocation} location. Available: ${currentStock[movementData.fromLocation]}g, Requested: ${movementData.quantity}g`);
+    }
+    
+    // Create the movement record first
+    const [movement] = await db
+      .insert(stockMovements)
+      .values(movementData)
+      .returning();
+    
+    // Update the product stock quantities
+    const updateData: any = {};
+    if (movementData.fromLocation === 'internal') {
+      updateData.internalGrams = (product.internalGrams || 0) - movementData.quantity;
+    } else if (movementData.fromLocation === 'external') {
+      updateData.externalGrams = (product.externalGrams || 0) - movementData.quantity;
+    } else if (movementData.fromLocation === 'shelf') {
+      updateData.onShelfGrams = (product.onShelfGrams || 0) - movementData.quantity;
+    }
+    
+    if (movementData.toLocation === 'internal') {
+      updateData.internalGrams = (updateData.internalGrams !== undefined ? updateData.internalGrams : (product.internalGrams || 0)) + movementData.quantity;
+    } else if (movementData.toLocation === 'external') {
+      updateData.externalGrams = (updateData.externalGrams !== undefined ? updateData.externalGrams : (product.externalGrams || 0)) + movementData.quantity;
+    } else if (movementData.toLocation === 'shelf') {
+      updateData.onShelfGrams = (updateData.onShelfGrams !== undefined ? updateData.onShelfGrams : (product.onShelfGrams || 0)) + movementData.quantity;
+    }
+    
+    // Calculate new total stock
+    const newTotalStock = (updateData.onShelfGrams || product.onShelfGrams || 0) + 
+                         (updateData.internalGrams || product.internalGrams || 0) + 
+                         (updateData.externalGrams || product.externalGrams || 0);
+    
+    // Update product with new stock levels
+    await db
+      .update(products)
+      .set({
+        ...updateData,
+        stockQuantity: newTotalStock,
+        lastUpdated: new Date()
+      })
+      .where(eq(products.id, movementData.productId));
+    
+    return movement;
+  }
+
+  async getStockMovements(): Promise<any[]> {
+    const db = await getDb();
+    const movements = await db
+      .select({
+        id: stockMovements.id,
+        productId: stockMovements.productId,
+        fromLocation: stockMovements.fromLocation,
+        toLocation: stockMovements.toLocation,
+        quantity: stockMovements.quantity,
+        workerName: stockMovements.workerName,
+        movementDate: stockMovements.movementDate,
+        notes: stockMovements.notes,
+        createdAt: stockMovements.createdAt,
+        productName: products.name,
+        productCode: products.productCode
+      })
+      .from(stockMovements)
+      .leftJoin(products, eq(stockMovements.productId, products.id))
+      .orderBy(desc(stockMovements.createdAt));
+    
+    return movements;
   }
 
   async createShiftReconciliation(reconciliationData: InsertShiftReconciliation): Promise<ShiftReconciliation> {
