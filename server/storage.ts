@@ -597,8 +597,8 @@ export class DatabaseStorage implements IStorage {
       shelf: product.onShelfGrams || 0
     };
     
-    if (currentStock[movementData.fromLocation] < movementData.quantity) {
-      throw new Error(`Insufficient stock in ${movementData.fromLocation} location. Available: ${currentStock[movementData.fromLocation]}g, Requested: ${movementData.quantity}g`);
+    if (currentStock[movementData.fromLocation as keyof typeof currentStock] < movementData.quantity) {
+      throw new Error(`Insufficient stock in ${movementData.fromLocation} location. Available: ${currentStock[movementData.fromLocation as keyof typeof currentStock]}g, Requested: ${movementData.quantity}g`);
     }
     
     // Create the movement record first
