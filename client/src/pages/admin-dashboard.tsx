@@ -4233,7 +4233,16 @@ export function AdminDashboard() {
                                 step="1"
                                 placeholder="0"
                                 {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                value={field.value || ''}
+                                onChange={(e) => {
+                                  let value = e.target.value;
+                                  // Remove leading zeros, but keep single zero
+                                  if (value && value !== '0') {
+                                    value = value.replace(/^0+(?=\d)/, '');
+                                  }
+                                  const numValue = parseInt(value) || 0;
+                                  field.onChange(numValue);
+                                }}
                               />
                             </FormControl>
                             <FormMessage />
