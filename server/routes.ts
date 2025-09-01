@@ -183,7 +183,33 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     }
     
     report += `Total collections: ₳${shift.totalSales || '0'}\n`;
-    report += `Net total: ₳${shift.netAmount || '0'}\n\n`;
+    report += `Net total: ₳${shift.netAmount || '0'}\n`;
+    
+    // Money reconciliation calculation
+    if (reconciliation && shift.startingTillAmount) {
+      const startingTill = parseFloat(shift.startingTillAmount) || 0;
+      const totalSales = parseFloat(shift.totalSales || '0');
+      const totalExpenses = parseFloat(shift.totalExpenses || '0');
+      const actualCashInTill = parseFloat(reconciliation.cashInTill || '0');
+      
+      // Expected till amount = Starting till + Sales - Expenses
+      const expectedTillAmount = startingTill + totalSales - totalExpenses;
+      const moneyDifference = actualCashInTill - expectedTillAmount;
+      
+      report += `\nMONEY RECONCILIATION\n`;
+      report += `Expected in till: ₳${expectedTillAmount.toFixed(2)}\n`;
+      report += `Actual in till: ₳${actualCashInTill.toFixed(2)}\n`;
+      
+      if (Math.abs(moneyDifference) < 0.01) {
+        report += `Money is all correct\n`;
+      } else if (moneyDifference > 0) {
+        report += `₳${moneyDifference.toFixed(2)} excess\n`;
+      } else {
+        report += `₳${Math.abs(moneyDifference).toFixed(2)} missing\n`;
+      }
+    }
+    
+    report += `\n`;
 
     return report;
 
