@@ -1734,7 +1734,7 @@ export function AdminDashboard() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>
             <h1 className="mobile-h1 font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="mobile-text-sm text-gray-600 mt-1">Demo Social Club Management</p>
+            <p className="mobile-text-sm text-gray-600 mt-1">Social Club Management</p>
           </div>
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
             <AlertDialog open={showFailsafeDialog} onOpenChange={setShowFailsafeDialog}>
