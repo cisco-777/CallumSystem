@@ -4,6 +4,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Sticky basket button styles */
+.sticky-basket-button {
+  position: fixed;
+  z-index: 40;
+  transition: all 0.3s ease-in-out;
+}
+
+.sticky-basket-button:hover {
+  transform: scale(1.1);
+}
+
+/* Ensure basket sidebar appears above sticky elements */
+.basket-sidebar {
+  z-index: 50;
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --background: 0 0% 100%; /* #FFFFFF */
   --foreground: 0 0% 3.9%; /* #0a0a0a */

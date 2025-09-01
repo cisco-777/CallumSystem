@@ -56,8 +56,8 @@ export function RightNavigation({ type, onLogout, onShowBasket, basketCount = 0 
   };
 
   const handleItemClick = (item: any) => {
-    if (item.action === 'logout' && onLogout) {
-      onLogout();
+    if (item.action === 'logout') {
+      onLogout?.();
     } else if (item.scrollTo) {
       scrollToSection(item.scrollTo);
     }

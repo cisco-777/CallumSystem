@@ -189,20 +189,6 @@ export function Dashboard({ onLogout }: DashboardProps) {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
             <Button
               variant="ghost"
-              onClick={() => setShowBasket(true)}
-              className="relative mobile-btn-md mobile-touch-target"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              <span className="mobile-text-sm ml-2 sm:hidden">View Basket</span>
-              {basketCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-[#116149] text-white min-w-[20px] h-5 mobile-text-xs">
-                  {basketCount}
-                </Badge>
-              )}
-            </Button>
-            
-            <Button
-              variant="ghost"
               onClick={onLogout}
               className="text-gray-600 hover:text-gray-900 mobile-btn-md mobile-touch-target"
             >
@@ -578,6 +564,36 @@ export function Dashboard({ onLogout }: DashboardProps) {
             <p className="text-gray-500">No items available at the moment.</p>
           </div>
         )}
+
+        {/* Sticky Basket Button - Fixed positioning for constant visibility */}
+        <div className="fixed bottom-6 right-6 z-40 lg:hidden">
+          <Button
+            onClick={() => setShowBasket(true)}
+            className="relative bg-[#116149] hover:bg-[#0d4d3a] text-white rounded-full w-16 h-16 shadow-lg"
+          >
+            <ShoppingBag className="w-6 h-6" />
+            {basketCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-red-500 text-white min-w-[24px] h-6 text-xs">
+                {basketCount}
+              </Badge>
+            )}
+          </Button>
+        </div>
+
+        {/* Desktop Sticky Basket Button */}
+        <div className="hidden lg:block fixed right-8 top-1/2 transform -translate-y-1/2 z-40">
+          <Button
+            onClick={() => setShowBasket(true)}
+            className="relative bg-[#116149] hover:bg-[#0d4d3a] text-white rounded-full w-14 h-14 shadow-lg"
+          >
+            <ShoppingBag className="w-5 h-5" />
+            {basketCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-red-500 text-white min-w-[20px] h-5 text-xs">
+                {basketCount}
+              </Badge>
+            )}
+          </Button>
+        </div>
 
         {/* Basket Sidebar */}
         <AnimatePresence>
