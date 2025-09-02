@@ -131,26 +131,6 @@ function StockLogsTab() {
     }
   };
 
-  const getProductTypeBadge = (productType: string) => {
-    switch (productType) {
-      case 'Cannabis':
-        return { color: 'bg-green-100 text-green-800', label: 'Cannabis' };
-      case 'Hash':
-        return { color: 'bg-amber-100 text-amber-800', label: 'Hash' };
-      case 'Wax':
-        return { color: 'bg-yellow-100 text-yellow-800', label: 'Wax' };
-      case 'Vapes':
-        return { color: 'bg-blue-100 text-blue-800', label: 'Vapes' };
-      case 'Pre-Rolls':
-        return { color: 'bg-purple-100 text-purple-800', label: 'Pre-Rolls' };
-      case 'Edibles':
-        return { color: 'bg-pink-100 text-pink-800', label: 'Edibles' };
-      case 'Cali Pax':
-        return { color: 'bg-indigo-100 text-indigo-800', label: 'Cali Pax' };
-      default:
-        return { color: 'bg-gray-100 text-gray-800', label: productType || 'Unknown' };
-    }
-  };
 
   // Helper function to format values for display
   const formatValues = (values: any) => {
@@ -542,6 +522,28 @@ export function AdminDashboard() {
     localStorage.removeItem('msc-admin-authenticated');
     localStorage.removeItem('msc-admin');
     window.location.href = '/';
+  };
+
+  // Helper function to get product type badge styling
+  const getProductTypeBadge = (productType: string) => {
+    switch (productType) {
+      case 'Cannabis':
+        return { color: 'bg-green-100 text-green-800', label: 'Cannabis' };
+      case 'Hash':
+        return { color: 'bg-amber-100 text-amber-800', label: 'Hash' };
+      case 'Wax':
+        return { color: 'bg-yellow-100 text-yellow-800', label: 'Wax' };
+      case 'Vapes':
+        return { color: 'bg-blue-100 text-blue-800', label: 'Vapes' };
+      case 'Pre-Rolls':
+        return { color: 'bg-purple-100 text-purple-800', label: 'Pre-Rolls' };
+      case 'Edibles':
+        return { color: 'bg-pink-100 text-pink-800', label: 'Edibles' };
+      case 'Cali Pax':
+        return { color: 'bg-indigo-100 text-indigo-800', label: 'Cali Pax' };
+      default:
+        return { color: 'bg-gray-100 text-gray-800', label: productType || 'Unknown' };
+    }
   };
 
 
