@@ -807,7 +807,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Product code already exists. Please use a unique 6-digit code." });
       }
       
-      const product = await storage.createProduct({ productCode, ...productData });
+      // Remove category for products that shouldn't have cannabis categories
+      const finalProductData = { ...productData };
+      if (['Vapes', 'Pre-Rolls', 'Edibles', 'Wax'].includes(productData.productType)) {
+        delete finalProductData.category;
+      }
+      
+      const product = await storage.createProduct({ productCode, ...finalProductData });
       res.json(product);
     } catch (error) {
       console.error("Create product error:", error);
@@ -853,7 +859,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Product code already exists. Please use a unique 6-digit code." });
       }
       
-      const newProduct = await storage.createStockEntry(stockData);
+      // Remove category for products that shouldn't have cannabis categories
+      const finalStockData = { ...stockData };
+      if (['Vapes', 'Pre-Rolls', 'Edibles', 'Wax'].includes(stockData.productType)) {
+        delete finalStockData.category;
+      }
+      
+      const newProduct = await storage.createStockEntry(finalStockData);
       res.json(newProduct);
     } catch (error) {
       console.error('Create stock entry error:', error);

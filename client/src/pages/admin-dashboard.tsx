@@ -398,9 +398,8 @@ const fullStockFormSchema = baseStockFormSchema.extend({
   externalGrams: z.number().min(0, 'External amount must be positive')
 });
 
-// Simplified form schema for Pre-Rolls and Edibles
+// Simplified form schema for Pre-Rolls, Edibles, Vapes, and Wax (no category needed)
 const simplifiedStockFormSchema = baseStockFormSchema.extend({
-  category: z.enum(['Sativa', 'Indica', 'Hybrid']).optional(),
   supplier: z.string().min(1, 'Supplier is required'),
   internalGrams: z.number().optional(),
   externalGrams: z.number().optional()
@@ -3784,7 +3783,7 @@ export function AdminDashboard() {
                             )}
                           />
                           
-                          {!isSimplifiedProductType(watchedProductType) && (
+                          {['Cannabis', 'Hash', 'Cali Pax'].includes(watchedProductType) && (
                             <FormField
                               control={stockForm.control}
                               name="category"
