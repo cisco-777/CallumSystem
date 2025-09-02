@@ -122,6 +122,8 @@ function StockLogsTab() {
         return { color: 'bg-green-100 text-green-800', label: 'Created' };
       case 'product_edited':
         return { color: 'bg-blue-100 text-blue-800', label: 'Edited' };
+      case 'product_deleted':
+        return { color: 'bg-red-100 text-red-800', label: 'DELETED' };
       case 'stock_movement':
         return { color: 'bg-purple-100 text-purple-800', label: 'Movement' };
       case 'order_processed':
@@ -193,12 +195,18 @@ function StockLogsTab() {
                 <div className="space-y-3">
                   {logsByShift['no-shift'].map((log: any) => {
                     const badge = getActionTypeBadge(log.actionType);
+                    const isDeleted = log.actionType === 'product_deleted';
+                    const hasDeletedProduct = !isDeleted && log.productId && !products.find((p: any) => p.id === log.productId);
+                    
                     return (
-                      <div key={log.id} className="border rounded-lg p-4 bg-gray-50">
+                      <div key={log.id} className={`border rounded-lg p-4 ${isDeleted ? 'bg-red-50 opacity-75' : hasDeletedProduct ? 'bg-gray-100 opacity-60' : 'bg-gray-50'}`}>
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
                             <Badge className={badge.color}>{badge.label}</Badge>
-                            <span className="font-medium">{log.productName}</span>
+                            <span className={`font-medium ${hasDeletedProduct ? 'line-through text-gray-500' : ''}`}>
+                              {log.productName}
+                              {hasDeletedProduct && <span className="text-xs text-red-500 ml-2">(DELETED)</span>}
+                            </span>
                           </div>
                           <span className="text-sm text-gray-500">
                             {new Date(log.createdAt).toLocaleString()}
@@ -254,12 +262,18 @@ function StockLogsTab() {
                       .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                       .map((log: any) => {
                         const badge = getActionTypeBadge(log.actionType);
+                        const isDeleted = log.actionType === 'product_deleted';
+                        const hasDeletedProduct = !isDeleted && log.productId && !products.find((p: any) => p.id === log.productId);
+                        
                         return (
-                          <div key={log.id} className="border rounded-lg p-4 bg-white">
+                          <div key={log.id} className={`border rounded-lg p-4 ${isDeleted ? 'bg-red-50 opacity-75' : hasDeletedProduct ? 'bg-gray-100 opacity-60' : 'bg-white'}`}>
                             <div className="flex justify-between items-start mb-2">
                               <div className="flex items-center gap-2">
                                 <Badge className={badge.color}>{badge.label}</Badge>
-                                <span className="font-medium">{log.productName}</span>
+                                <span className={`font-medium ${hasDeletedProduct ? 'line-through text-gray-500' : ''}`}>
+                                  {log.productName}
+                                  {hasDeletedProduct && <span className="text-xs text-red-500 ml-2">(DELETED)</span>}
+                                </span>
                               </div>
                               <span className="text-sm text-gray-500">
                                 {new Date(log.createdAt).toLocaleString()}

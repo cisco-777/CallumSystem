@@ -644,9 +644,42 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProduct(id: number): Promise<void> {
     const db = await getDb();
-    // First remove all stock logs for this product
-    await db.delete(stockLogs).where(eq(stockLogs.productId, id));
-    // Then remove all basket items for this product
+    
+    // Get product info before deletion to preserve in logs
+    const productToDelete = await db.select().from(products).where(eq(products.id, id)).limit(1);
+    const product = productToDelete[0];
+    
+    if (!product) {
+      throw new Error('Product not found');
+    }
+    
+    // Get current active shift
+    const activeShifts = await db.select().from(shifts).orderBy(desc(shifts.createdAt)).limit(1);
+    const currentShift = activeShifts[0];
+    
+    // Create deletion log entry BEFORE deleting product
+    await db.insert(stockLogs).values({
+      shiftId: currentShift?.id || null,
+      productId: id,
+      actionType: 'product_deleted',
+      workerName: 'Admin',
+      actionDate: new Date(),
+      productName: product.name,
+      oldValues: {
+        name: product.name,
+        productType: product.productType,
+        onShelfGrams: product.onShelfGrams,
+        internalGrams: product.internalGrams,
+        externalGrams: product.externalGrams,
+        costPrice: product.costPrice,
+        shelfPrice: product.shelfPrice
+      },
+      newValues: { status: 'deleted' },
+      notes: `Product "${product.name}" has been deleted from inventory`
+    });
+    
+    // DON'T delete stock logs - preserve them for audit trail
+    // Instead, just remove basket items and the product itself
     await db.delete(basketItems).where(eq(basketItems.productId, id));
     
     // Finally delete the product itself
