@@ -1196,6 +1196,11 @@ export class DatabaseStorage implements IStorage {
           await db.delete(shiftActivities)
             .where(eq(shiftActivities.shiftId, shiftToDelete.id));
           
+          // Remove email report references to this shift
+          await db.update(emailReports)
+            .set({ shiftId: null })
+            .where(eq(emailReports.shiftId, shiftToDelete.id));
+          
           // Remove reconciliation reference from shift first
           if (shiftToDelete.reconciliationId) {
             await db.update(shifts)
