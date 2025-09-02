@@ -1754,7 +1754,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/expenses/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const expense = await storage.getExpense(parseInt(id));
+      const expenseId = parseInt(id);
+      
+      if (isNaN(expenseId)) {
+        return res.status(400).json({ message: "Invalid expense ID" });
+      }
+      
+      const expense = await storage.getExpense(expenseId);
       
       if (!expense) {
         return res.status(404).json({ message: "Expense not found" });
@@ -1770,9 +1776,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/expenses/:id", async (req, res) => {
     try {
       const { id } = req.params;
+      const expenseId = parseInt(id);
+      
+      if (isNaN(expenseId)) {
+        return res.status(400).json({ message: "Invalid expense ID" });
+      }
+      
       const { description, amount, workerName, shiftId, paidAmount, paymentStatus, outstandingAmount } = req.body;
       
-      const expense = await storage.updateExpense(parseInt(id), {
+      const expense = await storage.updateExpense(expenseId, {
         description,
         amount,
         workerName,
@@ -1792,7 +1804,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/expenses/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteExpense(parseInt(id));
+      const expenseId = parseInt(id);
+      
+      if (isNaN(expenseId)) {
+        return res.status(400).json({ message: "Invalid expense ID" });
+      }
+      
+      await storage.deleteExpense(expenseId);
       res.json({ message: "Expense deleted successfully" });
     } catch (error) {
       console.error("Error deleting expense:", error);
