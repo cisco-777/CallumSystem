@@ -180,6 +180,21 @@ export const stockLogs = pgTable("stock_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Email reports table for inbox functionality
+export const emailReports = pgTable("email_reports", {
+  id: serial("id").primaryKey(),
+  shiftId: integer("shift_id").references(() => shifts.id),
+  reportType: text("report_type").notNull(), // 'shift_end', 'reconciliation', etc.
+  subject: text("subject").notNull(),
+  content: text("content").notNull(), // Full email content
+  recipientEmail: text("recipient_email"),
+  sentAt: timestamp("sent_at").defaultNow(),
+  shiftDate: text("shift_date"), // Date the shift ended
+  workerName: text("worker_name"), // Worker who generated the report
+  metadata: jsonb("metadata"), // Additional shift/report data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
@@ -276,6 +291,17 @@ export const insertStockLogSchema = createInsertSchema(stockLogs).pick({
   metadata: true,
 });
 
+export const insertEmailReportSchema = createInsertSchema(emailReports).pick({
+  shiftId: true,
+  reportType: true,
+  subject: true,
+  content: true,
+  recipientEmail: true,
+  shiftDate: true,
+  workerName: true,
+  metadata: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type InsertShiftReconciliation = z.infer<typeof insertShiftReconciliationSchema>;
@@ -283,6 +309,7 @@ export type InsertExpense = z.infer<typeof insertExpenseSchema>;
 export type InsertShift = z.infer<typeof insertShiftSchema>;
 export type InsertShiftActivity = z.infer<typeof insertShiftActivitySchema>;
 export type InsertStockLog = z.infer<typeof insertStockLogSchema>;
+export type InsertEmailReport = z.infer<typeof insertEmailReportSchema>;
 export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type BasketItem = typeof basketItems.$inferSelect;
@@ -293,3 +320,4 @@ export type Expense = typeof expenses.$inferSelect;
 export type Shift = typeof shifts.$inferSelect;
 export type ShiftActivity = typeof shiftActivities.$inferSelect;
 export type StockLog = typeof stockLogs.$inferSelect;
+export type EmailReport = typeof emailReports.$inferSelect;

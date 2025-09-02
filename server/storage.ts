@@ -10,6 +10,7 @@ import {
   shiftActivities,
   stockMovements,
   stockLogs,
+  emailReports,
   type User,
   type InsertUser,
   type Product,
@@ -27,6 +28,8 @@ import {
   type InsertShiftActivity,
   type StockLog,
   type InsertStockLog,
+  type EmailReport,
+  type InsertEmailReport,
 } from "@shared/schema";
 import { getDb } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -128,6 +131,10 @@ export interface IStorage {
   // Enhanced methods with shift tracking
   getTodaysExpenses(): Promise<Expense[]>;
   getShiftSummary(shiftId: number): Promise<any>;
+
+  // Email reports operations
+  getAllEmailReports(): Promise<EmailReport[]>;
+  storeEmailReport(reportData: InsertEmailReport): Promise<EmailReport>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1022,6 +1029,21 @@ export class DatabaseStorage implements IStorage {
       console.error("Error cleaning up old shifts:", error);
       // Don't throw error to avoid disrupting the reconciliation process
     }
+  }
+
+  // Email reports operations
+  async getAllEmailReports(): Promise<EmailReport[]> {
+    const db = await getDb();
+    return await db.select().from(emailReports).orderBy(desc(emailReports.sentAt));
+  }
+
+  async storeEmailReport(reportData: InsertEmailReport): Promise<EmailReport> {
+    const db = await getDb();
+    const [report] = await db
+      .insert(emailReports)
+      .values(reportData)
+      .returning();
+    return report;
   }
 }
 

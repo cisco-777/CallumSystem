@@ -232,6 +232,33 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     
     report += `\n`;
 
+    // Store the email report in the inbox
+    try {
+      const emailReportData = {
+        shiftId: shiftId,
+        reportType: 'shift_end',
+        subject: `Shift Report - ${shift.workerName} - ${shiftDate}`,
+        content: report,
+        recipientEmail: 'management@demo-social-club.com', // Default recipient
+        shiftDate: shiftDate,
+        workerName: shift.workerName,
+        metadata: {
+          shiftStartTime: shiftStartTime,
+          shiftEndTime: shiftEndTime,
+          totalSales: shift.totalSales,
+          totalExpenses: shift.totalExpenses,
+          netAmount: shift.netAmount,
+          stockDiscrepancies: reconciliation?.totalDiscrepancies || 0
+        }
+      };
+      
+      await storage.storeEmailReport(emailReportData);
+      console.log(`Stored shift report for ${shift.workerName} in inbox`);
+    } catch (storeError) {
+      console.error('Error storing email report in inbox:', storeError);
+      // Don't fail the report generation if storage fails
+    }
+
     return report;
 
   } catch (error) {
@@ -2091,6 +2118,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error clearing stock logs:", error);
       res.status(500).json({ message: "Failed to clear stock logs" });
+    }
+  });
+
+  // Inbox Routes
+  app.get("/api/inbox/reports", async (req, res) => {
+    try {
+      const reports = await storage.getAllEmailReports();
+      res.json(reports);
+    } catch (error) {
+      console.error("Error getting email reports:", error);
+      res.status(500).json({ message: "Failed to get email reports" });
+    }
+  });
+
+  app.post("/api/inbox/store", async (req, res) => {
+    try {
+      const reportData = req.body;
+      const report = await storage.storeEmailReport(reportData);
+      res.json(report);
+    } catch (error) {
+      console.error("Error storing email report:", error);
+      res.status(500).json({ message: "Failed to store email report" });
     }
   });
 

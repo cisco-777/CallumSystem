@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History, LogOut, Settings, RefreshCw, Tag, X } from 'lucide-react';
+import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChart3, AlertCircle, Search, PieChart, Hash, Leaf, TriangleAlert, Plus, Edit, Trash2, ClipboardCheck, Timer, Receipt, PoundSterling, Clock, PlayCircle, StopCircle, Eye, Copy, PauseCircle, History, LogOut, Settings, RefreshCw, Tag, X, Mail, Calendar } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -509,6 +509,74 @@ const getFormSchema = (productType: string) => {
 };
 
 
+// Inbox Viewer Component
+function InboxViewer() {
+  const { data: emailReports = [] } = useQuery<any[]>({
+    queryKey: ['/api/inbox/reports']
+  });
+
+  if (emailReports.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        <p className="text-lg">No email reports found</p>
+        <p className="text-sm">Email reports will appear here after shifts are completed</p>
+      </div>
+    );
+  }
+
+  const sortedReports = [...emailReports].sort((a: any, b: any) => 
+    new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+  );
+
+  return (
+    <div className="space-y-4">
+      {sortedReports.map((report: any) => (
+        <Card key={report.id} className="border border-gray-200">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <Mail className="w-5 h-5 text-blue-600" />
+                  <span>{report.subject}</span>
+                </CardTitle>
+                <div className="flex items-center space-x-4 text-sm text-gray-500 mt-2">
+                  <div className="flex items-center space-x-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{new Date(report.sentAt).toLocaleString()}</span>
+                  </div>
+                  {report.workerName && (
+                    <div className="flex items-center space-x-1">
+                      <Users className="w-4 h-4" />
+                      <span>{report.workerName}</span>
+                    </div>
+                  )}
+                  {report.shiftDate && (
+                    <div className="flex items-center space-x-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>{report.shiftDate}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Badge variant="outline" className="ml-2">
+                {report.reportType}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-gray-50 border rounded-lg p-4 max-h-40 overflow-y-auto">
+              <pre className="whitespace-pre-wrap text-xs font-mono">
+                {report.content}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('shift-management');
@@ -543,6 +611,8 @@ export function AdminDashboard() {
   const [showManagementModal, setShowManagementModal] = useState(false);
   const [showAdminCreationForm, setShowAdminCreationForm] = useState(false);
   const [showManualOrderForm, setShowManualOrderForm] = useState(false);
+  const [showInboxModal, setShowInboxModal] = useState(false);
+  const [showInboxAuthModal, setShowInboxAuthModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1801,6 +1871,44 @@ export function AdminDashboard() {
     }, 60000);
   };
 
+  // INBOX Authentication Form
+  const inboxAuthForm = useForm<z.infer<typeof logClearingSchema>>({
+    resolver: zodResolver(logClearingSchema),
+    defaultValues: {
+      username: '',
+      password: ''
+    }
+  });
+
+  // Handle INBOX button click
+  const handleInboxClick = () => {
+    setShowInboxAuthModal(true);
+  };
+
+  // Handle INBOX authentication
+  const handleInboxAuth = async (data: z.infer<typeof logClearingSchema>) => {
+    try {
+      // Check credentials (same as log clearing)
+      if (data.username === 'Management2025' && data.password === 'Clearing123!!') {
+        setShowInboxAuthModal(false);
+        setShowInboxModal(true);
+        inboxAuthForm.reset();
+        toast({
+          title: "Authentication Successful",
+          description: "Accessing INBOX...",
+        });
+      } else {
+        throw new Error('Invalid credentials');
+      }
+    } catch (error) {
+      toast({
+        title: "Authentication Failed",
+        description: "Invalid credentials. Please check your username and password.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   // Calculate customer preferences
   const calculateCustomerPreferences = () => {
@@ -2223,6 +2331,14 @@ export function AdminDashboard() {
             >
               <Receipt className="w-4 h-4 mr-2" />
               <span className="mobile-text-sm">Expenses Log</span>
+            </Button>
+
+            <Button
+              onClick={handleInboxClick}
+              className="bg-blue-600 hover:bg-blue-700 text-white mobile-btn-md mobile-touch-target w-full sm:w-auto"
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              <span className="mobile-text-sm">INBOX</span>
             </Button>
 
             {isSuperAdmin && (
@@ -5428,6 +5544,107 @@ export function AdminDashboard() {
                 </div>
               </form>
             </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* INBOX Authentication Modal */}
+        <Dialog open={showInboxAuthModal} onOpenChange={setShowInboxAuthModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <Mail className="w-5 h-5 text-blue-600" />
+                <span>INBOX Authentication</span>
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Form {...inboxAuthForm}>
+              <form onSubmit={inboxAuthForm.handleSubmit(handleInboxAuth)} className="space-y-4">
+                <FormField
+                  control={inboxAuthForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter username" 
+                          {...field} 
+                          type="text"
+                          autoComplete="username"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={inboxAuthForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter password" 
+                          {...field} 
+                          type="password"
+                          autoComplete="current-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowInboxAuthModal(false);
+                      inboxAuthForm.reset();
+                    }}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    Access INBOX
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* INBOX Viewing Modal */}
+        <Dialog open={showInboxModal} onOpenChange={setShowInboxModal}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <Mail className="w-5 h-5 text-blue-600" />
+                <span>Email Reports INBOX</span>
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="h-[60vh] overflow-y-auto">
+              <InboxViewer />
+            </div>
+
+            <div className="flex justify-end pt-4 border-t">
+              <Button
+                onClick={() => setShowInboxModal(false)}
+                variant="outline"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Close
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
 
