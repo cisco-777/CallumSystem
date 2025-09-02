@@ -868,7 +868,9 @@ export function AdminDashboard() {
       });
     },
     onSuccess: () => {
+      // Force refresh the orders data immediately
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.refetchQueries({ queryKey: ['/api/orders'] });
       toast({
         title: "Order Cancelled",
         description: "Order has been cancelled successfully.",
