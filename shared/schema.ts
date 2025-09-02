@@ -100,7 +100,7 @@ export const shiftReconciliations = pgTable("shift_reconciliations", {
   shiftDate: timestamp("shift_date").defaultNow(),
   productCounts: jsonb("product_counts").notNull(), // {productId: physicalCount}
   discrepancies: jsonb("discrepancies").notNull(), // {productId: {expected, actual, difference, type}}
-  totalDiscrepancies: integer("total_discrepancies").default(0),
+  totalDiscrepancies: decimal("total_discrepancies", { precision: 10, scale: 2 }).default("0.00"),
   adminNotes: text("admin_notes"),
   // Cash breakdown fields
   cashInTill: text("cash_in_till").default("0"), // Total cash amount
