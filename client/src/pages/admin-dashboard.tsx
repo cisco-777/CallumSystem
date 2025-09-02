@@ -401,7 +401,7 @@ const fullStockFormSchema = baseStockFormSchema.extend({
 // Simplified form schema for Pre-Rolls and Edibles
 const simplifiedStockFormSchema = baseStockFormSchema.extend({
   category: z.enum(['Sativa', 'Indica', 'Hybrid']).optional(),
-  supplier: z.string().optional(),
+  supplier: z.string().min(1, 'Supplier is required'),
   internalGrams: z.number().optional(),
   externalGrams: z.number().optional()
 });
@@ -3937,23 +3937,21 @@ export function AdminDashboard() {
                         </h4>
                         <p className="text-sm text-blue-700 mb-4">This information is for admin use only and will not be visible to customers</p>
                         
-                        {!isSimplifiedProductType(watchedProductType) && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <FormField
-                              control={stockForm.control}
-                              name="supplier"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Supplier *</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="e.g., Green Harvest Co." {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                          <FormField
+                            control={stockForm.control}
+                            name="supplier"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Supplier *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="e.g., Green Harvest Co." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                         
                         {/* Stock Distribution */}
                         <div className="space-y-4 mb-6">
