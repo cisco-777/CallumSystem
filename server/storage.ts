@@ -132,7 +132,7 @@ export interface IStorage {
   getShifts(): Promise<Shift[]>;
   getShift(id: number): Promise<Shift | undefined>;
   getActiveShift(): Promise<Shift | undefined>;
-  endShift(id: number, totals: { totalSales: string; totalExpenses: string; netAmount: string; stockDiscrepancies: number; reconciliationId?: number; }): Promise<Shift>;
+  endShift(id: number, totals: { totalSales: string; totalExpenses: string; netAmount: string; stockDiscrepancies: string; reconciliationId?: number; }): Promise<Shift>;
   
   // Shift activity operations
   createShiftActivity(activityData: InsertShiftActivity): Promise<ShiftActivity>;
@@ -1030,7 +1030,7 @@ export class DatabaseStorage implements IStorage {
       .from(expensePayments)
       .where(eq(expensePayments.shiftId, shiftId));
     
-    return payments.reduce((total, payment) => {
+    return payments.reduce((total: number, payment: any) => {
       return total + parseFloat(payment.paymentAmount?.toString() || "0");
     }, 0);
   }
@@ -1062,7 +1062,7 @@ export class DatabaseStorage implements IStorage {
     return shift || undefined;
   }
 
-  async endShift(id: number, totals: { totalSales: string; totalExpenses: string; netAmount: string; stockDiscrepancies: number; reconciliationId?: number; }): Promise<Shift> {
+  async endShift(id: number, totals: { totalSales: string; totalExpenses: string; netAmount: string; stockDiscrepancies: string; reconciliationId?: number; }): Promise<Shift> {
     const db = await getDb();
     const [shift] = await db
       .update(shifts)

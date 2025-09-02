@@ -1942,7 +1942,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalSales: totalSales.toFixed(2),
         totalExpenses: totalExpenses.toFixed(2),
         netAmount: netAmount.toFixed(2),
-        stockDiscrepancies: 0 // Will be updated after reconciliation
+        stockDiscrepancies: "0.00" // Will be updated after reconciliation
       });
       
       // Create end shift activity
@@ -2084,7 +2084,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalSales: totalSales.toFixed(2),
         totalExpenses: totalExpenses.toFixed(2), 
         netAmount: netAmount.toFixed(2),
-        stockDiscrepancies: parseFloat(reconciliation.totalDiscrepancies?.toString() || "0"),
+        stockDiscrepancies: reconciliation.totalDiscrepancies?.toString() || "0.00",
         reconciliationId: reconciliation.id
       });
       

@@ -150,7 +150,7 @@ export const shifts = pgTable("shifts", {
   totalSales: text("total_sales").default("0"),
   totalExpenses: text("total_expenses").default("0"),
   netAmount: text("net_amount").default("0"),
-  stockDiscrepancies: integer("stock_discrepancies").default(0),
+  stockDiscrepancies: decimal("stock_discrepancies", { precision: 10, scale: 2 }).default("0.00"),
   reconciliationId: integer("reconciliation_id").references(() => shiftReconciliations.id),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
