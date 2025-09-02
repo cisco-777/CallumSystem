@@ -511,9 +511,20 @@ const getFormSchema = (productType: string) => {
 
 // Inbox Viewer Component
 function InboxViewer() {
-  const { data: emailReports = [] } = useQuery<any[]>({
-    queryKey: ['/api/inbox/reports']
+  const { data: emailReports = [], isLoading, refetch } = useQuery<any[]>({
+    queryKey: ['/api/inbox/reports'],
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0 // Don't cache for long
   });
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <RefreshCw className="w-12 h-12 mx-auto mb-4 opacity-50 animate-spin" />
+        <p className="text-lg">Loading email reports...</p>
+      </div>
+    );
+  }
 
   if (emailReports.length === 0) {
     return (
@@ -521,6 +532,14 @@ function InboxViewer() {
         <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
         <p className="text-lg">No email reports found</p>
         <p className="text-sm">Email reports will appear here after shifts are completed</p>
+        <Button
+          onClick={() => refetch()}
+          variant="outline"
+          className="mt-4"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
+        </Button>
       </div>
     );
   }
@@ -1893,6 +1912,10 @@ export function AdminDashboard() {
         setShowInboxAuthModal(false);
         setShowInboxModal(true);
         inboxAuthForm.reset();
+        
+        // Invalidate the inbox reports query to fetch fresh data
+        queryClient.invalidateQueries({ queryKey: ['/api/inbox/reports'] });
+        
         toast({
           title: "Authentication Successful",
           description: "Accessing INBOX...",
@@ -5626,10 +5649,20 @@ export function AdminDashboard() {
         <Dialog open={showInboxModal} onOpenChange={() => {}}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
             <DialogHeader>
-              <DialogTitle className="flex items-center space-x-2">
-                <Mail className="w-5 h-5 text-blue-600" />
-                <span>Email Reports INBOX</span>
-              </DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="flex items-center space-x-2">
+                  <Mail className="w-5 h-5 text-blue-600" />
+                  <span>Email Reports INBOX</span>
+                </DialogTitle>
+                <Button
+                  onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/inbox/reports'] })}
+                  variant="outline"
+                  size="sm"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </DialogHeader>
             
             <div className="h-[60vh] overflow-y-auto">
