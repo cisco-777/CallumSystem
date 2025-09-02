@@ -1973,9 +1973,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .filter((order: any) => order.status === "completed")
         .reduce((sum: number, order: any) => sum + parseFloat(order.totalPrice || "0"), 0);
       
-      // Calculate expenses
-      const totalExpenses = shiftSummary.expenses
-        .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || "0"), 0);
+      // Calculate expenses - use actual payments made during shift, not full expense amounts
+      const totalExpenses = shiftSummary.totalExpensePayments || 0;
       
       // Net amount
       const netAmount = totalSales - totalExpenses;
@@ -2028,9 +2027,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Shift not found" });
       }
       
-      // Calculate real-time totals
-      const totalExpenses = summary.expenses
-        .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || "0"), 0);
+      // Calculate real-time totals - use actual payments made during shift, not full expense amounts
+      const totalExpenses = summary.totalExpensePayments || 0;
       
       const totalSales = summary.orders
         .filter((order: any) => order.status === "completed")

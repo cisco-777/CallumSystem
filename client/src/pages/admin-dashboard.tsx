@@ -3866,8 +3866,9 @@ export function AdminDashboard() {
                   const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
                     expense.shiftId === shift.id
                   ) : [];
+                  // Calculate total using paid amounts, not full expense amounts
                   const totalExpenses = shiftExpenses.reduce((sum: number, expense: any) => 
-                    sum + parseFloat(expense.amount || "0"), 0
+                    sum + parseFloat(expense.paidAmount || "0"), 0
                   );
 
                   return (
