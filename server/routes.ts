@@ -55,7 +55,7 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
 
     // Helper function to get unit type for product category
     const getUnitType = (productType: string) => {
-      return ['Pre-Rolls', 'Edibles'].includes(productType) ? 'units' : 'grams';
+      return ['Pre-Rolls', 'Edibles', 'Vapes'].includes(productType) ? 'units' : 'grams';
     };
 
     // Build the report

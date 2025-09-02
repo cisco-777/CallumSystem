@@ -375,7 +375,7 @@ const baseStockFormSchema = z.object({
   // Common fields for all product types
   name: z.string().min(1, 'Product name is required'),
   description: z.string().optional(),
-  productType: z.enum(['Cannabis', 'Hash', 'Cali Pax', 'Edibles', 'Pre-Rolls']),
+  productType: z.enum(['Cannabis', 'Hash', 'Cali Pax', 'Edibles', 'Pre-Rolls', 'Vapes', 'Wax']),
   imageUrl: z.string().optional(),
   productCode: z.string().min(1, 'Product code is required'),
   onShelfGrams: z.number().min(0, 'On shelf amount must be positive'),
@@ -471,7 +471,7 @@ type StockFormData = UnifiedStockFormData; // For backward compatibility
 
 // Helper function to determine if a product type requires simplified form
 const isSimplifiedProductType = (productType: string) => {
-  return productType === 'Pre-Rolls' || productType === 'Edibles';
+  return productType === 'Pre-Rolls' || productType === 'Edibles' || productType === 'Vapes';
 };
 
 // Helper function to get appropriate schema based on product type
@@ -1744,7 +1744,7 @@ export function AdminDashboard() {
     if (!Array.isArray(analyticsOrders) || analyticsOrders.length === 0) return null;
     
     let sativaCount = 0, indicaCount = 0, hybridCount = 0;
-    let cannabisCount = 0, hashCount = 0, ediblesCount = 0, preRollsCount = 0, caliPaxCount = 0;
+    let cannabisCount = 0, hashCount = 0, ediblesCount = 0, preRollsCount = 0, caliPaxCount = 0, vapesCount = 0, waxCount = 0;
     const categoryCount: { [key: string]: number } = {};
     
     analyticsOrders.forEach((order: any) => {
@@ -1769,6 +1769,10 @@ export function AdminDashboard() {
             actualProductType = 'pre-rolls';
           } else if (category === 'cali pax') {
             actualProductType = 'cali pax';
+          } else if (category === 'vapes') {
+            actualProductType = 'vapes';
+          } else if (category === 'wax') {
+            actualProductType = 'wax';
           } else if (category === 'cannabis') {
             actualProductType = 'cannabis';
           } else {
@@ -1795,6 +1799,10 @@ export function AdminDashboard() {
             preRollsCount++;
           } else if (actualProductType === 'cali pax') {
             caliPaxCount++;
+          } else if (actualProductType === 'vapes') {
+            vapesCount++;
+          } else if (actualProductType === 'wax') {
+            waxCount++;
           } else {
             cannabisCount++; // Cannabis and fallback
           }
@@ -1806,7 +1814,7 @@ export function AdminDashboard() {
     });
     
     const total = sativaCount + indicaCount + hybridCount;
-    const productTotal = cannabisCount + hashCount + ediblesCount + preRollsCount + caliPaxCount;
+    const productTotal = cannabisCount + hashCount + ediblesCount + preRollsCount + caliPaxCount + vapesCount + waxCount;
     
     return {
       strainPreferences: {
@@ -1819,7 +1827,9 @@ export function AdminDashboard() {
         hash: productTotal > 0 ? Math.round((hashCount / productTotal) * 100) : 0,
         edibles: productTotal > 0 ? Math.round((ediblesCount / productTotal) * 100) : 0,
         preRolls: productTotal > 0 ? Math.round((preRollsCount / productTotal) * 100) : 0,
-        caliPax: productTotal > 0 ? Math.round((caliPaxCount / productTotal) * 100) : 0
+        caliPax: productTotal > 0 ? Math.round((caliPaxCount / productTotal) * 100) : 0,
+        vapes: productTotal > 0 ? Math.round((vapesCount / productTotal) * 100) : 0,
+        wax: productTotal > 0 ? Math.round((waxCount / productTotal) * 100) : 0
       },
       popularCategories: Object.entries(categoryCount)
         .sort(([,a], [,b]) => (b as number) - (a as number))
@@ -1939,12 +1949,14 @@ export function AdminDashboard() {
       hash: 0,
       edibles: 0,
       preRolls: 0,
-      caliPax: 0
+      caliPax: 0,
+      vapes: 0,
+      wax: 0
     };
     
     if (userOrders.length > 0) {
       let sativaCount = 0, indicaCount = 0, hybridCount = 0;
-      let cannabisCount = 0, hashCount = 0, ediblesCount = 0, preRollsCount = 0, caliPaxCount = 0;
+      let cannabisCount = 0, hashCount = 0, ediblesCount = 0, preRollsCount = 0, caliPaxCount = 0, vapesCount = 0, waxCount = 0;
       let totalItems = 0;
       
       userOrders.forEach((order: any) => {
@@ -1970,6 +1982,10 @@ export function AdminDashboard() {
               actualProductType = 'pre-rolls';
             } else if (category === 'cali pax') {
               actualProductType = 'cali pax';
+            } else if (category === 'vapes') {
+              actualProductType = 'vapes';
+            } else if (category === 'wax') {
+              actualProductType = 'wax';
             } else if (category === 'cannabis') {
               actualProductType = 'cannabis';
             } else {
@@ -1996,6 +2012,10 @@ export function AdminDashboard() {
               preRollsCount++;
             } else if (actualProductType === 'cali pax') {
               caliPaxCount++;
+            } else if (actualProductType === 'vapes') {
+              vapesCount++;
+            } else if (actualProductType === 'wax') {
+              waxCount++;
             } else {
               cannabisCount++; // Cannabis and fallback
             }
@@ -2012,7 +2032,9 @@ export function AdminDashboard() {
           hash: Math.round((hashCount / totalItems) * 100),
           edibles: Math.round((ediblesCount / totalItems) * 100),
           preRolls: Math.round((preRollsCount / totalItems) * 100),
-          caliPax: Math.round((caliPaxCount / totalItems) * 100)
+          caliPax: Math.round((caliPaxCount / totalItems) * 100),
+          vapes: Math.round((vapesCount / totalItems) * 100),
+          wax: Math.round((waxCount / totalItems) * 100)
         };
       }
     }
@@ -2990,6 +3012,30 @@ export function AdminDashboard() {
                                       <span className="font-bold text-purple-700 text-sm">{profile.preferences.caliPax}%</span>
                                     </div>
                                   </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Vapes:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.vapes || 0}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.vapes || 0}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm">Wax:</span>
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                        <div 
+                                          className="bg-purple-600 h-2 rounded-full" 
+                                          style={{width: `${profile.preferences.wax || 0}%`}}
+                                        ></div>
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">{profile.preferences.wax || 0}%</span>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -3440,6 +3486,14 @@ export function AdminDashboard() {
                           <span className="text-sm">Cali Pax:</span>
                           <span className="font-bold text-green-700">{customerPrefs.productPreferences.caliPax}%</span>
                         </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Vapes:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.vapes || 0}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Wax:</span>
+                          <span className="font-bold text-green-700">{customerPrefs.productPreferences.wax || 0}%</span>
+                        </div>
                       </div>
                     </div>
 
@@ -3773,6 +3827,8 @@ export function AdminDashboard() {
                                     <SelectItem value="Cali Pax">Cali Pax</SelectItem>
                                     <SelectItem value="Edibles">Edibles</SelectItem>
                                     <SelectItem value="Pre-Rolls">Pre-Rolls</SelectItem>
+                                    <SelectItem value="Vapes">Vapes</SelectItem>
+                                    <SelectItem value="Wax">Wax</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
