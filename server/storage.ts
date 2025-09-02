@@ -382,12 +382,12 @@ export class DatabaseStorage implements IStorage {
   async createProduct(productData: any): Promise<Product> {
     const db = await getDb();
     
-    // Prepare product data with rounded integer values for database storage
+    // Prepare product data with decimal values for NUMERIC database storage
     const processedData = { ...productData };
-    if (productData.onShelfGrams !== undefined) processedData.onShelfGrams = Math.round(parseFloat(productData.onShelfGrams.toString()));
-    if (productData.internalGrams !== undefined) processedData.internalGrams = Math.round(parseFloat(productData.internalGrams.toString()));
-    if (productData.externalGrams !== undefined) processedData.externalGrams = Math.round(parseFloat(productData.externalGrams.toString()));
-    if (productData.jarWeight !== undefined) processedData.jarWeight = Math.round(parseFloat(productData.jarWeight.toString()));
+    if (productData.onShelfGrams !== undefined) processedData.onShelfGrams = productData.onShelfGrams.toString();
+    if (productData.internalGrams !== undefined) processedData.internalGrams = productData.internalGrams.toString();
+    if (productData.externalGrams !== undefined) processedData.externalGrams = productData.externalGrams.toString();
+    if (productData.jarWeight !== undefined) processedData.jarWeight = productData.jarWeight.toString();
     if (productData.stockQuantity !== undefined) processedData.stockQuantity = Math.round(parseFloat(productData.stockQuantity.toString()));
     
     const [product] = await db
@@ -404,18 +404,18 @@ export class DatabaseStorage implements IStorage {
     if (!currentProduct) throw new Error("Product not found");
 
     // Calculate new stock values using provided data or current values
-    // Round decimal values for integer database fields
-    const newOnShelfGrams = stockData.onShelfGrams !== undefined ? Math.round(parseFloat(stockData.onShelfGrams.toString())) : currentProduct.onShelfGrams || 0;
-    const newInternalGrams = stockData.internalGrams !== undefined ? Math.round(parseFloat(stockData.internalGrams.toString())) : currentProduct.internalGrams || 0;
-    const newExternalGrams = stockData.externalGrams !== undefined ? Math.round(parseFloat(stockData.externalGrams.toString())) : currentProduct.externalGrams || 0;
-    const newTotalStock = newOnShelfGrams + newInternalGrams + newExternalGrams;
+    // Handle decimal values directly since database now supports NUMERIC type
+    const newOnShelfGrams = stockData.onShelfGrams !== undefined ? parseFloat(stockData.onShelfGrams.toString()) : parseFloat(currentProduct.onShelfGrams?.toString() || "0");
+    const newInternalGrams = stockData.internalGrams !== undefined ? parseFloat(stockData.internalGrams.toString()) : parseFloat(currentProduct.internalGrams?.toString() || "0");
+    const newExternalGrams = stockData.externalGrams !== undefined ? parseFloat(stockData.externalGrams.toString()) : parseFloat(currentProduct.externalGrams?.toString() || "0");
+    const newTotalStock = Math.round(newOnShelfGrams + newInternalGrams + newExternalGrams);
 
-    // Prepare stock data with rounded integer values
+    // Prepare stock data with decimal values for NUMERIC database fields
     const updateStockData = { ...stockData };
-    if (stockData.onShelfGrams !== undefined) updateStockData.onShelfGrams = newOnShelfGrams;
-    if (stockData.internalGrams !== undefined) updateStockData.internalGrams = newInternalGrams;
-    if (stockData.externalGrams !== undefined) updateStockData.externalGrams = newExternalGrams;
-    if (stockData.jarWeight !== undefined) updateStockData.jarWeight = Math.round(parseFloat(stockData.jarWeight.toString()));
+    if (stockData.onShelfGrams !== undefined) updateStockData.onShelfGrams = stockData.onShelfGrams.toString();
+    if (stockData.internalGrams !== undefined) updateStockData.internalGrams = stockData.internalGrams.toString();
+    if (stockData.externalGrams !== undefined) updateStockData.externalGrams = stockData.externalGrams.toString();
+    if (stockData.jarWeight !== undefined) updateStockData.jarWeight = stockData.jarWeight.toString();
 
     const [product] = await db
       .update(products)
@@ -625,7 +625,7 @@ export class DatabaseStorage implements IStorage {
       if (!product) throw new Error(`Product not found: ${quantity.productId}`);
 
       // Check if sufficient shelf stock is available
-      const availableShelfStock = product.onShelfGrams || 0;
+      const availableShelfStock = parseFloat(product.onShelfGrams?.toString() || "0");
       if (availableShelfStock < quantity.quantity) {
         if (availableShelfStock === 0) {
           throw new Error(`Item needs restocking - 0 on shelf`);
@@ -635,26 +635,25 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Calculate new stock values - handle decimal quantities safely
+      // Calculate new stock values - handle decimal quantities with precision
       const quantityAmount = parseFloat(quantity.quantity.toString());
-      const newOnShelfGramsExact = availableShelfStock - quantityAmount;
-      const newTotalStockExact = newOnShelfGramsExact + (product.internalGrams || 0) + (product.externalGrams || 0);
-      
-      // Round to nearest integer for database storage (integer fields)
-      const newOnShelfGrams = Math.round(newOnShelfGramsExact);
-      const newTotalStock = Math.round(newTotalStockExact);
+      const newOnShelfGrams = availableShelfStock - quantityAmount;
+      const internalGrams = parseFloat(product.internalGrams?.toString() || "0");
+      const externalGrams = parseFloat(product.externalGrams?.toString() || "0");
+      const newTotalStock = Math.round(newOnShelfGrams + internalGrams + externalGrams);
 
-      // Prepare update data
+      // Prepare update data with decimal precision
       const updateData: any = {
-        onShelfGrams: newOnShelfGrams,
+        onShelfGrams: newOnShelfGrams.toString(),
         stockQuantity: newTotalStock,
         lastUpdated: new Date()
       };
 
       // For Cannabis products, also deduct from jar weight when processing orders
-      if (product.productType === 'Cannabis' && product.jarWeight && product.jarWeight > 0) {
-        const newJarWeight = Math.max(0, Math.round((product.jarWeight || 0) - quantityAmount));
-        updateData.jarWeight = newJarWeight;
+      if (product.productType === 'Cannabis' && product.jarWeight && parseFloat(product.jarWeight.toString()) > 0) {
+        const currentJarWeight = parseFloat(product.jarWeight.toString());
+        const newJarWeight = Math.max(0, currentJarWeight - quantityAmount);
+        updateData.jarWeight = newJarWeight.toString();
       }
 
       // Update product stock quantities
@@ -734,9 +733,9 @@ export class DatabaseStorage implements IStorage {
     }
     
     const currentStock = {
-      internal: product.internalGrams || 0,
-      external: product.externalGrams || 0,
-      shelf: product.onShelfGrams || 0
+      internal: parseFloat(product.internalGrams?.toString() || "0"),
+      external: parseFloat(product.externalGrams?.toString() || "0"),
+      shelf: parseFloat(product.onShelfGrams?.toString() || "0")
     };
     
     if (currentStock[movementData.fromLocation as keyof typeof currentStock] < movementData.quantity) {
@@ -749,32 +748,37 @@ export class DatabaseStorage implements IStorage {
       .values(movementData)
       .returning();
     
-    // Update the product stock quantities
+    // Update the product stock quantities with decimal precision
     const updateData: any = {};
     if (movementData.fromLocation === 'internal') {
-      updateData.internalGrams = (product.internalGrams || 0) - movementData.quantity;
+      updateData.internalGrams = (parseFloat(product.internalGrams?.toString() || "0") - movementData.quantity).toString();
     } else if (movementData.fromLocation === 'external') {
-      updateData.externalGrams = (product.externalGrams || 0) - movementData.quantity;
+      updateData.externalGrams = (parseFloat(product.externalGrams?.toString() || "0") - movementData.quantity).toString();
     } else if (movementData.fromLocation === 'shelf') {
-      updateData.onShelfGrams = (product.onShelfGrams || 0) - movementData.quantity;
+      updateData.onShelfGrams = (parseFloat(product.onShelfGrams?.toString() || "0") - movementData.quantity).toString();
       // For Cannabis products, also deduct from jar weight when moving from shelf
-      if (product.productType === 'Cannabis' && product.jarWeight && product.jarWeight > 0) {
-        updateData.jarWeight = Math.max(0, (product.jarWeight || 0) - movementData.quantity);
+      if (product.productType === 'Cannabis' && product.jarWeight && parseFloat(product.jarWeight.toString()) > 0) {
+        const currentJarWeight = parseFloat(product.jarWeight.toString());
+        updateData.jarWeight = Math.max(0, currentJarWeight - movementData.quantity).toString();
       }
     }
     
     if (movementData.toLocation === 'internal') {
-      updateData.internalGrams = (updateData.internalGrams !== undefined ? updateData.internalGrams : (product.internalGrams || 0)) + movementData.quantity;
+      const currentInternal = updateData.internalGrams !== undefined ? parseFloat(updateData.internalGrams) : parseFloat(product.internalGrams?.toString() || "0");
+      updateData.internalGrams = (currentInternal + movementData.quantity).toString();
     } else if (movementData.toLocation === 'external') {
-      updateData.externalGrams = (updateData.externalGrams !== undefined ? updateData.externalGrams : (product.externalGrams || 0)) + movementData.quantity;
+      const currentExternal = updateData.externalGrams !== undefined ? parseFloat(updateData.externalGrams) : parseFloat(product.externalGrams?.toString() || "0");
+      updateData.externalGrams = (currentExternal + movementData.quantity).toString();
     } else if (movementData.toLocation === 'shelf') {
-      updateData.onShelfGrams = (updateData.onShelfGrams !== undefined ? updateData.onShelfGrams : (product.onShelfGrams || 0)) + movementData.quantity;
+      const currentShelf = updateData.onShelfGrams !== undefined ? parseFloat(updateData.onShelfGrams) : parseFloat(product.onShelfGrams?.toString() || "0");
+      updateData.onShelfGrams = (currentShelf + movementData.quantity).toString();
     }
     
-    // Calculate new total stock
-    const newTotalStock = (updateData.onShelfGrams || product.onShelfGrams || 0) + 
-                         (updateData.internalGrams || product.internalGrams || 0) + 
-                         (updateData.externalGrams || product.externalGrams || 0);
+    // Calculate new total stock (round for stockQuantity integer field)
+    const finalOnShelf = parseFloat(updateData.onShelfGrams || product.onShelfGrams?.toString() || "0");
+    const finalInternal = parseFloat(updateData.internalGrams || product.internalGrams?.toString() || "0");
+    const finalExternal = parseFloat(updateData.externalGrams || product.externalGrams?.toString() || "0");
+    const newTotalStock = Math.round(finalOnShelf + finalInternal + finalExternal);
     
     // Update product with new stock levels
     await db

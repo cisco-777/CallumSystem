@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -45,9 +45,9 @@ export const products = pgTable("products", {
   adminPrice: text("admin_price").notNull().default("0"),
   // Enhanced stock management fields
   supplier: text("supplier"),
-  onShelfGrams: integer("on_shelf_grams").notNull().default(0),
-  internalGrams: integer("internal_grams").notNull().default(0),
-  externalGrams: integer("external_grams").notNull().default(0),
+  onShelfGrams: decimal("on_shelf_grams", { precision: 10, scale: 2 }).notNull().default("0"),
+  internalGrams: decimal("internal_grams", { precision: 10, scale: 2 }).notNull().default("0"),
+  externalGrams: decimal("external_grams", { precision: 10, scale: 2 }).notNull().default("0"),
   costPrice: text("cost_price").notNull().default("0"),
   shelfPrice: text("shelf_price").notNull().default("0"),
   lastUpdated: timestamp("last_updated").defaultNow(),
@@ -61,7 +61,7 @@ export const products = pgTable("products", {
   dealStartDate: text("deal_start_date"), // When deal becomes active
   dealEndDate: text("deal_end_date"), // When deal expires
   // Cannabis-specific jar weight tracking (for Callum's system)
-  jarWeight: integer("jar_weight"), // Total weight including jar (grams) - only for Cannabis products
+  jarWeight: decimal("jar_weight", { precision: 10, scale: 2 }), // Total weight including jar (grams) - only for Cannabis products
 });
 
 export const basketItems = pgTable("basket_items", {
