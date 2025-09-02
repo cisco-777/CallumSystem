@@ -3783,7 +3783,7 @@ export function AdminDashboard() {
                             )}
                           />
                           
-                          {['Cannabis', 'Hash', 'Cali Pax'].includes(watchedProductType) && (
+                          {['Cannabis', 'Hash', 'Cali Pax', 'Wax'].includes(watchedProductType) && (
                             <FormField
                               control={stockForm.control}
                               name="category"
@@ -3967,6 +3967,8 @@ export function AdminDashboard() {
                                   <FormControl>
                                     <Input 
                                       type="number" 
+                                      step="0.01"
+                                      min="0"
                                       placeholder="0" 
                                       {...field} 
                                       value={field.value || ''}
@@ -3975,7 +3977,7 @@ export function AdminDashboard() {
                                         if (value === '') {
                                           field.onChange(0);
                                         } else {
-                                          const numValue = parseInt(value, 10);
+                                          const numValue = parseFloat(value);
                                           if (!isNaN(numValue)) {
                                             field.onChange(numValue);
                                           }
@@ -3998,6 +4000,8 @@ export function AdminDashboard() {
                                     <FormControl>
                                       <Input 
                                         type="number" 
+                                        step="0.01"
+                                        min="0"
                                         placeholder="0" 
                                         {...field} 
                                         value={field.value || ''}
@@ -4006,7 +4010,7 @@ export function AdminDashboard() {
                                           if (value === '') {
                                             field.onChange(0);
                                           } else {
-                                            const numValue = parseInt(value, 10);
+                                            const numValue = parseFloat(value);
                                             if (!isNaN(numValue)) {
                                               field.onChange(numValue);
                                             }
@@ -4030,6 +4034,8 @@ export function AdminDashboard() {
                                     <FormControl>
                                       <Input 
                                         type="number" 
+                                        step="0.01"
+                                        min="0"
                                         placeholder="0" 
                                         {...field} 
                                         value={field.value || ''}
@@ -4038,7 +4044,7 @@ export function AdminDashboard() {
                                           if (value === '') {
                                             field.onChange(0);
                                           } else {
-                                            const numValue = parseInt(value, 10);
+                                            const numValue = parseFloat(value);
                                             if (!isNaN(numValue)) {
                                               field.onChange(numValue);
                                             }
@@ -5073,19 +5079,14 @@ export function AdminDashboard() {
                             <FormControl>
                               <Input
                                 type="number"
-                                min="1"
-                                step="1"
+                                min="0.01"
+                                step="0.01"
                                 placeholder="0"
                                 {...field}
                                 value={field.value || ''}
                                 onChange={(e) => {
-                                  let value = e.target.value;
-                                  // Remove leading zeros, but keep single zero
-                                  if (value && value !== '0') {
-                                    value = value.replace(/^0+(?=\d)/, '');
-                                  }
-                                  const numValue = parseInt(value) || 0;
-                                  field.onChange(numValue);
+                                  const value = parseFloat(e.target.value) || 0;
+                                  field.onChange(value);
                                 }}
                               />
                             </FormControl>

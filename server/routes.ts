@@ -809,7 +809,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Remove category for products that shouldn't have cannabis categories
       const finalProductData = { ...productData };
-      if (['Vapes', 'Pre-Rolls', 'Edibles', 'Wax'].includes(productData.productType)) {
+      if (['Vapes', 'Pre-Rolls', 'Edibles'].includes(productData.productType)) {
         delete finalProductData.category;
       }
       
@@ -861,7 +861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Remove category for products that shouldn't have cannabis categories
       const finalStockData = { ...stockData };
-      if (['Vapes', 'Pre-Rolls', 'Edibles', 'Wax'].includes(stockData.productType)) {
+      if (['Vapes', 'Pre-Rolls', 'Edibles'].includes(stockData.productType)) {
         delete finalStockData.category;
       }
       

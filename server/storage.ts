@@ -644,10 +644,12 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProduct(id: number): Promise<void> {
     const db = await getDb();
-    // First remove all basket items for this product
+    // First remove all stock logs for this product
+    await db.delete(stockLogs).where(eq(stockLogs.productId, id));
+    // Then remove all basket items for this product
     await db.delete(basketItems).where(eq(basketItems.productId, id));
     
-    // Then delete the product itself
+    // Finally delete the product itself
     await db.delete(products).where(eq(products.id, id));
   }
 
