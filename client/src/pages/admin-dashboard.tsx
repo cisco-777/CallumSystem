@@ -2855,7 +2855,12 @@ export function AdminDashboard() {
                                 <strong>Customer:</strong> {users.find((u: any) => u.id === order.userId)?.firstName || 'Unknown'} {users.find((u: any) => u.id === order.userId)?.lastName || ''}
                               </div>
                               <div className="mobile-text-sm">
-                                <strong>Items:</strong> {order.items && order.items.map((item: any) => item.name).join(', ')}
+                                <strong>Items:</strong> {order.items && order.quantities && order.items.map((item: any, index: number) => {
+                                  const quantity = order.quantities[index]?.quantity || 0;
+                                  const isUnitBased = item.category && isSimplifiedProductType(item.category);
+                                  const unit = isUnitBased ? 'units' : 'g';
+                                  return `${item.name} ${quantity}${unit}`;
+                                }).join(', ')}
                               </div>
                               <div className="mobile-text-sm font-medium text-green-700">
                                 <strong>Total:</strong> €{order.totalPrice}
