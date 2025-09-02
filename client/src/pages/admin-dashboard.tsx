@@ -449,11 +449,14 @@ const adminCreationFormSchema = z.object({
   path: ["confirmPassword"]
 });
 
-// Manual order form schema
+// Manual order form schema - allows decimals for gram-based products
 const manualOrderFormSchema = z.object({
   items: z.array(z.object({
     productId: z.number().min(1, 'Please select a product'),
-    quantity: z.number().min(1, 'Quantity must be at least 1')
+    quantity: z.number().min(0.01, 'Quantity must be at least 0.01').refine((val) => {
+      // Allow any positive decimal value - validation will be handled at the input level
+      return val > 0;
+    }, 'Quantity must be greater than 0')
   })).min(1, 'At least one item is required')
 });
 
@@ -1608,10 +1611,6 @@ export function AdminDashboard() {
 
 
   const onSubmitStock = (data: UnifiedStockFormData) => {
-    console.log('Form submission data:', data);
-    console.log('Product type:', data.productType);
-    console.log('Editing stock:', editingStock);
-    
     // Create final data with uploaded image URL if available
     const finalData = {
       ...data,
@@ -5134,26 +5133,34 @@ export function AdminDashboard() {
                       <FormField
                         control={manualOrderForm.control}
                         name={`items.${index}.quantity`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Quantity (grams) *</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min="0.01"
-                                step="0.01"
-                                placeholder="0"
-                                {...field}
-                                value={field.value || ''}
-                                onChange={(e) => {
-                                  const value = parseFloat(e.target.value) || 0;
-                                  field.onChange(value);
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        render={({ field }) => {
+                          const selectedProductId = manualOrderForm.watch(`items.${index}.productId`);
+                          const selectedProduct = products.find((p: any) => p.id === selectedProductId);
+                          const isUnitBased = selectedProduct && isSimplifiedProductType(selectedProduct.productType);
+                          
+                          return (
+                            <FormItem>
+                              <FormLabel>
+                                Quantity ({isUnitBased ? 'units' : 'grams'}) *
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min={isUnitBased ? "1" : "0.01"}
+                                  step={isUnitBased ? "1" : "0.01"}
+                                  placeholder="0"
+                                  {...field}
+                                  value={field.value || ''}
+                                  onChange={(e) => {
+                                    const value = parseFloat(e.target.value) || 0;
+                                    field.onChange(value);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
                       />
                     </div>
                   </div>
