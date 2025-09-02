@@ -42,6 +42,10 @@ function StockLogsTab() {
     queryKey: ['/api/shifts']
   });
 
+  const { data: products = [] } = useQuery<any[]>({
+    queryKey: ['/api/products']
+  });
+
   // Form for log clearing authentication
   const clearForm = useForm<z.infer<typeof logClearingSchema>>({
     resolver: zodResolver(logClearingSchema),
