@@ -606,7 +606,8 @@ export class DatabaseStorage implements IStorage {
         if (availableShelfStock === 0) {
           throw new Error(`Item needs restocking - 0 on shelf`);
         } else {
-          throw new Error(`Insufficient shelf stock for ${product.name}. Available: ${availableShelfStock}g, Required: ${quantity.quantity}g`);
+          const unitType = ['Pre-Rolls', 'Edibles', 'Vapes'].includes(product.productType || '') ? ' units' : 'g';
+          throw new Error(`Insufficient shelf stock for ${product.name}. Available: ${availableShelfStock}${unitType}, Required: ${quantity.quantity}${unitType}`);
         }
       }
 

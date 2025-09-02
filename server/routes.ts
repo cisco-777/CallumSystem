@@ -157,7 +157,7 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
       Object.entries(reconciliation.discrepancies).forEach(([productId, discrepancy]: [string, any]) => {
         // Copy exact same format logic from interface badge
         const difference = Math.abs(discrepancy.difference);
-        const unitType = discrepancy.productType && ['Pre-Rolls', 'Edibles'].includes(discrepancy.productType) ? ' units' : 'g';
+        const unitType = discrepancy.productType && ['Pre-Rolls', 'Edibles', 'Vapes'].includes(discrepancy.productType) ? ' units' : 'g';
         const discrepancyType = discrepancy.type;
         
         // Format exactly like interface: "Product Name: Xg missing/excess"
@@ -1163,8 +1163,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               message: `Item needs restocking - 0 on shelf` 
             });
           } else {
+            const unitType = ['Pre-Rolls', 'Edibles', 'Vapes'].includes(product.productType || '') ? ' units' : 'g';
             return res.status(400).json({ 
-              message: `Insufficient shelf stock for ${product.name}. Available: ${availableStock}g, Requested: ${item.quantity}g` 
+              message: `Insufficient shelf stock for ${product.name}. Available: ${availableStock}${unitType}, Requested: ${item.quantity}${unitType}` 
             });
           }
         }
