@@ -2063,6 +2063,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/stock-logs/clear", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Validate management credentials
+      if (username !== "Management2025" || password !== "Clearing123!!") {
+        return res.status(401).json({ message: "Invalid management credentials" });
+      }
+      
+      // Clear all stock logs
+      await storage.clearAllStockLogs();
+      res.json({ message: "All stock logs cleared successfully" });
+    } catch (error) {
+      console.error("Error clearing stock logs:", error);
+      res.status(500).json({ message: "Failed to clear stock logs" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

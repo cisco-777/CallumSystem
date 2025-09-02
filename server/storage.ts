@@ -79,6 +79,7 @@ export interface IStorage {
   createStockLog(logData: InsertStockLog): Promise<StockLog>;
   getStockLogs(): Promise<StockLog[]>;
   getStockLogsByShift(shiftId: number): Promise<StockLog[]>;
+  clearAllStockLogs(): Promise<void>;
   
   // Basket operations
   getBasketItems(userId: number): Promise<BasketItem[]>;
@@ -779,6 +780,11 @@ export class DatabaseStorage implements IStorage {
       .from(stockLogs)
       .where(eq(stockLogs.shiftId, shiftId))
       .orderBy(desc(stockLogs.actionDate));
+  }
+
+  async clearAllStockLogs(): Promise<void> {
+    const db = await getDb();
+    await db.delete(stockLogs);
   }
 
   async createShiftReconciliation(reconciliationData: InsertShiftReconciliation): Promise<ShiftReconciliation> {

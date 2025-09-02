@@ -22,8 +22,18 @@ import { ObjectUploader } from '@/components/ObjectUploader';
 import type { UploadResult } from '@uppy/core';
 import { useAdminUser } from '@/hooks/useAdminUser';
 
+// Log clearing authentication schema
+const logClearingSchema = z.object({
+  username: z.string().min(1, 'Username is required'),
+  password: z.string().min(1, 'Password is required')
+});
+
 // Stock Logs Tab Component
 function StockLogsTab() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [showClearModal, setShowClearModal] = useState(false);
+  
   const { data: stockLogs = [] } = useQuery<any[]>({
     queryKey: ['/api/stock-logs']
   });
@@ -31,6 +41,64 @@ function StockLogsTab() {
   const { data: shifts = [] } = useQuery<any[]>({
     queryKey: ['/api/shifts']
   });
+
+  // Form for log clearing authentication
+  const clearForm = useForm<z.infer<typeof logClearingSchema>>({
+    resolver: zodResolver(logClearingSchema),
+    defaultValues: {
+      username: '',
+      password: ''
+    }
+  });
+
+  // Refresh data mutation
+  const refreshMutation = useMutation({
+    mutationFn: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['/api/stock-logs'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/shifts'] });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Logs Refreshed",
+        description: "Stock logs have been refreshed successfully.",
+      });
+    }
+  });
+
+  // Clear logs mutation
+  const clearLogsMutation = useMutation({
+    mutationFn: async (credentials: z.infer<typeof logClearingSchema>) => {
+      return await apiRequest('/api/stock-logs/clear', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/stock-logs'] });
+      setShowClearModal(false);
+      clearForm.reset();
+      toast({
+        title: "Logs Cleared",
+        description: "All stock logs have been cleared successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Authentication Failed",
+        description: error.message || "Invalid credentials. Please check your username and password.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleRefresh = () => {
+    refreshMutation.mutate();
+  };
+
+  const handleClearLogs = (data: z.infer<typeof logClearingSchema>) => {
+    clearLogsMutation.mutate(data);
+  };
 
   // Group logs by shift ID
   const logsByShift = (stockLogs as any[]).reduce((acc: any, log: any) => {
@@ -75,8 +143,33 @@ function StockLogsTab() {
   };
 
   return (
-    <div className="space-y-6">
-      {(stockLogs as any[]).length === 0 ? (
+    <>
+      {/* Log Actions Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={handleRefresh}
+            disabled={refreshMutation.isPending}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+            Refresh Logs
+          </Button>
+        </div>
+        
+        <Button
+          onClick={() => setShowClearModal(true)}
+          variant="destructive"
+          className="flex items-center gap-2"
+        >
+          <Trash2 className="h-4 w-4" />
+          Clear All Logs
+        </Button>
+      </div>
+
+      <div className="space-y-6">
+        {(stockLogs as any[]).length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <History className="w-16 h-16 mx-auto mb-4 text-gray-300" />
@@ -194,7 +287,85 @@ function StockLogsTab() {
           })}
         </>
       )}
-    </div>
+      </div>
+
+      {/* Clear Logs Authentication Modal */}
+      <Dialog open={showClearModal} onOpenChange={setShowClearModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Clear All Stock Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              This action will permanently delete all stock logs from the system. Please enter management credentials to confirm.
+            </p>
+            
+            <Form {...clearForm}>
+              <form onSubmit={clearForm.handleSubmit(handleClearLogs)} className="space-y-4">
+                <FormField
+                  control={clearForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter management username" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={clearForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password"
+                          placeholder="Enter management password" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowClearModal(false);
+                      clearForm.reset();
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="destructive"
+                    disabled={clearLogsMutation.isPending}
+                  >
+                    {clearLogsMutation.isPending ? 'Clearing...' : 'Clear All Logs'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
