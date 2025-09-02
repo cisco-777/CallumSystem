@@ -1623,8 +1623,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // For Cannabis products, use jar weight for calculations; for others use onShelfGrams
         const expectedAmount = product.productType === 'Cannabis' && product.jarWeight 
-          ? product.jarWeight 
-          : (product.onShelfGrams || 0);
+          ? parseFloat(product.jarWeight.toString()) 
+          : parseFloat((product.onShelfGrams || 0).toString());
         
         const difference = expectedAmount - physicalCount;
         
@@ -1687,7 +1687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense routes
   app.post("/api/expenses", async (req, res) => {
     try {
-      const { description, amount, workerName, shiftId } = req.body;
+      const { description, amount, workerName, shiftId, paidAmount, paymentStatus, outstandingAmount } = req.body;
       
       if (!description || !amount || !workerName) {
         return res.status(400).json({ message: "Description, amount, and worker name are required" });
@@ -1697,7 +1697,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description,
         amount,
         workerName,
-        shiftId: shiftId || null
+        shiftId: shiftId || null,
+        paidAmount: paidAmount || '0.00',
+        paymentStatus: paymentStatus || 'unpaid',
+        outstandingAmount: outstandingAmount || amount
       });
       
       res.json(expense);
@@ -1736,13 +1739,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/expenses/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const { description, amount, workerName, shiftId } = req.body;
+      const { description, amount, workerName, shiftId, paidAmount, paymentStatus, outstandingAmount } = req.body;
       
       const expense = await storage.updateExpense(parseInt(id), {
         description,
         amount,
         workerName,
-        shiftId: shiftId || null
+        shiftId: shiftId || null,
+        paidAmount: paidAmount || '0.00',
+        paymentStatus: paymentStatus || 'unpaid',
+        outstandingAmount: outstandingAmount || amount
       });
       
       res.json(expense);
@@ -1789,7 +1795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error) {
       console.error("Error making payment on expense:", error);
-      res.status(500).json({ message: error.message || "Failed to make payment" });
+      res.status(500).json({ message: (error as Error).message || "Failed to make payment" });
     }
   });
 
@@ -2029,7 +2035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate discrepancies for each product
       for (const product of products) {
         const physicalCount = reqProductCounts[product.id] || 0;
-        const expectedOnShelf = product.onShelfGrams || 0;
+        const expectedOnShelf = parseFloat((product.onShelfGrams || 0).toString());
         const difference = expectedOnShelf - physicalCount;
         
         if (difference !== 0) {
