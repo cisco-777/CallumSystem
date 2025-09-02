@@ -4192,43 +4192,58 @@ export function AdminDashboard() {
                       </div>
                       
                       {/* Money Reconciliation Display */}
-                      {activeShift && activeShift.startingTillAmount && (
+                      {reconciliationResult && reconciliationResult.cashInTill !== undefined && (
                         <div className="mb-6">
                           <h4 className="font-semibold mb-3">Money Reconciliation</h4>
                           <Card>
                             <CardContent className="p-4">
                               {(() => {
-                                const startingTill = parseFloat(activeShift.startingTillAmount) || 0;
-                                const totalSales = parseFloat(activeShift.totalSales || '0');
-                                const totalExpenses = parseFloat(activeShift.totalExpenses || '0');
-                                const actualCashInTill = parseFloat(reconciliationResult.cashInTill || '0');
+                                // Extract money reconciliation from email report if available
+                                let expectedTill = 0;
+                                let actualTill = parseFloat(reconciliationResult.cashInTill || '0');
+                                let moneyStatus = 'unknown';
                                 
-                                // Expected till amount = Starting till + Sales - Expenses
-                                const expectedTillAmount = startingTill + totalSales - totalExpenses;
-                                const moneyDifference = actualCashInTill - expectedTillAmount;
+                                if (emailReport) {
+                                  const expectedMatch = emailReport.match(/Expected in till: A(\d+\.\d+)/);
+                                  const actualMatch = emailReport.match(/Actual in till: A(\d+\.\d+)/);
+                                  const statusMatch = emailReport.match(/A(\d+\.\d+) (missing|excess)/);
+                                  const correctMatch = emailReport.includes('Money is all correct');
+                                  
+                                  if (expectedMatch) expectedTill = parseFloat(expectedMatch[1]);
+                                  if (actualMatch) actualTill = parseFloat(actualMatch[1]);
+                                  
+                                  if (correctMatch) {
+                                    moneyStatus = 'correct';
+                                  } else if (statusMatch) {
+                                    const amount = parseFloat(statusMatch[1]);
+                                    moneyStatus = statusMatch[2] === 'missing' ? `missing-${amount}` : `excess-${amount}`;
+                                  }
+                                }
+                                
+                                const moneyDifference = actualTill - expectedTill;
                                 
                                 return (
                                   <div className="space-y-3">
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                       <div>
                                         <div className="text-gray-600">Expected in till:</div>
-                                        <div className="font-medium">€{expectedTillAmount.toFixed(2)}</div>
+                                        <div className="font-medium">€{expectedTill.toFixed(2)}</div>
                                       </div>
                                       <div>
                                         <div className="text-gray-600">Actual in till:</div>
-                                        <div className="font-medium">€{actualCashInTill.toFixed(2)}</div>
+                                        <div className="font-medium">€{actualTill.toFixed(2)}</div>
                                       </div>
                                     </div>
                                     <div className="pt-3 border-t">
-                                      {Math.abs(moneyDifference) < 0.01 ? (
+                                      {moneyStatus === 'correct' || Math.abs(moneyDifference) < 0.01 ? (
                                         <div className="text-green-700 font-medium flex items-center">
                                           <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
                                           Money is all correct
                                         </div>
-                                      ) : moneyDifference > 0 ? (
+                                      ) : moneyStatus.startsWith('excess') || moneyDifference > 0 ? (
                                         <div className="text-blue-700 font-medium flex items-center">
                                           <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                                          €{moneyDifference.toFixed(2)} excess
+                                          €{Math.abs(moneyDifference).toFixed(2)} excess
                                         </div>
                                       ) : (
                                         <div className="text-red-700 font-medium flex items-center">
