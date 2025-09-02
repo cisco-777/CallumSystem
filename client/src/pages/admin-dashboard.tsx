@@ -5145,19 +5145,21 @@ export function AdminDashboard() {
                               </FormLabel>
                               <FormControl>
                                 <Input
-                                  type="number"
-                                  min={isUnitBased ? "1" : "0.01"}
-                                  step={isUnitBased ? "1" : "0.01"}
+                                  type="text"
                                   placeholder="0"
                                   {...field}
-                                  value={field.value || ''}
+                                  value={field.value?.toString() || ''}
                                   onChange={(e) => {
                                     const inputValue = e.target.value;
-                                    // Allow empty string, "0", and valid decimal numbers
-                                    if (inputValue === '' || inputValue === '0' || !isNaN(parseFloat(inputValue))) {
-                                      const numValue = inputValue === '' ? 0 : parseFloat(inputValue);
-                                      field.onChange(numValue);
+                                    // Allow typing anything, convert to number if valid
+                                    if (inputValue === '' || /^\d*\.?\d*$/.test(inputValue)) {
+                                      field.onChange(inputValue === '' ? '' : inputValue);
                                     }
+                                  }}
+                                  onBlur={(e) => {
+                                    const inputValue = e.target.value;
+                                    const numValue = parseFloat(inputValue) || 0;
+                                    field.onChange(numValue);
                                   }}
                                 />
                               </FormControl>
