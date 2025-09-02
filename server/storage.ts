@@ -6,6 +6,7 @@ import {
   orders,
   shiftReconciliations,
   expenses,
+  expensePayments,
   shifts,
   shiftActivities,
   stockMovements,
@@ -22,6 +23,8 @@ import {
   type InsertShiftReconciliation,
   type Expense,
   type InsertExpense,
+  type ExpensePayment,
+  type InsertExpensePayment,
   type Shift,
   type InsertShift,
   type ShiftActivity,
@@ -116,6 +119,13 @@ export interface IStorage {
   getExpense(id: number): Promise<Expense | undefined>;
   updateExpense(id: number, updates: Partial<Expense>): Promise<Expense>;
   deleteExpense(id: number): Promise<void>;
+  
+  // Expense payment operations
+  createExpensePayment(paymentData: InsertExpensePayment): Promise<ExpensePayment>;
+  getExpensePayments(expenseId: number): Promise<ExpensePayment[]>;
+  makePaymentOnExpense(expenseId: number, paymentAmount: number, workerName: string, shiftId?: number, notes?: string): Promise<{ expense: Expense; payment: ExpensePayment }>;
+  getOutstandingExpenses(): Promise<Expense[]>;
+  getShiftExpensePayments(shiftId: number): Promise<number>;
   
   // Shift operations
   createShift(shiftData: InsertShift): Promise<Shift>;
@@ -924,6 +934,107 @@ export class DatabaseStorage implements IStorage {
     await db.delete(expenses).where(eq(expenses.id, id));
   }
 
+  // Expense payment tracking methods
+  async createExpensePayment(paymentData: InsertExpensePayment): Promise<ExpensePayment> {
+    const db = await getDb();
+    const [payment] = await db
+      .insert(expensePayments)
+      .values(paymentData)
+      .returning();
+    return payment;
+  }
+
+  async getExpensePayments(expenseId: number): Promise<ExpensePayment[]> {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(expensePayments)
+      .where(eq(expensePayments.expenseId, expenseId))
+      .orderBy(desc(expensePayments.paymentDate));
+  }
+
+  async makePaymentOnExpense(
+    expenseId: number, 
+    paymentAmount: number, 
+    workerName: string, 
+    shiftId?: number, 
+    notes?: string
+  ): Promise<{ expense: Expense; payment: ExpensePayment }> {
+    const db = await getDb();
+    
+    // Get current expense details
+    const expense = await this.getExpense(expenseId);
+    if (!expense) {
+      throw new Error('Expense not found');
+    }
+
+    const currentPaidAmount = parseFloat(expense.paidAmount?.toString() || "0");
+    const totalAmount = parseFloat(expense.amount);
+    const currentOutstanding = parseFloat(expense.outstandingAmount?.toString() || expense.amount);
+
+    // Validate payment amount
+    if (paymentAmount <= 0) {
+      throw new Error('Payment amount must be positive');
+    }
+    
+    if (paymentAmount > currentOutstanding) {
+      throw new Error(`Payment amount (₳${paymentAmount}) cannot exceed outstanding amount (₳${currentOutstanding})`);
+    }
+
+    // Calculate new amounts
+    const newPaidAmount = currentPaidAmount + paymentAmount;
+    const newOutstandingAmount = currentOutstanding - paymentAmount;
+    
+    // Determine payment status
+    let paymentStatus = 'partial';
+    if (newOutstandingAmount === 0) {
+      paymentStatus = 'paid';
+    } else if (newPaidAmount === 0) {
+      paymentStatus = 'unpaid';
+    }
+
+    // Create payment record
+    const payment = await this.createExpensePayment({
+      expenseId,
+      shiftId: shiftId || null,
+      paymentAmount: paymentAmount.toString(),
+      workerName,
+      notes: notes || null
+    });
+
+    // Update expense with new payment totals
+    const updatedExpense = await this.updateExpense(expenseId, {
+      paidAmount: newPaidAmount.toString(),
+      outstandingAmount: newOutstandingAmount.toString(),
+      paymentStatus,
+      lastPaymentDate: new Date()
+    });
+
+    return { expense: updatedExpense, payment };
+  }
+
+  async getOutstandingExpenses(): Promise<Expense[]> {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(expenses)
+      .where(sql`${expenses.paymentStatus} != 'paid'`)
+      .orderBy(desc(expenses.createdAt));
+  }
+
+  // Calculate total expenses based on payments made during a specific shift
+  async getShiftExpensePayments(shiftId: number): Promise<number> {
+    const db = await getDb();
+    const payments = await db
+      .select()
+      .from(expensePayments)
+      .where(eq(expensePayments.shiftId, shiftId));
+    
+    return payments.reduce((total, payment) => {
+      return total + parseFloat(payment.paymentAmount?.toString() || "0");
+    }, 0);
+  }
+
   // Shift operations
   async createShift(shiftData: InsertShift): Promise<Shift> {
     const db = await getDb();
@@ -1009,6 +1120,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(expenses.shiftId, shiftId))
       .orderBy(desc(expenses.createdAt));
 
+    // Get expense payments made during this shift
+    const shiftExpensePayments = await db.select().from(expensePayments)
+      .where(eq(expensePayments.shiftId, shiftId))
+      .orderBy(desc(expensePayments.paymentDate));
+
     // Get orders created during this shift (by time range)
     const shiftOrders = await db.select().from(orders)
       .where(sql`${orders.createdAt} >= ${shift.startTime} AND ${orders.createdAt} <= ${shift.endTime || new Date()}`)
@@ -1020,10 +1136,15 @@ export class DatabaseStorage implements IStorage {
       reconciliation = await this.getShiftReconciliation(shift.reconciliationId);
     }
 
+    // Calculate total expenses based on payments made during this shift
+    const totalExpensePayments = await this.getShiftExpensePayments(shiftId);
+
     return {
       shift,
       activities,
       expenses: shiftExpenses,
+      expensePayments: shiftExpensePayments,
+      totalExpensePayments,
       orders: shiftOrders,
       reconciliation
     };

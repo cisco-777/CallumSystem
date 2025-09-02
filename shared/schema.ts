@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, decimal, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -116,6 +116,23 @@ export const expenses = pgTable("expenses", {
   workerName: text("worker_name").notNull(),
   expenseDate: timestamp("expense_date").defaultNow(),
   shiftId: integer("shift_id").references(() => shifts.id), // Link to shift
+  // Payment tracking fields
+  paidAmount: numeric("paid_amount", { precision: 10, scale: 2 }).default("0.00"),
+  outstandingAmount: numeric("outstanding_amount", { precision: 10, scale: 2 }),
+  paymentStatus: text("payment_status").default("unpaid"), // unpaid, partial, paid
+  lastPaymentDate: timestamp("last_payment_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Table for tracking payment history across multiple shifts
+export const expensePayments = pgTable("expense_payments", {
+  id: serial("id").primaryKey(),
+  expenseId: integer("expense_id").references(() => expenses.id, { onDelete: "cascade" }).notNull(),
+  shiftId: integer("shift_id").references(() => shifts.id),
+  paymentAmount: numeric("payment_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentDate: timestamp("payment_date").defaultNow(),
+  workerName: text("worker_name").notNull(),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -259,6 +276,17 @@ export const insertExpenseSchema = createInsertSchema(expenses).pick({
   amount: true,
   workerName: true,
   shiftId: true,
+  paidAmount: true,
+  outstandingAmount: true,
+  paymentStatus: true,
+});
+
+export const insertExpensePaymentSchema = createInsertSchema(expensePayments).pick({
+  expenseId: true,
+  shiftId: true,
+  paymentAmount: true,
+  workerName: true,
+  notes: true,
 });
 
 export const insertShiftSchema = createInsertSchema(shifts).pick({
@@ -308,6 +336,7 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type InsertShiftReconciliation = z.infer<typeof insertShiftReconciliationSchema>;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
+export type InsertExpensePayment = z.infer<typeof insertExpensePaymentSchema>;
 export type InsertShift = z.infer<typeof insertShiftSchema>;
 export type InsertShiftActivity = z.infer<typeof insertShiftActivitySchema>;
 export type InsertStockLog = z.infer<typeof insertStockLogSchema>;
@@ -319,6 +348,7 @@ export type Donation = typeof donations.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type ShiftReconciliation = typeof shiftReconciliations.$inferSelect;
 export type Expense = typeof expenses.$inferSelect;
+export type ExpensePayment = typeof expensePayments.$inferSelect;
 export type Shift = typeof shifts.$inferSelect;
 export type ShiftActivity = typeof shiftActivities.$inferSelect;
 export type StockLog = typeof stockLogs.$inferSelect;

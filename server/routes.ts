@@ -1763,6 +1763,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Expense Payment Tracking Routes
+  app.post("/api/expenses/:id/payments", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { paymentAmount, workerName, shiftId, notes } = req.body;
+      
+      if (!paymentAmount || !workerName) {
+        return res.status(400).json({ message: "Payment amount and worker name are required" });
+      }
+      
+      const payment = parseFloat(paymentAmount);
+      if (payment <= 0) {
+        return res.status(400).json({ message: "Payment amount must be positive" });
+      }
+      
+      const result = await storage.makePaymentOnExpense(
+        parseInt(id),
+        payment,
+        workerName,
+        shiftId || undefined,
+        notes || undefined
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error making payment on expense:", error);
+      res.status(500).json({ message: error.message || "Failed to make payment" });
+    }
+  });
+
+  app.get("/api/expenses/:id/payments", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const payments = await storage.getExpensePayments(parseInt(id));
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching expense payments:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  app.get("/api/expenses/outstanding", async (req, res) => {
+    try {
+      const outstandingExpenses = await storage.getOutstandingExpenses();
+      res.json(outstandingExpenses);
+    } catch (error) {
+      console.error("Error fetching outstanding expenses:", error);
+      res.status(500).json({ message: "Failed to fetch outstanding expenses" });
+    }
+  });
+
   // Shift Management Routes
   app.post("/api/shifts/start", async (req, res) => {
     try {
