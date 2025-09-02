@@ -381,9 +381,18 @@ export class DatabaseStorage implements IStorage {
 
   async createProduct(productData: any): Promise<Product> {
     const db = await getDb();
+    
+    // Prepare product data with rounded integer values for database storage
+    const processedData = { ...productData };
+    if (productData.onShelfGrams !== undefined) processedData.onShelfGrams = Math.round(parseFloat(productData.onShelfGrams.toString()));
+    if (productData.internalGrams !== undefined) processedData.internalGrams = Math.round(parseFloat(productData.internalGrams.toString()));
+    if (productData.externalGrams !== undefined) processedData.externalGrams = Math.round(parseFloat(productData.externalGrams.toString()));
+    if (productData.jarWeight !== undefined) processedData.jarWeight = Math.round(parseFloat(productData.jarWeight.toString()));
+    if (productData.stockQuantity !== undefined) processedData.stockQuantity = Math.round(parseFloat(productData.stockQuantity.toString()));
+    
     const [product] = await db
       .insert(products)
-      .values(productData)
+      .values(processedData)
       .returning();
     return product;
   }
@@ -395,15 +404,23 @@ export class DatabaseStorage implements IStorage {
     if (!currentProduct) throw new Error("Product not found");
 
     // Calculate new stock values using provided data or current values
-    const newOnShelfGrams = stockData.onShelfGrams !== undefined ? stockData.onShelfGrams : currentProduct.onShelfGrams || 0;
-    const newInternalGrams = stockData.internalGrams !== undefined ? stockData.internalGrams : currentProduct.internalGrams || 0;
-    const newExternalGrams = stockData.externalGrams !== undefined ? stockData.externalGrams : currentProduct.externalGrams || 0;
+    // Round decimal values for integer database fields
+    const newOnShelfGrams = stockData.onShelfGrams !== undefined ? Math.round(parseFloat(stockData.onShelfGrams.toString())) : currentProduct.onShelfGrams || 0;
+    const newInternalGrams = stockData.internalGrams !== undefined ? Math.round(parseFloat(stockData.internalGrams.toString())) : currentProduct.internalGrams || 0;
+    const newExternalGrams = stockData.externalGrams !== undefined ? Math.round(parseFloat(stockData.externalGrams.toString())) : currentProduct.externalGrams || 0;
     const newTotalStock = newOnShelfGrams + newInternalGrams + newExternalGrams;
+
+    // Prepare stock data with rounded integer values
+    const updateStockData = { ...stockData };
+    if (stockData.onShelfGrams !== undefined) updateStockData.onShelfGrams = newOnShelfGrams;
+    if (stockData.internalGrams !== undefined) updateStockData.internalGrams = newInternalGrams;
+    if (stockData.externalGrams !== undefined) updateStockData.externalGrams = newExternalGrams;
+    if (stockData.jarWeight !== undefined) updateStockData.jarWeight = Math.round(parseFloat(stockData.jarWeight.toString()));
 
     const [product] = await db
       .update(products)
       .set({
-        ...stockData,
+        ...updateStockData,
         stockQuantity: newTotalStock,
         adminPrice: stockData.shelfPrice || currentProduct.adminPrice, // For backward compatibility
         lastUpdated: new Date()
