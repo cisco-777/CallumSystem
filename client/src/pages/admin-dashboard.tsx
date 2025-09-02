@@ -1608,6 +1608,10 @@ export function AdminDashboard() {
 
 
   const onSubmitStock = (data: UnifiedStockFormData) => {
+    console.log('Form submission data:', data);
+    console.log('Product type:', data.productType);
+    console.log('Editing stock:', editingStock);
+    
     // Create final data with uploaded image URL if available
     const finalData = {
       ...data,
@@ -1627,21 +1631,28 @@ export function AdminDashboard() {
 
   const handleEditStock = (product: any) => {
     setEditingStock(product);
+    
+    // Determine if this product type uses simplified schema
+    const isSimplified = isSimplifiedProductType(product.productType);
+    
     stockForm.reset({
       // Product Catalog fields
       name: product.name,
       description: product.description || '',
-      category: product.category,
+      category: isSimplified ? undefined : (product.category || 'Sativa'),
       productType: product.productType || 'Cannabis',
       imageUrl: product.imageUrl || '',
       productCode: product.productCode,
       // Stock Management fields
       supplier: product.supplier || '',
       onShelfGrams: product.onShelfGrams || 0,
-      internalGrams: product.internalGrams || 0,
-      externalGrams: product.externalGrams || 0,
+      internalGrams: isSimplified ? (product.internalGrams || undefined) : (product.internalGrams || 0),
+      externalGrams: isSimplified ? (product.externalGrams || undefined) : (product.externalGrams || 0),
       costPrice: product.costPrice || '0',
-      shelfPrice: product.shelfPrice || product.adminPrice || '0'
+      shelfPrice: product.shelfPrice || product.adminPrice || '0',
+      // Worker signature fields (ensure these are populated for editing)
+      workerName: product.workerName || '',
+      entryDate: product.entryDate || new Date().toISOString().split('T')[0]
     });
     // Set image preview if product has image
     if (product.imageUrl) {
