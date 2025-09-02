@@ -5623,7 +5623,7 @@ export function AdminDashboard() {
         </Dialog>
 
         {/* INBOX Viewing Modal */}
-        <Dialog open={showInboxModal} onOpenChange={setShowInboxModal}>
+        <Dialog open={showInboxModal} onOpenChange={() => {}}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
             <DialogHeader>
               <DialogTitle className="flex items-center space-x-2">
