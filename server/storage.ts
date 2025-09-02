@@ -618,9 +618,14 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Calculate new stock values
-      const newOnShelfGrams = availableShelfStock - quantity.quantity;
-      const newTotalStock = newOnShelfGrams + (product.internalGrams || 0) + (product.externalGrams || 0);
+      // Calculate new stock values - handle decimal quantities safely
+      const quantityAmount = parseFloat(quantity.quantity.toString());
+      const newOnShelfGramsExact = availableShelfStock - quantityAmount;
+      const newTotalStockExact = newOnShelfGramsExact + (product.internalGrams || 0) + (product.externalGrams || 0);
+      
+      // Round to nearest integer for database storage (integer fields)
+      const newOnShelfGrams = Math.round(newOnShelfGramsExact);
+      const newTotalStock = Math.round(newTotalStockExact);
 
       // Update product stock quantities
       await db

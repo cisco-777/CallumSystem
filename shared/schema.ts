@@ -321,3 +321,26 @@ export type Shift = typeof shifts.$inferSelect;
 export type ShiftActivity = typeof shiftActivities.$inferSelect;
 export type StockLog = typeof stockLogs.$inferSelect;
 export type EmailReport = typeof emailReports.$inferSelect;
+
+// Add decimal-compatible columns to existing tables for manual order support
+// These columns will be used alongside existing integer columns to support decimal quantities
+export const basketItemsDecimal = pgTable("basket_items_decimal", {
+  id: serial("id").primaryKey(),
+  basketItemId: integer("basket_item_id").references(() => basketItems.id),
+  quantityDecimal: text("quantity_decimal"), // Store decimal quantities as text for precision
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const stockMovementsDecimal = pgTable("stock_movements_decimal", {
+  id: serial("id").primaryKey(),
+  stockMovementId: integer("stock_movement_id").references(() => stockMovements.id),
+  quantityDecimal: text("quantity_decimal"), // Store decimal quantities as text for precision
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const stockLogsDecimal = pgTable("stock_logs_decimal", {
+  id: serial("id").primaryKey(),
+  stockLogId: integer("stock_log_id").references(() => stockLogs.id),
+  quantityChangedDecimal: text("quantity_changed_decimal"), // Store decimal quantities as text for precision
+  createdAt: timestamp("created_at").defaultNow(),
+});
