@@ -3837,17 +3837,18 @@ export function AdminDashboard() {
                   .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime()) // Sort by end time descending
                   : [];
                 
-                // Find the most recent completed shift that has expenses
-                const mostRecentWithExpenses = completedShifts.find((shift: any) => {
+                // Find ALL completed shifts that have unpaid expenses
+                completedShifts.forEach((shift: any) => {
                   const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
                     expense.shiftId === shift.id
                   ) : [];
-                  return shiftExpenses.length > 0;
+                  const hasUnpaidExpenses = shiftExpenses.some((expense: any) => 
+                    expense.paymentStatus !== 'paid'
+                  );
+                  if (hasUnpaidExpenses) {
+                    shiftsWithExpenses.push(shift);
+                  }
                 });
-                
-                if (mostRecentWithExpenses) {
-                  shiftsWithExpenses.push(mostRecentWithExpenses);
-                }
 
                 if (shiftsWithExpenses.length === 0) {
                   return (
