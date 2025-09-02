@@ -5146,14 +5146,17 @@ export function AdminDashboard() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  min={isUnitBased ? "1" : "0.01"}
                                   step={isUnitBased ? "1" : "0.01"}
                                   placeholder="0"
                                   {...field}
                                   value={field.value || ''}
                                   onChange={(e) => {
-                                    const value = parseFloat(e.target.value) || 0;
-                                    field.onChange(value);
+                                    const inputValue = e.target.value;
+                                    // Allow typing "0" and decimal values like "0.5"
+                                    if (inputValue === '' || inputValue === '0' || /^0\.\d*$/.test(inputValue) || /^\d*\.?\d*$/.test(inputValue)) {
+                                      const numValue = parseFloat(inputValue) || 0;
+                                      field.onChange(numValue);
+                                    }
                                   }}
                                 />
                               </FormControl>
