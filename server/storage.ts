@@ -1013,14 +1013,6 @@ export class DatabaseStorage implements IStorage {
     return { expense: updatedExpense, payment };
   }
 
-  async getOutstandingExpenses(): Promise<Expense[]> {
-    const db = await getDb();
-    return await db
-      .select()
-      .from(expenses)
-      .where(sql`${expenses.paymentStatus} != 'paid'`)
-      .orderBy(desc(expenses.createdAt));
-  }
 
   // Calculate total expenses based on payments made during a specific shift
   async getShiftExpensePayments(shiftId: number): Promise<number> {
@@ -1106,6 +1098,24 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(expenses.createdAt));
   }
 
+  // Get expenses created during current shift only
+  async getCurrentShiftExpenses(shiftId: number): Promise<Expense[]> {
+    const db = await getDb();
+    return await db.select().from(expenses)
+      .where(eq(expenses.shiftId, shiftId))
+      .orderBy(desc(expenses.createdAt));
+  }
+
+  // Get unpaid/partially paid expenses from previous shifts (orphaned)
+  async getOutstandingExpenses(): Promise<Expense[]> {
+    const db = await getDb();
+    return await db.select().from(expenses)
+      .where(
+        sql`${expenses.shiftId} IS NULL AND ${expenses.paymentStatus} != 'paid'`
+      )
+      .orderBy(desc(expenses.createdAt));
+  }
+
   async getShiftSummary(shiftId: number): Promise<any> {
     const db = await getDb();
     // Get shift details
@@ -1115,12 +1125,12 @@ export class DatabaseStorage implements IStorage {
     // Get all activities for this shift
     const activities = await this.getShiftActivities(shiftId);
 
-    // Get expenses linked to this shift AND unpaid expenses from previous shifts (shiftId = null)
-    const shiftExpenses = await db.select().from(expenses)
-      .where(
-        sql`${expenses.shiftId} = ${shiftId} OR (${expenses.shiftId} IS NULL AND ${expenses.paymentStatus} != 'paid')`
-      )
-      .orderBy(desc(expenses.createdAt));
+    // Get current shift expenses and outstanding expenses separately
+    const currentShiftExpenses = await this.getCurrentShiftExpenses(shiftId);
+    const outstandingExpenses = await this.getOutstandingExpenses();
+    
+    // Combined for backward compatibility
+    const shiftExpenses = [...currentShiftExpenses, ...outstandingExpenses];
 
     // Get expense payments made during this shift
     const shiftExpensePayments = await db.select().from(expensePayments)
@@ -1144,7 +1154,9 @@ export class DatabaseStorage implements IStorage {
     return {
       shift,
       activities,
-      expenses: shiftExpenses,
+      expenses: shiftExpenses, // All expenses for backward compatibility
+      currentShiftExpenses,    // Expenses created during this shift only
+      outstandingExpenses,     // Unpaid expenses from previous shifts
       expensePayments: shiftExpensePayments,
       totalExpensePayments,
       orders: shiftOrders,
@@ -1184,8 +1196,13 @@ export class DatabaseStorage implements IStorage {
           await db.delete(shiftActivities)
             .where(eq(shiftActivities.shiftId, shiftToDelete.id));
           
-          // Delete reconciliation record if exists
+          // Remove reconciliation reference from shift first
           if (shiftToDelete.reconciliationId) {
+            await db.update(shifts)
+              .set({ reconciliationId: null })
+              .where(eq(shifts.id, shiftToDelete.id));
+            
+            // Then delete the reconciliation record
             await db.delete(shiftReconciliations)
               .where(eq(shiftReconciliations.id, shiftToDelete.reconciliationId));
           }

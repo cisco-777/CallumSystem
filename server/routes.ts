@@ -179,31 +179,49 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     // Financial summary
     report += `FINANCIAL SUMMARY\n`;
     
-    // Expenses first with individual items and payment information
-    if (summary.expensePayments && summary.expensePayments.length > 0) {
-      report += `EXPENSES (Payments Made This Shift)\n`;
-      summary.expensePayments.forEach((payment: any) => {
-        report += `${payment.notes || 'Expense payment'}: ₳${payment.paymentAmount}\n`;
-      });
-      report += `Total expense payments: ₳${summary.totalExpensePayments || '0'}\n`;
-    } else if (summary.expenses && summary.expenses.length > 0) {
-      // Fallback: show expenses created during shift if no payments made
-      report += `EXPENSES (Created This Shift)\n`;
-      summary.expenses.forEach((expense: any) => {
+    // Expenses - separated by current shift vs outstanding from previous shifts
+    report += `EXPENSES\n`;
+    
+    // Current shift expenses section
+    if (summary.currentShiftExpenses && summary.currentShiftExpenses.length > 0) {
+      report += `Current Shift Expenses:\n`;
+      summary.currentShiftExpenses.forEach((expense: any) => {
         const paidAmount = parseFloat(expense.paidAmount || '0');
         const totalAmount = parseFloat(expense.amount || '0');
-        if (paidAmount > 0) {
-          report += `${expense.description}: ₳${paidAmount} paid of ₳${totalAmount}\n`;
+        if (paidAmount > 0 && paidAmount < totalAmount) {
+          report += `  ${expense.description}: ₳${paidAmount} paid of ₳${totalAmount} (partial)\n`;
+        } else if (paidAmount === totalAmount) {
+          report += `  ${expense.description}: ₳${totalAmount} (fully paid)\n`;
         } else {
-          report += `${expense.description}: ₳${totalAmount} (unpaid)\n`;
+          report += `  ${expense.description}: ₳${totalAmount} (unpaid)\n`;
         }
       });
-      report += `Total expense payments: ₳${summary.totalExpensePayments || '0'}\n`;
     } else {
-      report += `EXPENSES\n`;
-      report += `No expense payments made this shift\n`;
-      report += `Total expense payments: ₳0\n`;
+      report += `Current Shift Expenses: None\n`;
     }
+    
+    // Outstanding expenses from previous shifts
+    if (summary.outstandingExpenses && summary.outstandingExpenses.length > 0) {
+      report += `Outstanding from Previous Shifts:\n`;
+      summary.outstandingExpenses.forEach((expense: any) => {
+        const outstandingAmount = parseFloat(expense.outstandingAmount || expense.amount);
+        const paidAmount = parseFloat(expense.paidAmount || '0');
+        const totalAmount = parseFloat(expense.amount || '0');
+        report += `  ${expense.description}: ₳${outstandingAmount} outstanding (₳${paidAmount} of ₳${totalAmount} paid)\n`;
+      });
+    } else {
+      report += `Outstanding from Previous Shifts: None\n`;
+    }
+    
+    // Payment totals made during this shift
+    if (summary.expensePayments && summary.expensePayments.length > 0) {
+      report += `Payments Made This Shift:\n`;
+      summary.expensePayments.forEach((payment: any) => {
+        report += `  ${payment.notes || 'Payment'}: ₳${payment.paymentAmount}\n`;
+      });
+    }
+    
+    report += `Total payments made this shift: ₳${summary.totalExpensePayments || '0'}\n`;
     report += `\n`;
     
     // Financial details in requested order
@@ -1830,6 +1848,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching outstanding expenses:", error);
       res.status(500).json({ message: "Failed to fetch outstanding expenses" });
+    }
+  });
+
+  // Get current shift expenses only
+  app.get("/api/shifts/:shiftId/current-expenses", async (req, res) => {
+    try {
+      const shiftId = parseInt(req.params.shiftId);
+      const expenses = await storage.getCurrentShiftExpenses(shiftId);
+      res.json(expenses);
+    } catch (error) {
+      console.error("Error getting current shift expenses:", error);
+      res.status(500).json({ message: "Failed to get current shift expenses" });
     }
   });
 

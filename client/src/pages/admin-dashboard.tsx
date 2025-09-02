@@ -796,6 +796,15 @@ export function AdminDashboard() {
     queryKey: ['/api/shifts/active']
   });
 
+  const { data: outstandingExpenses = [] } = useQuery({
+    queryKey: ['/api/expenses/outstanding']
+  });
+
+  const { data: currentShiftExpenses = [] } = useQuery({
+    queryKey: ['/api/shifts/current-expenses', activeShift?.id],
+    enabled: !!activeShift
+  });
+
   const { data: shifts = [] } = useQuery({
     queryKey: ['/api/shifts']
   });
