@@ -179,17 +179,30 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     // Financial summary
     report += `FINANCIAL SUMMARY\n`;
     
-    // Expenses first with individual items
-    if (summary.expenses && summary.expenses.length > 0) {
-      report += `EXPENSES\n`;
-      summary.expenses.forEach((expense: any) => {
-        report += `${expense.description}: ₳${expense.amount}\n`;
+    // Expenses first with individual items and payment information
+    if (summary.expensePayments && summary.expensePayments.length > 0) {
+      report += `EXPENSES (Payments Made This Shift)\n`;
+      summary.expensePayments.forEach((payment: any) => {
+        report += `${payment.notes || 'Expense payment'}: ₳${payment.paymentAmount}\n`;
       });
-      report += `Total expenses: ₳${shift.totalExpenses || '0'}\n`;
+      report += `Total expense payments: ₳${summary.totalExpensePayments || '0'}\n`;
+    } else if (summary.expenses && summary.expenses.length > 0) {
+      // Fallback: show expenses created during shift if no payments made
+      report += `EXPENSES (Created This Shift)\n`;
+      summary.expenses.forEach((expense: any) => {
+        const paidAmount = parseFloat(expense.paidAmount || '0');
+        const totalAmount = parseFloat(expense.amount || '0');
+        if (paidAmount > 0) {
+          report += `${expense.description}: ₳${paidAmount} paid of ₳${totalAmount}\n`;
+        } else {
+          report += `${expense.description}: ₳${totalAmount} (unpaid)\n`;
+        }
+      });
+      report += `Total expense payments: ₳${summary.totalExpensePayments || '0'}\n`;
     } else {
       report += `EXPENSES\n`;
-      report += `No expenses recorded\n`;
-      report += `Total expenses: ₳0\n`;
+      report += `No expense payments made this shift\n`;
+      report += `Total expense payments: ₳0\n`;
     }
     report += `\n`;
     
@@ -2069,9 +2082,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get current shift summary to calculate actual totals
       const shiftSummary = await storage.getShiftSummary(shiftId);
       
-      // Calculate actual totals from expenses and orders
-      const totalExpenses = shiftSummary.expenses
-        .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount || "0"), 0);
+      // Calculate actual totals from payments made during this shift (not full expense amounts)
+      const totalExpenses = shiftSummary.totalExpensePayments || 0;
       
       const totalSales = shiftSummary.orders
         .filter((order: any) => order.status === "completed")

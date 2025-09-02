@@ -1115,9 +1115,11 @@ export class DatabaseStorage implements IStorage {
     // Get all activities for this shift
     const activities = await this.getShiftActivities(shiftId);
 
-    // Get detailed expenses and orders linked to this shift
+    // Get expenses linked to this shift AND unpaid expenses from previous shifts (shiftId = null)
     const shiftExpenses = await db.select().from(expenses)
-      .where(eq(expenses.shiftId, shiftId))
+      .where(
+        sql`${expenses.shiftId} = ${shiftId} OR (${expenses.shiftId} IS NULL AND ${expenses.paymentStatus} != 'paid')`
+      )
       .orderBy(desc(expenses.createdAt));
 
     // Get expense payments made during this shift
@@ -1164,9 +1166,19 @@ export class DatabaseStorage implements IStorage {
         const shiftsToDelete = completedShifts.slice(1); // Keep first 1, delete the rest
         
         for (const shiftToDelete of shiftsToDelete) {
-          // Delete all expenses associated with this shift
+          // Only delete fully paid expenses associated with this shift
+          // Keep unpaid/partially paid expenses by setting their shiftId to null
+          await db.update(expenses)
+            .set({ shiftId: null })
+            .where(
+              sql`${expenses.shiftId} = ${shiftToDelete.id} AND ${expenses.paymentStatus} != 'paid'`
+            );
+          
+          // Delete only fully paid expenses
           await db.delete(expenses)
-            .where(eq(expenses.shiftId, shiftToDelete.id));
+            .where(
+              sql`${expenses.shiftId} = ${shiftToDelete.id} AND ${expenses.paymentStatus} = 'paid'`
+            );
           
           // Delete all shift activities
           await db.delete(shiftActivities)
