@@ -132,11 +132,11 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     if (reconciliation && shift.startingTillAmount) {
       const startingTill = parseFloat(shift.startingTillAmount) || 0;
       const totalSales = parseFloat(shift.totalSales || '0');
-      const totalExpensesPaid = summary.totalExpensePayments || 0; // Use actual payments made during shift
+      const totalExpenses = parseFloat(shift.totalExpenses || '0');
       const actualCashInTill = parseFloat(reconciliation.cashInTill || '0');
       
-      // Expected till amount = Starting till + Sales - Paid Expenses
-      const expectedTillAmount = startingTill + totalSales - totalExpensesPaid;
+      // Expected till amount = Starting till + Sales - Expenses
+      const expectedTillAmount = startingTill + totalSales - totalExpenses;
       const moneyDifference = actualCashInTill - expectedTillAmount;
       
       if (Math.abs(moneyDifference) < 0.01) {
@@ -241,11 +241,11 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     if (reconciliation && shift.startingTillAmount) {
       const startingTill = parseFloat(shift.startingTillAmount) || 0;
       const totalSales = parseFloat(shift.totalSales || '0');
-      const totalExpensesPaid = summary.totalExpensePayments || 0; // Use actual payments made during shift
+      const totalExpenses = parseFloat(shift.totalExpenses || '0');
       const actualCashInTill = parseFloat(reconciliation.cashInTill || '0');
       
-      // Expected till amount = Starting till + Sales - Paid Expenses
-      const expectedTillAmount = startingTill + totalSales - totalExpensesPaid;
+      // Expected till amount = Starting till + Sales - Expenses
+      const expectedTillAmount = startingTill + totalSales - totalExpenses;
       const moneyDifference = actualCashInTill - expectedTillAmount;
       
       report += `\nMONEY RECONCILIATION\n`;
