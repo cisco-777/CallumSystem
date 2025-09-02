@@ -440,7 +440,10 @@ const unifiedStockFormSchema = dynamicStockFormSchema;
 const expenseFormSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   amount: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Amount must be a valid number'),
-  workerName: z.string().min(1, 'Worker name is required')
+  workerName: z.string().min(1, 'Worker name is required'),
+  paidAmount: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Paid amount must be a valid number').default('0.00'),
+  outstandingAmount: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Outstanding amount must be a valid number').optional(),
+  paymentStatus: z.enum(['unpaid', 'partial', 'paid']).default('unpaid')
 });
 
 // Start shift form schema
@@ -722,7 +725,9 @@ export function AdminDashboard() {
     defaultValues: {
       description: '',
       amount: '',
-      workerName: ''
+      workerName: '',
+      paidAmount: '0.00',
+      paymentStatus: 'unpaid'
     }
   });
 
@@ -1581,7 +1586,9 @@ export function AdminDashboard() {
     expenseForm.reset({
       description: '',
       amount: '',
-      workerName: ''
+      workerName: '',
+      paidAmount: '0.00',
+      paymentStatus: 'unpaid'
     });
   };
 
@@ -1591,7 +1598,9 @@ export function AdminDashboard() {
     expenseForm.reset({
       description: expense.description,
       amount: expense.amount,
-      workerName: expense.workerName
+      workerName: expense.workerName,
+      paidAmount: expense.paidAmount?.toString() || '0.00',
+      paymentStatus: expense.paymentStatus || 'unpaid'
     });
   };
 
@@ -1607,9 +1616,28 @@ export function AdminDashboard() {
   };
 
   const onSubmitExpense = (data: z.infer<typeof expenseFormSchema>) => {
-    // Add active shift ID to expense data if there's an active shift
+    // Calculate outstanding amount automatically
+    const totalAmount = parseFloat(data.amount);
+    const paidAmount = parseFloat(data.paidAmount || '0');
+    const outstandingAmount = (totalAmount - paidAmount).toString();
+    
+    // Determine payment status based on amounts
+    let paymentStatus = data.paymentStatus;
+    if (paidAmount === 0) {
+      paymentStatus = 'unpaid';
+    } else if (paidAmount >= totalAmount) {
+      paymentStatus = 'paid';
+      // Ensure paid amount doesn't exceed total
+      data.paidAmount = totalAmount.toString();
+    } else {
+      paymentStatus = 'partial';
+    }
+    
+    // Add active shift ID and calculated fields to expense data
     const expenseData = {
       ...data,
+      outstandingAmount,
+      paymentStatus,
       shiftId: activeShift?.id || null
     };
     
@@ -3866,9 +3894,33 @@ export function AdminDashboard() {
                                 <div className="flex justify-between items-start">
                                   <div className="flex-1">
                                     <div className="flex items-center justify-between mb-2">
-                                      <h4 className="font-semibold">{expense.description}</h4>
+                                      <div className="flex-1">
+                                        <h4 className="font-semibold">{expense.description}</h4>
+                                        <div className="flex items-center mt-1 space-x-2">
+                                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                            expense.paymentStatus === 'paid' 
+                                              ? 'bg-green-100 text-green-800' 
+                                              : expense.paymentStatus === 'partial'
+                                              ? 'bg-yellow-100 text-yellow-800'
+                                              : 'bg-red-100 text-red-800'
+                                          }`}>
+                                            {expense.paymentStatus === 'paid' ? 'Paid' : 
+                                             expense.paymentStatus === 'partial' ? 'Partial' : 'Unpaid'}
+                                          </span>
+                                          {expense.paymentStatus !== 'unpaid' && (
+                                            <span className="text-xs text-gray-600">
+                                              €{expense.paidAmount || '0.00'} of €{expense.amount} paid
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
                                       <div className="text-right">
                                         <div className="font-bold text-lg text-green-600">€{expense.amount}</div>
+                                        {expense.paymentStatus !== 'paid' && (
+                                          <div className="text-sm text-red-600 font-medium">
+                                            €{expense.outstandingAmount || expense.amount} outstanding
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     
@@ -3898,7 +3950,9 @@ export function AdminDashboard() {
                                         expenseForm.reset({
                                           description: expense.description,
                                           amount: expense.amount.toString(),
-                                          workerName: expense.workerName
+                                          workerName: expense.workerName,
+                                          paidAmount: expense.paidAmount?.toString() || '0.00',
+                                          paymentStatus: expense.paymentStatus || 'unpaid'
                                         });
                                         setShowExpenseForm(true);
                                       }}
@@ -4618,6 +4672,54 @@ export function AdminDashboard() {
                         <Input 
                           {...field} 
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={expenseForm.control}
+                  name="paidAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Paid Amount (€)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm font-medium">€</span>
+                          <Input 
+                            type="number"
+                            step="0.01"
+                            className="pl-8"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={expenseForm.control}
+                  name="paymentStatus"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payment Status</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select payment status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unpaid">Unpaid</SelectItem>
+                            <SelectItem value="partial">Partial</SelectItem>
+                            <SelectItem value="paid">Paid</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
