@@ -2257,15 +2257,20 @@ export function AdminDashboard() {
                     ).map((order: any) => (
                       <div key={order.id} className="border rounded-lg mobile-p-2 bg-white">
                         <div className="flex flex-col space-y-3 sm:flex-row sm:justify-between sm:items-start sm:space-y-0">
-                          <div className="flex-1">
+                          <div className={`flex-1 ${order.status === 'cancelled' ? 'opacity-60' : ''}`}>
                             <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3 mb-3">
                               <Badge 
-                                variant={order.status === 'pending' ? 'default' : order.status === 'completed' ? 'secondary' : 'outline'}
-                                className={order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-300 w-fit' : order.status === 'completed' ? 'bg-green-100 text-green-800 border-green-300 w-fit' : 'w-fit'}
+                                variant={order.status === 'pending' ? 'default' : order.status === 'completed' ? 'secondary' : order.status === 'cancelled' ? 'destructive' : 'outline'}
+                                className={
+                                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-300 w-fit' : 
+                                  order.status === 'completed' ? 'bg-green-100 text-green-800 border-green-300 w-fit' : 
+                                  order.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-300 w-fit' : 
+                                  'w-fit'
+                                }
                               >
                                 {order.status.toUpperCase()}
                               </Badge>
-                              <span className="font-mono mobile-text-sm text-blue-700">#{order.pickupCode}</span>
+                              <span className={`font-mono mobile-text-sm ${order.status === 'cancelled' ? 'text-gray-500 line-through' : 'text-blue-700'}`}>#{order.pickupCode}</span>
                             </div>
                             
                             <div className="space-y-2">
@@ -2313,6 +2318,11 @@ export function AdminDashboard() {
                             {order.status === 'completed' && (
                               <Badge className="bg-green-100 text-green-800 border-green-300 w-fit">
                                 Completed
+                              </Badge>
+                            )}
+                            {order.status === 'cancelled' && (
+                              <Badge className="bg-red-100 text-red-800 border-red-300 w-fit">
+                                Cancelled
                               </Badge>
                             )}
                           </div>
@@ -4208,7 +4218,7 @@ export function AdminDashboard() {
                                 let totalExpenses = 0;
                                 
                                 // Find the current or most recent shift that matches this reconciliation
-                                const recentShift = shifts && shifts.length > 0 ? shifts[0] : null;
+                                const recentShift = Array.isArray(shifts) && shifts.length > 0 ? shifts[0] : null;
                                 
                                 if (recentShift && recentShift.startingTillAmount) {
                                   startingTill = parseFloat(recentShift.startingTillAmount) || 0;

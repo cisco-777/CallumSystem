@@ -1096,6 +1096,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/orders/:id/cancel", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.updateOrderStatus(orderId, 'cancelled');
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to cancel order" });
+    }
+  });
+
   app.delete("/api/orders/all", async (req, res) => {
     try {
       await storage.deleteAllOrders();
