@@ -406,8 +406,16 @@ const simplifiedStockFormSchema = baseStockFormSchema.extend({
   externalGrams: z.number().optional()
 });
 
+// Dynamic schema that works for all product types (flexible validation)
+const dynamicStockFormSchema = baseStockFormSchema.extend({
+  category: z.enum(['Sativa', 'Indica', 'Hybrid']).optional(),
+  supplier: z.string().min(1, 'Supplier is required'),
+  internalGrams: z.number().min(0, 'Internal amount must be positive').optional(),
+  externalGrams: z.number().min(0, 'External amount must be positive').optional()
+});
+
 // Unified form schema that combines both (for backward compatibility)
-const unifiedStockFormSchema = fullStockFormSchema;
+const unifiedStockFormSchema = dynamicStockFormSchema;
 
 // Expense form schema
 const expenseFormSchema = z.object({
@@ -548,7 +556,7 @@ export function AdminDashboard() {
 
 
   const stockForm = useForm<UnifiedStockFormData>({
-    resolver: zodResolver(fullStockFormSchema),
+    resolver: zodResolver(dynamicStockFormSchema),
     defaultValues: {
       // Product Catalog fields
       name: '',
@@ -574,11 +582,16 @@ export function AdminDashboard() {
   const watchedProductType = stockForm.watch('productType');
   
   useEffect(() => {
-    const currentSchema = getFormSchema(watchedProductType);
-    stockForm.clearErrors(); // Clear any existing validation errors
+    // Clear any existing validation errors when product type changes
+    stockForm.clearErrors();
     
-    // Note: React Hook Form doesn't allow changing resolver after initialization
-    // The form will still work with the original fullStockFormSchema
+    // For simplified product types, ensure optional fields don't show validation errors
+    if (isSimplifiedProductType(watchedProductType)) {
+      // Clear any category validation errors for simplified types
+      stockForm.clearErrors('category');
+      stockForm.clearErrors('internalGrams');
+      stockForm.clearErrors('externalGrams');
+    }
   }, [watchedProductType]);
 
   const adminCreationForm = useForm<z.infer<typeof adminCreationFormSchema>>({
