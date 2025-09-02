@@ -60,6 +60,8 @@ export const products = pgTable("products", {
   dealPrice: text("deal_price"), // Special deal price (null if no deal)
   dealStartDate: text("deal_start_date"), // When deal becomes active
   dealEndDate: text("deal_end_date"), // When deal expires
+  // Cannabis-specific jar weight tracking (for Callum's system)
+  jarWeight: integer("jar_weight"), // Total weight including jar (grams) - only for Cannabis products
 });
 
 export const basketItems = pgTable("basket_items", {

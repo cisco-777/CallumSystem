@@ -1620,14 +1620,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate discrepancies for each product
       for (const product of products) {
         const physicalCount = productCounts[product.id] || 0;
-        const expectedOnShelf = product.onShelfGrams || 0;
-        const difference = expectedOnShelf - physicalCount;
+        
+        // For Cannabis products, use jar weight for calculations; for others use onShelfGrams
+        const expectedAmount = product.productType === 'Cannabis' && product.jarWeight 
+          ? product.jarWeight 
+          : (product.onShelfGrams || 0);
+        
+        const difference = expectedAmount - physicalCount;
         
         if (difference !== 0) {
           discrepancies[product.id] = {
             productName: product.name,
             productType: product.productType,
-            expected: expectedOnShelf,
+            expected: expectedAmount,
             actual: physicalCount,
             difference: difference, // Store actual difference (positive = missing, negative = excess)
             type: difference > 0 ? 'missing' : 'excess'

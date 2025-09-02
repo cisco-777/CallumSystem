@@ -398,6 +398,7 @@ const baseStockFormSchema = z.object({
   imageUrl: z.string().optional(),
   productCode: z.string().min(1, 'Product code is required'),
   onShelfGrams: z.number().min(0, 'On shelf amount must be positive'),
+  jarWeight: z.number().min(0, 'Jar weight must be positive').optional(), // Cannabis-specific jar weight
   costPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Cost price must be a valid number'),
   shelfPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Shelf price must be a valid number'),
   // Deal pricing fields (optional)
@@ -1752,6 +1753,7 @@ export function AdminDashboard() {
       // Stock Management fields
       supplier: product.supplier || '',
       onShelfGrams: product.onShelfGrams || 0,
+      jarWeight: product.jarWeight || 0, // Cannabis-specific jar weight
       internalGrams: isSimplified ? (product.internalGrams || undefined) : (product.internalGrams || 0),
       externalGrams: isSimplified ? (product.externalGrams || undefined) : (product.externalGrams || 0),
       costPrice: product.costPrice || '0',
@@ -1781,6 +1783,7 @@ export function AdminDashboard() {
       // Stock Management fields
       supplier: '',
       onShelfGrams: 0,
+      jarWeight: 0, // Cannabis-specific jar weight
       internalGrams: 0,
       externalGrams: 0,
       costPrice: '0',
@@ -3476,6 +3479,9 @@ export function AdminDashboard() {
                           </p>
                           <div className="mobile-text-xs text-gray-600 ml-2 space-y-1">
                             <p>On shelf: {product.onShelfGrams || 0}g</p>
+                            {product.productType === 'Cannabis' && product.jarWeight && (
+                              <p>Jar weight: {product.jarWeight}g</p>
+                            )}
                             <p>Internal: {product.internalGrams || 0}g</p>
                             <p>External: {product.externalGrams || 0}g</p>
                           </div>
@@ -4211,6 +4217,41 @@ export function AdminDashboard() {
                                 </FormItem>
                               )}
                             />
+                            
+                            {/* Cannabis-specific jar weight field */}
+                            {watchedProductType === 'Cannabis' && (
+                              <FormField
+                                control={stockForm.control}
+                                name="jarWeight"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Jar Weight (including product)</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        type="number" 
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0" 
+                                        {...field} 
+                                        value={field.value || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            field.onChange(0);
+                                          } else {
+                                            const numValue = parseFloat(value);
+                                            if (!isNaN(numValue)) {
+                                              field.onChange(numValue);
+                                            }
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
                             
                             {!isSimplifiedProductType(watchedProductType) && (
                               <FormField
@@ -5548,6 +5589,9 @@ export function AdminDashboard() {
                           <div>Internal: {selectedProduct.internalGrams || 0}g</div>
                           <div>External: {selectedProduct.externalGrams || 0}g</div>
                           <div>Shelf: {selectedProduct.onShelfGrams || 0}g</div>
+                          {selectedProduct.productType === 'Cannabis' && selectedProduct.jarWeight && (
+                            <div className="col-span-3 text-orange-600">Jar weight: {selectedProduct.jarWeight}g</div>
+                          )}
                         </div>
                       );
                     })()}

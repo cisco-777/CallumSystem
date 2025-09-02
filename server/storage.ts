@@ -627,14 +627,23 @@ export class DatabaseStorage implements IStorage {
       const newOnShelfGrams = Math.round(newOnShelfGramsExact);
       const newTotalStock = Math.round(newTotalStockExact);
 
+      // Prepare update data
+      const updateData: any = {
+        onShelfGrams: newOnShelfGrams,
+        stockQuantity: newTotalStock,
+        lastUpdated: new Date()
+      };
+
+      // For Cannabis products, also deduct from jar weight when processing orders
+      if (product.productType === 'Cannabis' && product.jarWeight && product.jarWeight > 0) {
+        const newJarWeight = Math.max(0, Math.round((product.jarWeight || 0) - quantityAmount));
+        updateData.jarWeight = newJarWeight;
+      }
+
       // Update product stock quantities
       await db
         .update(products)
-        .set({ 
-          onShelfGrams: newOnShelfGrams,
-          stockQuantity: newTotalStock,
-          lastUpdated: new Date()
-        })
+        .set(updateData)
         .where(eq(products.id, quantity.productId));
     }
 
@@ -731,6 +740,10 @@ export class DatabaseStorage implements IStorage {
       updateData.externalGrams = (product.externalGrams || 0) - movementData.quantity;
     } else if (movementData.fromLocation === 'shelf') {
       updateData.onShelfGrams = (product.onShelfGrams || 0) - movementData.quantity;
+      // For Cannabis products, also deduct from jar weight when moving from shelf
+      if (product.productType === 'Cannabis' && product.jarWeight && product.jarWeight > 0) {
+        updateData.jarWeight = Math.max(0, (product.jarWeight || 0) - movementData.quantity);
+      }
     }
     
     if (movementData.toLocation === 'internal') {
