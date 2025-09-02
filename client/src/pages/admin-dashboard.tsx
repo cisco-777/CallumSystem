@@ -5152,8 +5152,12 @@ export function AdminDashboard() {
                                   {...field}
                                   value={field.value || ''}
                                   onChange={(e) => {
-                                    const value = parseFloat(e.target.value) || 0;
-                                    field.onChange(value);
+                                    const inputValue = e.target.value;
+                                    // Allow empty string, "0", and valid decimal numbers
+                                    if (inputValue === '' || inputValue === '0' || !isNaN(parseFloat(inputValue))) {
+                                      const numValue = inputValue === '' ? 0 : parseFloat(inputValue);
+                                      field.onChange(numValue);
+                                    }
                                   }}
                                 />
                               </FormControl>
