@@ -161,6 +161,25 @@ export const stockMovements = pgTable("stock_movements", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Stock logs table for comprehensive inventory tracking
+export const stockLogs = pgTable("stock_logs", {
+  id: serial("id").primaryKey(),
+  shiftId: integer("shift_id").references(() => shifts.id),
+  productId: integer("product_id").references(() => products.id),
+  actionType: text("action_type").notNull(), // 'product_created', 'product_edited', 'stock_added', 'stock_moved', 'stock_reduced'
+  workerName: text("worker_name").notNull(),
+  actionDate: timestamp("action_date").defaultNow(),
+  productName: text("product_name"), // Store product name at time of action
+  oldValues: jsonb("old_values"), // Previous values before change
+  newValues: jsonb("new_values"), // New values after change
+  quantityChanged: integer("quantity_changed"), // Amount added/removed/moved
+  locationFrom: text("location_from"), // For movements
+  locationTo: text("location_to"), // For movements
+  notes: text("notes"), // Additional details about the action
+  metadata: jsonb("metadata"), // Extra data specific to action type
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
@@ -242,12 +261,28 @@ export const insertShiftActivitySchema = createInsertSchema(shiftActivities).pic
   metadata: true,
 });
 
+export const insertStockLogSchema = createInsertSchema(stockLogs).pick({
+  shiftId: true,
+  productId: true,
+  actionType: true,
+  workerName: true,
+  productName: true,
+  oldValues: true,
+  newValues: true,
+  quantityChanged: true,
+  locationFrom: true,
+  locationTo: true,
+  notes: true,
+  metadata: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type InsertShiftReconciliation = z.infer<typeof insertShiftReconciliationSchema>;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
 export type InsertShift = z.infer<typeof insertShiftSchema>;
 export type InsertShiftActivity = z.infer<typeof insertShiftActivitySchema>;
+export type InsertStockLog = z.infer<typeof insertStockLogSchema>;
 export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type BasketItem = typeof basketItems.$inferSelect;
@@ -257,3 +292,4 @@ export type ShiftReconciliation = typeof shiftReconciliations.$inferSelect;
 export type Expense = typeof expenses.$inferSelect;
 export type Shift = typeof shifts.$inferSelect;
 export type ShiftActivity = typeof shiftActivities.$inferSelect;
+export type StockLog = typeof stockLogs.$inferSelect;

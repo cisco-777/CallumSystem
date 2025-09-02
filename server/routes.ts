@@ -2030,6 +2030,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stock Logs Routes
+  app.post("/api/stock-logs", async (req, res) => {
+    try {
+      const logData = req.body;
+      const log = await storage.createStockLog(logData);
+      res.json(log);
+    } catch (error) {
+      console.error("Error creating stock log:", error);
+      res.status(500).json({ message: "Failed to create stock log" });
+    }
+  });
+
+  app.get("/api/stock-logs", async (req, res) => {
+    try {
+      const logs = await storage.getStockLogs();
+      res.json(logs);
+    } catch (error) {
+      console.error("Error getting stock logs:", error);
+      res.status(500).json({ message: "Failed to get stock logs" });
+    }
+  });
+
+  app.get("/api/stock-logs/shift/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const logs = await storage.getStockLogsByShift(parseInt(id));
+      res.json(logs);
+    } catch (error) {
+      console.error("Error getting stock logs by shift:", error);
+      res.status(500).json({ message: "Failed to get stock logs by shift" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

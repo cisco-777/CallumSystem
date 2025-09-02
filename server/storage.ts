@@ -9,6 +9,7 @@ import {
   shifts,
   shiftActivities,
   stockMovements,
+  stockLogs,
   type User,
   type InsertUser,
   type Product,
@@ -24,6 +25,8 @@ import {
   type InsertShift,
   type ShiftActivity,
   type InsertShiftActivity,
+  type StockLog,
+  type InsertStockLog,
 } from "@shared/schema";
 import { getDb } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -71,6 +74,11 @@ export interface IStorage {
   // Stock movement operations
   createStockMovement(movementData: any): Promise<any>;
   getStockMovements(): Promise<any[]>;
+  
+  // Stock log operations
+  createStockLog(logData: InsertStockLog): Promise<StockLog>;
+  getStockLogs(): Promise<StockLog[]>;
+  getStockLogsByShift(shiftId: number): Promise<StockLog[]>;
   
   // Basket operations
   getBasketItems(userId: number): Promise<BasketItem[]>;
@@ -394,6 +402,41 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(products.id, id))
       .returning();
+      
+    // Create stock log entry for the edit
+    try {
+      const activeShift = await this.getActiveShift();
+      const oldValues = {
+        onShelfGrams: currentProduct.onShelfGrams,
+        internalGrams: currentProduct.internalGrams,
+        externalGrams: currentProduct.externalGrams,
+        shelfPrice: currentProduct.shelfPrice,
+        costPrice: currentProduct.costPrice,
+        dealPrice: currentProduct.dealPrice
+      };
+      const newValues = {
+        onShelfGrams: newOnShelfGrams,
+        internalGrams: newInternalGrams,
+        externalGrams: newExternalGrams,
+        shelfPrice: stockData.shelfPrice || currentProduct.shelfPrice,
+        costPrice: stockData.costPrice || currentProduct.costPrice,
+        dealPrice: stockData.dealPrice !== undefined ? stockData.dealPrice : currentProduct.dealPrice
+      };
+      
+      await this.createStockLog({
+        shiftId: activeShift?.id || null,
+        productId: product.id,
+        actionType: 'product_edited',
+        workerName: stockData.workerName || 'Unknown Worker',
+        productName: product.name,
+        oldValues,
+        newValues,
+        notes: `Product stock and pricing updated`
+      });
+    } catch (logError) {
+      console.error('Failed to create stock log for product update:', logError);
+    }
+    
     return product;
   }
 
@@ -408,6 +451,30 @@ export class DatabaseStorage implements IStorage {
         lastUpdated: new Date()
       })
       .returning();
+      
+    // Create stock log entry for the new product
+    try {
+      const activeShift = await this.getActiveShift();
+      await this.createStockLog({
+        shiftId: activeShift?.id || null,
+        productId: product.id,
+        actionType: 'product_created',
+        workerName: stockData.workerName || 'Unknown Worker',
+        productName: product.name,
+        newValues: {
+          onShelfGrams: stockData.onShelfGrams || 0,
+          internalGrams: stockData.internalGrams || 0,
+          externalGrams: stockData.externalGrams || 0,
+          shelfPrice: stockData.shelfPrice,
+          costPrice: stockData.costPrice,
+          dealPrice: stockData.dealPrice
+        },
+        notes: `New product created with initial stock`
+      });
+    } catch (logError) {
+      console.error('Failed to create stock log for new product:', logError);
+    }
+    
     return product;
   }
 
@@ -640,6 +707,31 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(products.id, movementData.productId));
     
+    // Create stock log entry for the movement
+    try {
+      const activeShift = await this.getActiveShift();
+      await this.createStockLog({
+        shiftId: activeShift?.id || null,
+        productId: product.id,
+        actionType: 'stock_movement',
+        workerName: movementData.workerName || 'Unknown Worker',
+        productName: product.name,
+        oldValues: {
+          onShelfGrams: product.onShelfGrams,
+          internalGrams: product.internalGrams,
+          externalGrams: product.externalGrams
+        },
+        newValues: {
+          onShelfGrams: updateData.onShelfGrams || product.onShelfGrams,
+          internalGrams: updateData.internalGrams || product.internalGrams,
+          externalGrams: updateData.externalGrams || product.externalGrams
+        },
+        notes: `${movementData.quantity}g moved from ${movementData.fromLocation} to ${movementData.toLocation}${movementData.notes ? ` - ${movementData.notes}` : ''}`
+      });
+    } catch (logError) {
+      console.error('Failed to create stock log for movement:', logError);
+    }
+    
     return movement;
   }
 
@@ -664,6 +756,29 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(stockMovements.createdAt));
     
     return movements;
+  }
+
+  async createStockLog(logData: InsertStockLog): Promise<StockLog> {
+    const db = await getDb();
+    const [log] = await db
+      .insert(stockLogs)
+      .values(logData)
+      .returning();
+    return log;
+  }
+
+  async getStockLogs(): Promise<StockLog[]> {
+    const db = await getDb();
+    return await db.select().from(stockLogs).orderBy(desc(stockLogs.actionDate));
+  }
+
+  async getStockLogsByShift(shiftId: number): Promise<StockLog[]> {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(stockLogs)
+      .where(eq(stockLogs.shiftId, shiftId))
+      .orderBy(desc(stockLogs.actionDate));
   }
 
   async createShiftReconciliation(reconciliationData: InsertShiftReconciliation): Promise<ShiftReconciliation> {

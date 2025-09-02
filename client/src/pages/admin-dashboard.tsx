@@ -22,6 +22,182 @@ import { ObjectUploader } from '@/components/ObjectUploader';
 import type { UploadResult } from '@uppy/core';
 import { useAdminUser } from '@/hooks/useAdminUser';
 
+// Stock Logs Tab Component
+function StockLogsTab() {
+  const { data: stockLogs = [] } = useQuery<any[]>({
+    queryKey: ['/api/stock-logs']
+  });
+
+  const { data: shifts = [] } = useQuery<any[]>({
+    queryKey: ['/api/shifts']
+  });
+
+  // Group logs by shift ID
+  const logsByShift = (stockLogs as any[]).reduce((acc: any, log: any) => {
+    const shiftId = log.shiftId || 'no-shift';
+    if (!acc[shiftId]) {
+      acc[shiftId] = [];
+    }
+    acc[shiftId].push(log);
+    return acc;
+  }, {});
+
+  // Sort shifts by most recent first
+  const sortedShifts = [...(shifts as any[])].sort((a: any, b: any) => 
+    new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+  );
+
+  // Helper function to get action type badge styling
+  const getActionTypeBadge = (actionType: string) => {
+    switch (actionType) {
+      case 'product_created':
+        return { color: 'bg-green-100 text-green-800', label: 'Created' };
+      case 'product_edited':
+        return { color: 'bg-blue-100 text-blue-800', label: 'Edited' };
+      case 'stock_movement':
+        return { color: 'bg-purple-100 text-purple-800', label: 'Movement' };
+      case 'order_processed':
+        return { color: 'bg-orange-100 text-orange-800', label: 'Order' };
+      default:
+        return { color: 'bg-gray-100 text-gray-800', label: actionType };
+    }
+  };
+
+  // Helper function to format values for display
+  const formatValues = (values: any) => {
+    if (!values) return 'N/A';
+    const parts = [];
+    if (values.onShelfGrams !== undefined) parts.push(`Shelf: ${values.onShelfGrams}g`);
+    if (values.internalGrams !== undefined) parts.push(`Internal: ${values.internalGrams}g`);
+    if (values.externalGrams !== undefined) parts.push(`External: ${values.externalGrams}g`);
+    if (values.shelfPrice !== undefined) parts.push(`Price: €${values.shelfPrice}`);
+    return parts.join(', ');
+  };
+
+  return (
+    <div className="space-y-6">
+      {(stockLogs as any[]).length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <History className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Stock Logs Yet</h3>
+            <p className="text-gray-500 mb-4">Stock operations will be logged here automatically.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* No shift operations */}
+          {logsByShift['no-shift'] && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gray-800">
+                  <Clock className="h-5 w-5" />
+                  Operations Outside Shifts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {logsByShift['no-shift'].map((log: any) => {
+                    const badge = getActionTypeBadge(log.actionType);
+                    return (
+                      <div key={log.id} className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center gap-2">
+                            <Badge className={badge.color}>{badge.label}</Badge>
+                            <span className="font-medium">{log.productName}</span>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(log.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <div>Worker: {log.workerName}</div>
+                          {log.oldValues && (
+                            <div>Before: {formatValues(log.oldValues)}</div>
+                          )}
+                          {log.newValues && (
+                            <div>After: {formatValues(log.newValues)}</div>
+                          )}
+                          {log.notes && (
+                            <div className="italic">Notes: {log.notes}</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Shift-organized operations */}
+          {sortedShifts.map((shift: any) => {
+            const shiftLogs = logsByShift[shift.id] || [];
+            if (shiftLogs.length === 0) return null;
+
+            const isActiveShift = !shift.endTime;
+            
+            return (
+              <Card key={shift.id} className={isActiveShift ? 'ring-2 ring-blue-200 bg-blue-50' : 'bg-white'}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 ${isActiveShift ? 'text-blue-800' : 'text-gray-800'}`}>
+                    <Timer className="h-5 w-5" />
+                    {isActiveShift ? 'Current Shift' : 'Completed Shift'}: {shift.shiftId}
+                  </CardTitle>
+                  <p className={`text-sm ${isActiveShift ? 'text-blue-600' : 'text-gray-600'}`}>
+                    Worker: {shift.workerName} • Started: {new Date(shift.startTime).toLocaleString()}
+                    {shift.endTime && ` • Ended: ${new Date(shift.endTime).toLocaleString()}`}
+                  </p>
+                  <div className="text-sm text-gray-500">
+                    {shiftLogs.length} operation{shiftLogs.length !== 1 ? 's' : ''} recorded
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-3">
+                    {shiftLogs
+                      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .map((log: any) => {
+                        const badge = getActionTypeBadge(log.actionType);
+                        return (
+                          <div key={log.id} className="border rounded-lg p-4 bg-white">
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex items-center gap-2">
+                                <Badge className={badge.color}>{badge.label}</Badge>
+                                <span className="font-medium">{log.productName}</span>
+                              </div>
+                              <span className="text-sm text-gray-500">
+                                {new Date(log.createdAt).toLocaleString()}
+                              </span>
+                            </div>
+                            
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <div>Worker: {log.workerName}</div>
+                              {log.oldValues && (
+                                <div>Before: {formatValues(log.oldValues)}</div>
+                              )}
+                              {log.newValues && (
+                                <div>After: {formatValues(log.newValues)}</div>
+                              )}
+                              {log.notes && (
+                                <div className="italic">Notes: {log.notes}</div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </>
+      )}
+    </div>
+  );
+}
+
 
 // Base form schema for all product types
 const baseStockFormSchema = z.object({
@@ -1891,19 +2067,23 @@ export function AdminDashboard() {
                   <TabsTrigger value="expenses" className="whitespace-nowrap px-3 py-2 text-sm">
                     Expenses
                   </TabsTrigger>
+                  <TabsTrigger value="logs" className="whitespace-nowrap px-3 py-2 text-sm">
+                    Logs
+                  </TabsTrigger>
                 </TabsList>
               </div>
             </div>
             
             {/* Desktop: Grid Layout */}
             <div className="hidden sm:block">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="shift-management">Shift Management</TabsTrigger>
                 <TabsTrigger value="orders-members">Orders</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
                 <TabsTrigger value="stock-inventory">Stock & Inventory</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 <TabsTrigger value="expenses">Expenses</TabsTrigger>
+                <TabsTrigger value="logs">Logs</TabsTrigger>
               </TabsList>
             </div>
           </div>
@@ -3306,6 +3486,22 @@ export function AdminDashboard() {
                 });
               })()}
             </div>
+          </TabsContent>
+
+          {/* Logs Tab */}
+          <TabsContent value="logs">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Stock & Inventory Logs</h2>
+                <p className="text-gray-600">Complete audit trail of all stock operations organized by shifts</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <History className="h-5 w-5 text-gray-500" />
+                <span className="text-sm text-gray-500">Chronological view by shifts</span>
+              </div>
+            </div>
+
+            <StockLogsTab />
           </TabsContent>
         </Tabs>
 
