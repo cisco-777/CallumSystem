@@ -1160,7 +1160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (availableStock < item.quantity) {
           if (availableStock === 0) {
             return res.status(400).json({ 
-              message: `${product.name} is currently out of stock on shelf. Please restock before adding to order.` 
+              message: `Item needs restocking - 0 on shelf` 
             });
           } else {
             return res.status(400).json({ 
