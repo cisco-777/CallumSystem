@@ -5026,7 +5026,14 @@ export function AdminDashboard() {
                                 if (recentShift && recentShift.startingTillAmount) {
                                   startingTill = parseFloat(recentShift.startingTillAmount) || 0;
                                   totalSales = parseFloat(recentShift.totalSales || '0');
-                                  totalExpenses = parseFloat(recentShift.totalExpenses || '0');
+                                  
+                                  // Calculate actual paid expenses from current shift expenses
+                                  const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
+                                    expense.shiftId === recentShift.id
+                                  ) : [];
+                                  totalExpenses = shiftExpenses.reduce((sum: number, expense: any) => 
+                                    sum + parseFloat(expense.paidAmount || "0"), 0
+                                  );
                                   
                                   // Expected till amount = Starting till + Sales - Expenses (same as email report)
                                   expectedTillAmount = startingTill + totalSales - totalExpenses;
