@@ -1,0 +1,634 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+🚀 Initializing database...
+🌱 Starting database seeding...
+ℹ️ Admin user already exists
+ℹ️ Demo member already exists
+📊 Current products count: 7
+ℹ️ Products already exist, skipping product seeding
+✅ Database seeding completed successfully
+📡 Database initialization complete, starting server...
+4:55:51 PM [express] serving on port 5000
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Checking for admin user...
+Admin user already exists
+4:55:56 PM [express] POST /api/seed-admin 200 in 41ms :: {"message":"Admin user already exists"}
+Checking for admin user...
+Admin user already exists
+4:55:57 PM [express] POST /api/seed-admin 200 in 39ms :: {"message":"Admin user already exists"}
+4:55:57 PM [express] GET /api/users/1 304 in 42ms :: {"id":1,"email":"demo@member.com","firstName":"…
+4:55:57 PM [express] GET /api/products 304 in 256ms :: [{"id":4,"name":"Wedding Cake","description":…
+4:55:57 PM [express] GET /api/basket/1 304 in 266ms :: []
+4:55:57 PM [express] GET /api/placeholder/300/200 200 in 4ms
+Checking for admin user...
+Admin user already exists
+4:56:47 PM [express] POST /api/seed-admin 200 in 324ms :: {"message":"Admin user already exists"}
+Admin login response: {
+  id: 2,
+  email: 'admin123@gmail.com',
+  role: 'superadmin',
+  firstName: 'tom',
+  lastName: 'tom',
+  isSuperAdmin: true
+}
+4:56:58 PM [express] POST /api/admin/login 200 in 262ms :: {"success":true,"admin":{"id":2,"email":"…
+Checking for admin user...
+Admin user already exists
+4:57:01 PM [express] POST /api/seed-admin 200 in 38ms :: {"message":"Admin user already exists"}
+4:57:01 PM [express] GET /api/orders 304 in 100ms :: [{"id":50,"userId":null,"pickupCode":"7671","it…
+4:57:01 PM [express] GET /api/products 304 in 263ms :: [{"id":4,"name":"Wedding Cake","description":…
+4:57:01 PM [express] GET /api/users 304 in 280ms :: [{"id":2,"email":"admin123@gmail.com","password"…
+4:57:01 PM [express] GET /api/shifts/active 304 in 290ms :: {"id":57,"shiftId":"SHIFT 02/09/2025 - 5…
+4:57:01 PM [express] GET /api/expenses 304 in 295ms :: [{"id":21,"description":"5","amount":"5","wor…
+4:57:01 PM [express] GET /api/orders/analytics 304 in 308ms :: [{"id":50,"userId":null,"pickupCode":…
+4:57:01 PM [express] GET /api/shifts 304 in 39ms :: [{"id":57,"shiftId":"SHIFT 02/09/2025 - 5","work…
+4:57:01 PM [express] GET /api/membership/pending 304 in 36ms :: []
+4:57:02 PM [express] GET /api/membership/statistics 304 in 207ms :: {"pending":0,"approved":3,"expir…
+4:57:05 PM [express] GET /api/stock-logs 200 in 41ms :: [{"id":18,"shiftId":57,"productId":5,"action…
+4:57:43 PM [express] GET /api/inbox/reports 200 in 257ms :: []
+5:00:08 PM [vite] hmr update /src/pages/admin-dashboard.tsx, /src/index.css?v=tfNifBroW7k_7cnMHUfwf
+5:00:42 PM [express] POST /api/shift-reconciliation 200 in 2729ms :: {"id":77,"shiftDate":"2025-09-0…
+Error cleaning up old shifts: error: update or delete on table "shift_reconciliations" violates foreign key constraint "shifts_reconciliation_id_shift_reconciliations_id_fk" on table "shifts"
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async DatabaseStorage.cleanupOldShifts (/home/runner/workspace/server/storage.ts:1017:13)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:2038:7) {
+  length: 349,
+  severity: 'ERROR',
+  code: '23503',
+  detail: 'Key (id)=(76) is still referenced from table "shifts".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'shifts',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'shifts_reconciliation_id_shift_reconciliations_id_fk',
+  file: 'ri_triggers.c',
+  line: '2621',
+  routine: 'ri_ReportViolation'
+}
+Stored shift report for 5 in inbox
+5:00:46 PM [express] POST /api/shifts/57/reconcile 200 in 3395ms :: {"id":78,"shiftDate":"2025-09-02…
+5:00:46 PM [express] GET /api/products 304 in 39ms :: [{"id":4,"name":"Wedding Cake","description":"…
+5:00:46 PM [express] GET /api/shifts/active 200 in 273ms
+5:00:46 PM [express] GET /api/shifts/active 304 in 37ms
+5:00:48 PM [express] GET /api/shifts 200 in 2279ms :: [{"id":57,"shiftId":"SHIFT 02/09/2025 - 5","wo…
+5:02:33 PM [express] GET /api/inbox/reports 200 in 2639ms :: [{"id":1,"shiftId":57,"reportType":"shi…
+5:03:01 PM [vite] hmr update /src/pages/admin-dashboard.tsx, /src/index.css?v=tfNifBroW7k_7cnMHUfwf (x2)
+5:03:09 PM [vite] hmr update /src/pages/admin-dashboard.tsx, /src/index.css?v=tfNifBroW7k_7cnMHUfwf (x3)
+5:03:13 PM [express] GET /api/inbox/reports 200 in 295ms :: [{"id":1,"shiftId":57,"reportType":"shif…
+5:03:17 PM [vite] hmr update /src/pages/admin-dashboard.tsx, /src/index.css?v=tfNifBroW7k_7cnMHUfwf (x4)
+5:03:21 PM [express] GET /api/inbox/reports 304 in 40ms :: [{"id":1,"shiftId":57,"reportType":"shift…
+5:03:28 PM [vite] hmr update /src/pages/admin-dashboard.tsx, /src/index.css?v=tfNifBroW7k_7cnMHUfwf (x5)
+5:03:31 PM [express] GET /api/inbox/reports 304 in 49ms :: [{"id":1,"shiftId":57,"reportType":"shift…
+5:03:55 PM [express] GET /api/inbox/reports 304 in 2272ms :: [{"id":1,"shiftId":57,"reportType":"shi…
+5:04:14 PM [express] POST /api/shifts/start 200 in 502ms :: {"id":58,"shiftId":"SHIFT 02/09/2025 - 6…
+5:04:14 PM [express] GET /api/shifts/active 200 in 38ms :: {"id":58,"shiftId":"SHIFT 02/09/2025 - 6"…
+5:04:16 PM [express] GET /api/shifts 200 in 2272ms :: [{"id":58,"shiftId":"SHIFT 02/09/2025 - 6","wo…
+Manual order creation error: error: invalid input syntax for type integer: "100.8"
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async DatabaseStorage.confirmOrderAndReduceStock (/home/runner/workspace/server/storage.ts:626:7)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:1258:7) {
+  length: 148,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $1 = '...'",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numutils.c',
+  line: '617',
+  routine: 'pg_strtoint32_safe'
+}
+5:04:26 PM [express] POST /api/orders/manual 500 in 245ms :: {"message":"Failed to create manual ord…
+Manual order creation error: error: invalid input syntax for type integer: "100.8"
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async DatabaseStorage.confirmOrderAndReduceStock (/home/runner/workspace/server/storage.ts:626:7)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:1258:7) {
+  length: 148,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $1 = '...'",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numutils.c',
+  line: '617',
+  routine: 'pg_strtoint32_safe'
+}
+5:04:33 PM [express] POST /api/orders/manual 500 in 448ms :: {"message":"Failed to create manual ord…
+5:04:39 PM [express] POST /api/orders/manual 400 in 263ms :: {"message":"Insufficient shelf stock fo…
+5:04:47 PM [express] POST /api/orders/manual 200 in 286ms :: {"success":true,"pickupCode":"3295","or…
+5:04:47 PM [express] POST /api/shift-activities 200 in 40ms :: {"id":166,"shiftId":58,"activityType"…
+5:04:47 PM [express] GET /api/orders 200 in 38ms :: [{"id":53,"userId":null,"pickupCode":"3295","ite…
+5:04:47 PM [express] GET /api/products 200 in 258ms :: [{"id":4,"name":"Wedding Cake","description":…
+5:04:47 PM [express] GET /api/orders/analytics 200 in 306ms :: [{"id":53,"userId":null,"pickupCode":…
+5:04:57 PM [express] PUT /api/products/20/stock 200 in 202ms :: {"id":20,"name":"wax","description":…
+5:04:57 PM [express] GET /api/products 200 in 39ms :: [{"id":4,"name":"Wedding Cake","description":"…
+Manual order creation error: error: invalid input syntax for type integer: "599.8"
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async DatabaseStorage.confirmOrderAndReduceStock (/home/runner/workspace/server/storage.ts:626:7)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:1258:7) {
+  length: 148,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $1 = '...'",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numutils.c',
+  line: '617',
+  routine: 'pg_strtoint32_safe'
+}
+5:05:10 PM [express] POST /api/orders/manual 500 in 446ms :: {"message":"Failed to create manual ord…
+5:06:22 PM [express] POST /api/products/stock 200 in 405ms :: {"id":22,"name":"edibles","description…
+5:06:23 PM [express] GET /api/products 200 in 37ms :: [{"id":4,"name":"Wedding Cake","description":"…
+node:events:502
+      throw er; // Unhandled 'error' event
+      ^
+
+error: terminating connection due to administrator command
+    at Parser.parseErrorMessage (/home/runner/workspace/node_modules/pg-protocol/src/parser.ts:369:69)
+    at Parser.handlePacket (/home/runner/workspace/node_modules/pg-protocol/src/parser.ts:187:21)
+    at Parser.parse (/home/runner/workspace/node_modules/pg-protocol/src/parser.ts:102:30)
+    at TLSSocket.<anonymous> (/home/runner/workspace/node_modules/pg-protocol/src/index.ts:7:48)
+    at TLSSocket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23)
+Emitted 'error' event on BoundPool instance at:
+    at Client.idleListener (/home/runner/workspace/node_modules/pg-pool/index.js:62:10)
+    at Client.emit (node:events:524:28)
+    at Client._handleErrorEvent (/home/runner/workspace/node_modules/pg/lib/client.js:350:10)
+    at Client._handleErrorMessage (/home/runner/workspace/node_modules/pg/lib/client.js:361:12)
+    at Connection.emit (node:events:524:28)
+    at /home/runner/workspace/node_modules/pg/lib/connection.js:116:12
+    at Parser.parse (/home/runner/workspace/node_modules/pg-protocol/src/parser.ts:103:9)
+    at TLSSocket.<anonymous> (/home/runner/workspace/node_modules/pg-protocol/src/index.ts:7:48)
+    [... lines matching original stack trace ...]
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  length: 116,
+  severity: 'FATAL',
+  code: '57P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'postgres.c',
+  line: '3289',
+  routine: 'ProcessInterrupts',
+  client: Client {
+    _events: [Object: null prototype] { error: [Function (anonymous)] },
+    _eventsCount: 1,
+    _maxListeners: undefined,
+    connectionParameters: ConnectionParameters {
+      user: 'neondb_owner',
+      database: 'neondb',
+      port: 5432,
+      host: 'ep-orange-bread-aexy00lw.c-2.us-east-2.aws.neon.tech',
+      binary: false,
+      options: undefined,
+      ssl: {},
+      client_encoding: '',
+      replication: undefined,
+      isDomainSocket: false,
+      application_name: undefined,
+      fallback_application_name: undefined,
+      statement_timeout: false,
+      lock_timeout: false,
+      idle_in_transaction_session_timeout: false,
+      query_timeout: false,
+      connect_timeout: 0
+    },
+    user: 'neondb_owner',
+    database: 'neondb',
+    port: 5432,
+    host: 'ep-orange-bread-aexy00lw.c-2.us-east-2.aws.neon.tech',
+    replication: undefined,
+    _Promise: [Function: Promise],
+    _types: TypeOverrides {
+      _types: {
+        getTypeParser: [Function: getTypeParser],
+        setTypeParser: [Function: setTypeParser],
+        arrayParser: { create: [Function: create] },
+        builtins: {
+          BOOL: 16,
+          BYTEA: 17,
+          CHAR: 18,
+          INT8: 20,
+          INT2: 21,
+          INT4: 23,
+          REGPROC: 24,
+          TEXT: 25,
+          OID: 26,
+          TID: 27,
+          XID: 28,
+          CID: 29,
+          JSON: 114,
+          XML: 142,
+          PG_NODE_TREE: 194,
+          SMGR: 210,
+          PATH: 602,
+          POLYGON: 604,
+          CIDR: 650,
+          FLOAT4: 700,
+          FLOAT8: 701,
+          ABSTIME: 702,
+          RELTIME: 703,
+          TINTERVAL: 704,
+          CIRCLE: 718,
+          MACADDR8: 774,
+          MONEY: 790,
+          MACADDR: 829,
+          INET: 869,
+          ACLITEM: 1033,
+          BPCHAR: 1042,
+          VARCHAR: 1043,
+          DATE: 1082,
+          TIME: 1083,
+          TIMESTAMP: 1114,
+          TIMESTAMPTZ: 1184,
+          INTERVAL: 1186,
+          TIMETZ: 1266,
+          BIT: 1560,
+          VARBIT: 1562,
+          NUMERIC: 1700,
+          REFCURSOR: 1790,
+          REGPROCEDURE: 2202,
+          REGOPER: 2203,
+          REGOPERATOR: 2204,
+          REGCLASS: 2205,
+          REGTYPE: 2206,
+          UUID: 2950,
+          TXID_SNAPSHOT: 2970,
+          PG_LSN: 3220,
+          PG_NDISTINCT: 3361,
+          PG_DEPENDENCIES: 3402,
+          TSVECTOR: 3614,
+          TSQUERY: 3615,
+          GTSVECTOR: 3642,
+          REGCONFIG: 3734,
+          REGDICTIONARY: 3769,
+          JSONB: 3802,
+          REGNAMESPACE: 4089,
+          REGROLE: 4096
+        }
+      },
+      text: {},
+      binary: {}
+    },
+    _ending: true,
+    _ended: false,
+    _connecting: false,
+    _connected: true,
+    _connectionError: false,
+    _queryable: false,
+    enableChannelBinding: false,
+    connection: Connection {
+      _events: [Object: null prototype] {
+        newListener: [Function (anonymous)],
+        connect: [Function (anonymous)],
+        sslconnect: [Function (anonymous)],
+        authenticationCleartextPassword: [Function: bound _handleAuthCleartextPassword],
+        authenticationMD5Password: [Function: bound _handleAuthMD5Password],
+        authenticationSASL: [Function: bound _handleAuthSASL],
+        authenticationSASLContinue: [Function: bound _handleAuthSASLContinue] AsyncFunction,
+        authenticationSASLFinal: [Function: bound _handleAuthSASLFinal],
+        backendKeyData: [Function: bound _handleBackendKeyData],
+        error: [Function: bound _handleErrorEvent],
+        errorMessage: [Function: bound _handleErrorMessage],
+        readyForQuery: [Function: bound _handleReadyForQuery],
+        notice: [Function: bound _handleNotice],
+        rowDescription: [Function: bound _handleRowDescription],
+        dataRow: [Function: bound _handleDataRow],
+        portalSuspended: [Function: bound _handlePortalSuspended],
+        emptyQuery: [Function: bound _handleEmptyQuery],
+        commandComplete: [Function: bound _handleCommandComplete],
+        parseComplete: [Function: bound _handleParseComplete],
+        copyInResponse: [Function: bound _handleCopyInResponse],
+        copyData: [Function: bound _handleCopyData],
+        notification: [Function: bound _handleNotification],
+        end: [
+          [Function: bound onceWrapper] {
+            listener: [Function (anonymous)]
+          },
+          [Function: bound onceWrapper] {
+            listener: [Function (anonymous)]
+          }
+        ]
+      },
+      _eventsCount: 23,
+      _maxListeners: undefined,
+      stream: <ref *1> TLSSocket {
+        _tlsOptions: {
+          allowHalfOpen: undefined,
+          pipe: false,
+          secureContext: SecureContext { context: SecureContext {} },
+          isServer: false,
+          requestCert: true,
+          rejectUnauthorized: true,
+          session: undefined,
+          ALPNProtocols: undefined,
+          requestOCSP: undefined,
+          enableTrace: undefined,
+          pskCallback: undefined,
+          highWaterMark: undefined,
+          onread: undefined,
+          signal: undefined
+        },
+        _secureEstablished: true,
+        _securePending: false,
+        _newSessionPending: false,
+        _controlReleased: true,
+        secureConnecting: false,
+        _SNICallback: null,
+        servername: 'ep-orange-bread-aexy00lw.c-2.us-east-2.aws.neon.tech',
+        alpnProtocol: false,
+        authorized: true,
+        authorizationError: null,
+        encrypted: true,
+        _events: [Object: null prototype] {
+          close: [Function: onSocketCloseDestroySSL],
+          end: [ [Function: onReadableStreamEnd], [Function (anonymous)] ],
+          error: [Function: reportStreamError],
+          newListener: [ [Function: keylogNewListener], [Function: newListener] ],
+          secure: [Function: onConnectSecure],
+          data: [Function (anonymous)]
+        },
+        _eventsCount: 6,
+        connecting: false,
+        _hadError: false,
+        _parent: Socket {
+          connecting: false,
+          _hadError: false,
+          _parent: null,
+          _host: 'ep-orange-bread-aexy00lw.c-2.us-east-2.aws.neon.tech',
+          _closeAfterHandlingError: false,
+          _events: {
+            close: [Array],
+            error: [Array],
+            prefinish: undefined,
+            finish: undefined,
+            drain: undefined,
+            data: undefined,
+            end: [Function: onReadableStreamEnd],
+            readable: undefined,
+            connect: [Function]
+          },
+          _readableState: ReadableState {
+            highWaterMark: 16384,
+            buffer: [],
+            bufferIndex: 0,
+            length: 0,
+            pipes: [],
+            awaitDrainWriters: null,
+            [Symbol(kState)]: 60303668
+          },
+          _writableState: WritableState {
+            highWaterMark: 16384,
+            length: 0,
+            corked: 0,
+            onwrite: [Function: bound onwrite],
+            writelen: 0,
+            bufferedIndex: 0,
+            pendingcb: 0,
+            [Symbol(kState)]: 17563956,
+            [Symbol(kBufferedValue)]: null,
+            [Symbol(kWriteCbValue)]: null
+          },
+          allowHalfOpen: false,
+          _maxListeners: undefined,
+          _eventsCount: 4,
+          _sockname: null,
+          _pendingData: null,
+          _pendingEncoding: '',
+          server: null,
+          _server: null,
+          autoSelectFamilyAttemptedAddresses: [ '3.132.12.55:5432' ],
+          [Symbol(async_id_symbol)]: 12910,
+          [Symbol(kHandle)]: null,
+          [Symbol(lastWriteQueueSize)]: 0,
+          [Symbol(timeout)]: null,
+          [Symbol(kBuffer)]: null,
+          [Symbol(kBufferCb)]: null,
+          [Symbol(kBufferGen)]: null,
+          [Symbol(shapeMode)]: true,
+          [Symbol(kCapture)]: false,
+          [Symbol(kSetNoDelay)]: true,
+          [Symbol(kSetKeepAlive)]: false,
+          [Symbol(kSetKeepAliveInitialDelay)]: 0,
+          [Symbol(kBytesRead)]: 13278,
+          [Symbol(kBytesWritten)]: 5208
+        },
+        _host: null,
+        _closeAfterHandlingError: false,
+        _readableState: ReadableState {
+          highWaterMark: 16384,
+          buffer: [],
+          bufferIndex: 0,
+          length: 0,
+          pipes: [],
+          awaitDrainWriters: null,
+          [Symbol(kState)]: 194519348
+        },
+        _writableState: WritableState {
+          highWaterMark: 16384,
+          length: 0,
+          corked: 0,
+          onwrite: [Function: bound onwrite],
+          writelen: 0,
+          bufferedIndex: 0,
+          pendingcb: 0,
+          [Symbol(kState)]: 17563956,
+          [Symbol(kBufferedValue)]: null,
+          [Symbol(kWriteCbValue)]: null
+        },
+        allowHalfOpen: false,
+        _maxListeners: undefined,
+        _sockname: null,
+        _pendingData: null,
+        _pendingEncoding: '',
+        server: undefined,
+        _server: null,
+        ssl: null,
+        _requestCert: true,
+        _rejectUnauthorized: true,
+        [Symbol(alpncallback)]: null,
+        [Symbol(res)]: TLSWrap {
+          _parent: TCP {
+            reading: [Getter/Setter],
+            onconnection: null,
+            [Symbol(owner_symbol)]: [Socket],
+            [Symbol(handle_onclose)]: [Function (anonymous)]
+          },
+          _parentWrap: Socket {
+            connecting: false,
+            _hadError: false,
+            _parent: null,
+            _host: 'ep-orange-bread-aexy00lw.c-2.us-east-2.aws.neon.tech',
+            _closeAfterHandlingError: false,
+            _events: [Object],
+            _readableState: [ReadableState],
+            _writableState: [WritableState],
+            allowHalfOpen: false,
+            _maxListeners: undefined,
+            _eventsCount: 4,
+            _sockname: null,
+            _pendingData: null,
+            _pendingEncoding: '',
+            server: null,
+            _server: null,
+            autoSelectFamilyAttemptedAddresses: [Array],
+            [Symbol(async_id_symbol)]: 12910,
+            [Symbol(kHandle)]: null,
+            [Symbol(lastWriteQueueSize)]: 0,
+            [Symbol(timeout)]: null,
+            [Symbol(kBuffer)]: null,
+            [Symbol(kBufferCb)]: null,
+            [Symbol(kBufferGen)]: null,
+            [Symbol(shapeMode)]: true,
+            [Symbol(kCapture)]: false,
+            [Symbol(kSetNoDelay)]: true,
+            [Symbol(kSetKeepAlive)]: false,
+            [Symbol(kSetKeepAliveInitialDelay)]: 0,
+            [Symbol(kBytesRead)]: 13278,
+            [Symbol(kBytesWritten)]: 5208
+          },
+          _secureContext: SecureContext { context: SecureContext {} },
+          reading: true,
+          onkeylog: [Function: onkeylog],
+          onhandshakestart: [Function: noop],
+          onhandshakedone: [Function (anonymous)],
+          onocspresponse: [Function: onocspresponse],
+          onnewsession: [Function: onnewsessionclient],
+          onerror: [Function: onerror],
+          [Symbol(owner_symbol)]: [Circular *1]
+        },
+        [Symbol(verified)]: true,
+        [Symbol(pendingSession)]: null,
+        [Symbol(async_id_symbol)]: 12915,
+        [Symbol(kHandle)]: null,
+        [Symbol(lastWriteQueueSize)]: 0,
+        [Symbol(timeout)]: null,
+        [Symbol(kBuffer)]: null,
+        [Symbol(kBufferCb)]: null,
+        [Symbol(kBufferGen)]: null,
+        [Symbol(shapeMode)]: true,
+        [Symbol(kCapture)]: false,
+        [Symbol(kSetNoDelay)]: false,
+        [Symbol(kSetKeepAlive)]: false,
+        [Symbol(kSetKeepAliveInitialDelay)]: 0,
+        [Symbol(kBytesRead)]: 8625,
+        [Symbol(kBytesWritten)]: 3315,
+        [Symbol(connect-options)]: {
+          rejectUnauthorized: true,
+          ciphers: 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA',
+          checkServerIdentity: [Function: checkServerIdentity],
+          minDHSize: 1024,
+          socket: Socket {
+            connecting: false,
+            _hadError: false,
+            _parent: null,
+            _host: 'ep-orange-bread-aexy00lw.c-2.us-east-2.aws.neon.tech',
+            _closeAfterHandlingError: false,
+            _events: [Object],
+            _readableState: [ReadableState],
+            _writableState: [WritableState],
+            allowHalfOpen: false,
+            _maxListeners: undefined,
+            _eventsCount: 4,
+            _sockname: null,
+            _pendingData: null,
+            _pendingEncoding: '',
+            server: null,
+            _server: null,
+            autoSelectFamilyAttemptedAddresses: [Array],
+            [Symbol(async_id_symbol)]: 12910,
+            [Symbol(kHandle)]: null,
+            [Symbol(lastWriteQueueSize)]: 0,
+            [Symbol(timeout)]: null,
+            [Symbol(kBuffer)]: null,
+            [Symbol(kBufferCb)]: null,
+            [Symbol(kBufferGen)]: null,
+            [Symbol(shapeMode)]: true,
+            [Symbol(kCapture)]: false,
+            [Symbol(kSetNoDelay)]: true,
+            [Symbol(kSetKeepAlive)]: false,
+            [Symbol(kSetKeepAliveInitialDelay)]: 0,
+            [Symbol(kBytesRead)]: 13278,
+            [Symbol(kBytesWritten)]: 5208
+          },
+          servername: 'ep-orange-bread-aexy00lw.c-2.us-east-2.aws.neon.tech',
+          singleUse: true
+        }
+      },
+      _keepAlive: false,
+      _keepAliveInitialDelayMillis: 0,
+      lastBuffer: false,
+      parsedStatements: {},
+      ssl: {},
+      _ending: true,
+      _emitMessage: false,
+      _connecting: true,
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    queryQueue: [],
+    binary: false,
+    processID: 190347908,
+    secretKey: 1083218171,
+    ssl: {},
+    _connectionTimeoutMillis: 0,
+    _connectionCallback: null,
+    saslSession: null,
+    release: [Function (anonymous)],
+    activeQuery: null,
+    readyForQuery: true,
+    hasExecuted: true,
+    _poolUseCount: 5,
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false
+  }
+}
+
+Node.js v20.19.3
