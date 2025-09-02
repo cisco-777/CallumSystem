@@ -1106,14 +1106,29 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(expenses.createdAt));
   }
 
-  // Get unpaid/partially paid expenses from previous shifts (orphaned)
+  // Get unpaid/partially paid expenses from any previous shifts
   async getOutstandingExpenses(): Promise<Expense[]> {
     const db = await getDb();
-    return await db.select().from(expenses)
-      .where(
-        sql`${expenses.shiftId} IS NULL AND ${expenses.paymentStatus} != 'paid'`
-      )
-      .orderBy(desc(expenses.createdAt));
+    
+    // Get current active shift to exclude its expenses
+    const activeShift = await this.getActiveShift();
+    const activeShiftId = activeShift?.id;
+    
+    if (activeShiftId) {
+      // Return all unpaid/partial expenses that are NOT from the current active shift
+      return await db.select().from(expenses)
+        .where(
+          sql`${expenses.shiftId} != ${activeShiftId} AND ${expenses.paymentStatus} != 'paid'`
+        )
+        .orderBy(desc(expenses.createdAt));
+    } else {
+      // No active shift, return all unpaid expenses
+      return await db.select().from(expenses)
+        .where(
+          sql`${expenses.paymentStatus} != 'paid'`
+        )
+        .orderBy(desc(expenses.createdAt));
+    }
   }
 
   async getShiftSummary(shiftId: number): Promise<any> {
