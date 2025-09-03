@@ -704,15 +704,26 @@ export class DatabaseStorage implements IStorage {
     const activeShifts = await db.select().from(shifts).orderBy(desc(shifts.createdAt)).limit(1);
     const currentShift = activeShifts[0];
     
-    // Create deletion log entry BEFORE deleting product
+    // First, remove all foreign key references that could block deletion
+    
+    // 1. Remove basket items referencing this product
+    await db.delete(basketItems).where(eq(basketItems.productId, id));
+    
+    // 2. Update stock logs to null out productId (preserve logs but remove FK constraint)
+    await db.update(stockLogs)
+      .set({ productId: null })
+      .where(eq(stockLogs.productId, id));
+    
+    // 3. Create final deletion log entry with productId as null (no FK constraint)
     await db.insert(stockLogs).values({
       shiftId: currentShift?.id || null,
-      productId: id,
+      productId: null, // No FK constraint
       actionType: 'product_deleted',
       workerName: 'Admin',
       actionDate: new Date(),
       productName: product.name,
       oldValues: {
+        id: id,
         name: product.name,
         productType: product.productType,
         onShelfGrams: product.onShelfGrams,
@@ -722,14 +733,10 @@ export class DatabaseStorage implements IStorage {
         shelfPrice: product.shelfPrice
       },
       newValues: { status: 'deleted' },
-      notes: `Product "${product.name}" has been deleted from inventory`
+      notes: `Product "${product.name}" (ID: ${id}) has been deleted from inventory`
     });
     
-    // DON'T delete stock logs - preserve them for audit trail
-    // Instead, just remove basket items and the product itself
-    await db.delete(basketItems).where(eq(basketItems.productId, id));
-    
-    // Finally delete the product itself
+    // 4. Finally delete the product itself (now no FK constraints block it)
     await db.delete(products).where(eq(products.id, id));
   }
 

@@ -397,10 +397,10 @@ const baseStockFormSchema = z.object({
   productType: z.enum(['Cannabis', 'Hash', 'Cali Pax', 'Edibles', 'Pre-Rolls', 'Vapes', 'Wax']),
   imageUrl: z.string().optional(),
   productCode: z.string().min(1, 'Product code is required'),
-  onShelfGrams: z.number().min(0, 'On shelf amount must be positive'),
-  jarWeight: z.number().min(0, 'Jar weight must be positive').optional(), // Cannabis-specific jar weight
-  costPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Cost price must be a valid number'),
-  shelfPrice: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Shelf price must be a valid number'),
+  onShelfGrams: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'On shelf amount must be a valid positive number'),
+  jarWeight: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'Jar weight must be a valid positive number').optional(),
+  costPrice: z.string().regex(/^\d+(\.\d{0,2})?$/, 'Cost price must be a valid number'),
+  shelfPrice: z.string().regex(/^\d+(\.\d{0,2})?$/, 'Shelf price must be a valid number'),
   // Deal pricing fields (optional)
   dealPrice: z.string().optional(),
   dealStartDate: z.string().optional(),
@@ -414,23 +414,23 @@ const baseStockFormSchema = z.object({
 const fullStockFormSchema = baseStockFormSchema.extend({
   category: z.enum(['Sativa', 'Indica', 'Hybrid']),
   supplier: z.string().min(1, 'Supplier is required'),
-  internalGrams: z.number().min(0, 'Internal amount must be positive'),
-  externalGrams: z.number().min(0, 'External amount must be positive')
+  internalGrams: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'Internal amount must be a valid positive number'),
+  externalGrams: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'External amount must be a valid positive number')
 });
 
 // Simplified form schema for Pre-Rolls, Edibles, Vapes, and Wax (no category needed)
 const simplifiedStockFormSchema = baseStockFormSchema.extend({
   supplier: z.string().min(1, 'Supplier is required'),
-  internalGrams: z.number().optional(),
-  externalGrams: z.number().optional()
+  internalGrams: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'Internal amount must be a valid positive number').optional(),
+  externalGrams: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'External amount must be a valid positive number').optional()
 });
 
 // Dynamic schema that works for all product types (flexible validation)
 const dynamicStockFormSchema = baseStockFormSchema.extend({
   category: z.enum(['Sativa', 'Indica', 'Hybrid']).optional(),
   supplier: z.string().min(1, 'Supplier is required'),
-  internalGrams: z.number().min(0, 'Internal amount must be positive').optional(),
-  externalGrams: z.number().min(0, 'External amount must be positive').optional()
+  internalGrams: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'Internal amount must be a valid positive number').optional(),
+  externalGrams: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'External amount must be a valid positive number').optional()
 });
 
 // Unified form schema that combines both (for backward compatibility)
@@ -1795,9 +1795,9 @@ export function AdminDashboard() {
       externalGrams: isSimplified ? (product.externalGrams || undefined) : (product.externalGrams || 0),
       costPrice: product.costPrice || '0',
       shelfPrice: product.shelfPrice || product.adminPrice || '0',
-      // Worker signature fields (ensure these are populated for editing)
-      workerName: product.workerName || '',
-      entryDate: product.entryDate || new Date().toISOString().split('T')[0]
+      // Clear worker signature fields for editing (require fresh signatures)
+      workerName: '',
+      entryDate: ''
     });
     // Set image preview if product has image
     if (product.imageUrl) {
@@ -1824,7 +1824,10 @@ export function AdminDashboard() {
       internalGrams: 0,
       externalGrams: 0,
       costPrice: '0',
-      shelfPrice: '0'
+      shelfPrice: '0',
+      // Clear worker signature fields
+      workerName: '',
+      entryDate: ''
     });
     // Clear image preview
     setImagePreview('');
