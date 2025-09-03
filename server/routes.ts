@@ -221,7 +221,14 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
     if (reconciliation && shift.startingTillAmount) {
       const startingTill = parseFloat(shift.startingTillAmount) || 0;
       const totalSales = parseFloat(shift.totalSales || '0');
-      const totalExpenses = summary.totalExpensePayments || 0; // Use actual paid amounts
+      
+      // Calculate expenses the same way as on-screen: use paidAmount from expenses table
+      const totalExpenses = summary.currentShiftExpenses 
+        ? summary.currentShiftExpenses.reduce((sum: number, expense: any) => 
+            sum + parseFloat(expense.paidAmount || "0"), 0
+          )
+        : 0;
+      
       const actualCashInTill = parseFloat(reconciliation.cashInTill || '0');
       
       // Expected till amount = Starting till + Sales - Expenses
