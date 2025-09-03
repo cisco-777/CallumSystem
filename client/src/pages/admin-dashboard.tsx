@@ -4525,7 +4525,7 @@ export function AdminDashboard() {
                           {/* Total calculation display */}
                           <div className="p-3 bg-blue-100 rounded-lg border border-blue-200">
                             <p className="text-sm font-medium text-blue-800">
-                              Total Stock Amount: {(stockForm.watch('onShelfGrams') || 0) + (stockForm.watch('internalGrams') || 0) + (stockForm.watch('externalGrams') || 0)}{isSimplifiedProductType(watchedProductType) ? ' units' : 'g'}
+                              Total Stock Amount: {(parseFloat(stockForm.watch('onShelfGrams')?.toString() || '0') + parseFloat(stockForm.watch('internalGrams')?.toString() || '0') + parseFloat(stockForm.watch('externalGrams')?.toString() || '0')).toFixed(2)}{isSimplifiedProductType(watchedProductType) ? ' units' : 'g'}
                             </p>
                           </div>
                         </div>
