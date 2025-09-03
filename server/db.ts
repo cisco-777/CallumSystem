@@ -18,8 +18,24 @@ if (!pool) {
     );
   }
 
-  // Initialize Pool and Drizzle client
-  pool = new Pool({ connectionString: databaseUrl });
+  // Production-ready pool configuration
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.REPLIT_DEPLOYMENT;
+  
+  pool = new Pool({ 
+    connectionString: databaseUrl,
+    // Production connection pool settings
+    max: isProduction ? 20 : 10, // Maximum pool size
+    min: isProduction ? 5 : 2, // Minimum pool size
+    idleTimeoutMillis: 30000, // Close idle connections after 30s
+    connectionTimeoutMillis: 2000, // Connection timeout
+    ssl: isProduction ? { rejectUnauthorized: false } : false // SSL for production
+  });
+  
+  // Handle pool errors gracefully
+  pool.on('error', (err: any) => {
+    console.error('Database pool error:', err);
+  });
+
   db = drizzle(pool, { schema });
 }
 

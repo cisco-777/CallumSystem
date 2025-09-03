@@ -1716,10 +1716,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense routes
   app.post("/api/expenses", async (req, res) => {
     try {
+      // Production environment validation
+      if (!process.env.DATABASE_URL) {
+        console.error("Database URL not configured for production");
+        return res.status(500).json({ message: "Database not configured" });
+      }
+
       const { description, amount, workerName, shiftId, paidAmount, paymentStatus, outstandingAmount } = req.body;
       
       if (!description || !amount || !workerName) {
         return res.status(400).json({ message: "Description, amount, and worker name are required" });
+      }
+      
+      // Validate amount format for production
+      const numericAmount = parseFloat(amount);
+      if (isNaN(numericAmount) || numericAmount < 0) {
+        return res.status(400).json({ message: "Invalid amount format" });
       }
       
       const expense = await storage.createExpense({
@@ -1741,21 +1753,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/expenses", async (req, res) => {
     try {
+      // Production database connection check
+      if (!process.env.DATABASE_URL) {
+        return res.status(500).json({ message: "Database not configured" });
+      }
+      
       const expenses = await storage.getExpenses();
+      
+      // Additional production validation
+      if (!Array.isArray(expenses)) {
+        console.error("Invalid expenses data structure returned from database");
+        return res.status(500).json({ message: "Data integrity error" });
+      }
+      
       res.json(expenses);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching expenses:", error);
-      res.status(500).json({ message: "Failed to fetch expenses" });
+      const isDevelopment = process.env.NODE_ENV !== 'production' && !process.env.REPLIT_DEPLOYMENT;
+      const message = isDevelopment ? error?.message || 'Unknown error' : "Failed to fetch expenses";
+      res.status(500).json({ message });
     }
   });
 
   app.get("/api/expenses/outstanding", async (req, res) => {
     try {
+      // Production database connection check
+      if (!process.env.DATABASE_URL) {
+        return res.status(500).json({ message: "Database not configured" });
+      }
+      
       const outstandingExpenses = await storage.getOutstandingExpenses();
+      
+      // Additional production validation
+      if (!Array.isArray(outstandingExpenses)) {
+        console.error("Invalid outstanding expenses data structure returned from database");
+        return res.status(500).json({ message: "Data integrity error" });
+      }
+      
       res.json(outstandingExpenses);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching outstanding expenses:", error);
-      res.status(500).json({ message: "Failed to fetch outstanding expenses" });
+      const isDevelopment = process.env.NODE_ENV !== 'production' && !process.env.REPLIT_DEPLOYMENT;
+      const message = isDevelopment ? error?.message || 'Unknown error' : "Failed to fetch outstanding expenses";
+      res.status(500).json({ message });
     }
   });
 

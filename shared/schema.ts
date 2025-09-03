@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, decimal, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, decimal, numeric, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -122,7 +122,13 @@ export const expenses = pgTable("expenses", {
   paymentStatus: text("payment_status").default("unpaid"), // unpaid, partial, paid
   lastPaymentDate: timestamp("last_payment_date"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Production indexes for performance
+  shiftIdIdx: index("expenses_shift_id_idx").on(table.shiftId),
+  paymentStatusIdx: index("expenses_payment_status_idx").on(table.paymentStatus),
+  expenseDateIdx: index("expenses_expense_date_idx").on(table.expenseDate),
+  workerNameIdx: index("expenses_worker_name_idx").on(table.workerName),
+}));
 
 // Table for tracking payment history across multiple shifts
 export const expensePayments = pgTable("expense_payments", {
@@ -134,7 +140,12 @@ export const expensePayments = pgTable("expense_payments", {
   workerName: text("worker_name").notNull(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Production indexes for performance
+  expenseIdIdx: index("expense_payments_expense_id_idx").on(table.expenseId),
+  shiftIdIdx: index("expense_payments_shift_id_idx").on(table.shiftId),
+  paymentDateIdx: index("expense_payments_payment_date_idx").on(table.paymentDate),
+}));
 
 // Shift management tables
 export const shifts = pgTable("shifts", {
