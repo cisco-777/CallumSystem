@@ -180,10 +180,14 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
       report += `Current Shift Expenses: None\n`;
     }
     
-    // Outstanding expenses from previous shifts
-    if (summary.outstandingExpenses && summary.outstandingExpenses.length > 0) {
+    // Outstanding expenses from previous shifts (exclude current shift expenses to prevent duplicates)
+    const previousShiftExpenses = summary.outstandingExpenses 
+      ? summary.outstandingExpenses.filter((expense: any) => expense.shiftId !== shiftId)
+      : [];
+    
+    if (previousShiftExpenses.length > 0) {
       report += `Outstanding from Previous Shifts:\n`;
-      summary.outstandingExpenses.forEach((expense: any) => {
+      previousShiftExpenses.forEach((expense: any) => {
         const outstandingAmount = parseFloat(expense.outstandingAmount || expense.amount);
         const paidAmount = parseFloat(expense.paidAmount || '0');
         const totalAmount = parseFloat(expense.amount || '0');
@@ -201,7 +205,14 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
       });
     }
     
-    report += `Total payments made this shift: ₳${summary.totalExpensePayments || '0'}\n`;
+    // Calculate total payments made this shift from current shift expenses
+    const totalPaymentsMadeThisShift = summary.currentShiftExpenses 
+      ? summary.currentShiftExpenses.reduce((sum: number, expense: any) => 
+          sum + parseFloat(expense.paidAmount || "0"), 0
+        )
+      : 0;
+    
+    report += `Total payments made this shift: ₳${totalPaymentsMadeThisShift.toFixed(2)}\n`;
     report += `\n`;
     
     // Financial details in requested order
