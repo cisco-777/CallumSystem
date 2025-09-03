@@ -3461,7 +3461,16 @@ export function AdminDashboard() {
               <CardContent>
                 <div className="mobile-card-grid">
                   {Array.isArray(products) && products.map((product: any) => {
-                    const totalAmount = (product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0);
+                    // Parse decimal values properly to avoid concatenation issues
+                    const onShelfAmount = parseFloat(product.onShelfGrams?.toString() || '0');
+                    const internalAmount = parseFloat(product.internalGrams?.toString() || '0');
+                    const externalAmount = parseFloat(product.externalGrams?.toString() || '0');
+                    const jarWeight = parseFloat(product.jarWeight?.toString() || '0');
+                    const totalAmount = onShelfAmount + internalAmount + externalAmount;
+                    
+                    // Determine unit type for display
+                    const isUnitBased = ['Pre-Rolls', 'Edibles', 'Vapes'].includes(product.productType);
+                    const unitLabel = isUnitBased ? 'units' : 'g';
                     return (
                       <div key={product.id} className="border rounded-lg mobile-p-2 relative">
                         <div className="flex justify-between items-start mb-3">
@@ -3512,15 +3521,15 @@ export function AdminDashboard() {
                         {/* Stock Distribution */}
                         <div className="space-y-2">
                           <p className="mobile-text-sm font-medium text-blue-700">
-                            Total: {totalAmount}g
+                            Total: {totalAmount.toFixed(2)}{unitLabel}
                           </p>
                           <div className="mobile-text-xs text-gray-600 ml-2 space-y-1">
-                            <p>On shelf: {product.onShelfGrams || 0}g</p>
-                            {product.productType === 'Cannabis' && product.jarWeight && (
-                              <p>Jar weight: {product.jarWeight}g</p>
+                            <p>On shelf: {onShelfAmount.toFixed(2)}{unitLabel}</p>
+                            {product.productType === 'Cannabis' && jarWeight > 0 && (
+                              <p>Jar weight: {jarWeight.toFixed(2)}g</p>
                             )}
-                            <p>Internal: {product.internalGrams || 0}g</p>
-                            <p>External: {product.externalGrams || 0}g</p>
+                            <p>Internal: {internalAmount.toFixed(2)}{unitLabel}</p>
+                            <p>External: {externalAmount.toFixed(2)}{unitLabel}</p>
                           </div>
                         </div>
                         
