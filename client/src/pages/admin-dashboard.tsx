@@ -3822,30 +3822,30 @@ export function AdminDashboard() {
 
             {/* Expenses organized by shifts */}
             <div className="space-y-6">
-              {/* Get only current shift and most recent previous shift with expenses */}
+              {/* Show current shift + ALL shifts with unpaid/partial expenses */}
               {(() => {
                 const shiftsWithExpenses = [];
                 
-                // Add current/active shift if it exists (even if no expenses yet)
+                // Add current/active shift if it exists (show all expenses regardless of payment status)
                 if (activeShift) {
                   shiftsWithExpenses.push(activeShift);
                 }
                 
-                // Add the most recent completed shift that has expenses
+                // Add ALL completed shifts that have unpaid or partial expenses
                 const completedShifts = Array.isArray(shifts) ? shifts
                   .filter((shift: any) => shift.endTime) // Only completed shifts
                   .sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime()) // Sort by end time descending
                   : [];
                 
-                // Find ALL completed shifts that have unpaid expenses
+                // Find ALL completed shifts that have unpaid or partial expenses (no age limit)
                 completedShifts.forEach((shift: any) => {
                   const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
                     expense.shiftId === shift.id
                   ) : [];
-                  const hasUnpaidExpenses = shiftExpenses.some((expense: any) => 
-                    expense.paymentStatus !== 'paid'
+                  const hasUnpaidOrPartialExpenses = shiftExpenses.some((expense: any) => 
+                    expense.paymentStatus === 'unpaid' || expense.paymentStatus === 'partial'
                   );
-                  if (hasUnpaidExpenses) {
+                  if (hasUnpaidOrPartialExpenses) {
                     shiftsWithExpenses.push(shift);
                   }
                 });
@@ -3864,9 +3864,16 @@ export function AdminDashboard() {
 
                 return shiftsWithExpenses.map((shift: any, index: number) => {
                   const isActiveShift = !shift.endTime && activeShift?.id === shift.id;
-                  const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
-                    expense.shiftId === shift.id
-                  ) : [];
+                  // For current shift: show ALL expenses, for previous shifts: only show unpaid/partial
+                  const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => {
+                    if (expense.shiftId !== shift.id) return false;
+                    
+                    // Current shift: show all expenses regardless of payment status
+                    if (isActiveShift) return true;
+                    
+                    // Previous shifts: only show unpaid or partial expenses
+                    return expense.paymentStatus === 'unpaid' || expense.paymentStatus === 'partial';
+                  }) : [];
                   // Calculate total using paid amounts, not full expense amounts
                   const totalExpenses = shiftExpenses.reduce((sum: number, expense: any) => 
                     sum + parseFloat(expense.paidAmount || "0"), 0
