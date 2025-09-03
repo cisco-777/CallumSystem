@@ -2266,6 +2266,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/inbox/clear", async (req, res) => {
+    try {
+      // Clear all email reports without authentication (as requested)
+      await storage.clearAllEmailReports();
+      res.json({ message: "All email reports cleared successfully" });
+    } catch (error) {
+      console.error("Error clearing email reports:", error);
+      res.status(500).json({ message: "Failed to clear email reports" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

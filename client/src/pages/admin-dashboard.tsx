@@ -1959,10 +1959,7 @@ export function AdminDashboard() {
         // Invalidate the inbox reports query to fetch fresh data
         queryClient.invalidateQueries({ queryKey: ['/api/inbox/reports'] });
         
-        toast({
-          title: "Authentication Successful",
-          description: "Accessing INBOX...",
-        });
+        // Remove authentication success message - open INBOX directly
       } else {
         throw new Error('Invalid credentials');
       }
@@ -5953,7 +5950,7 @@ export function AdminDashboard() {
         </Dialog>
 
         {/* INBOX Viewing Modal */}
-        <Dialog open={showInboxModal} onOpenChange={() => {}}>
+        <Dialog open={showInboxModal} onOpenChange={(open) => setShowInboxModal(open)}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
             <DialogHeader>
               <div className="flex items-center justify-between">
@@ -5961,14 +5958,40 @@ export function AdminDashboard() {
                   <Mail className="w-5 h-5 text-blue-600" />
                   <span>Email Reports INBOX</span>
                 </DialogTitle>
-                <Button
-                  onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/inbox/reports'] })}
-                  variant="outline"
-                  size="sm"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Refresh
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/inbox/reports'] })}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await apiRequest('/api/inbox/clear', { method: 'DELETE' });
+                        queryClient.invalidateQueries({ queryKey: ['/api/inbox/reports'] });
+                        toast({
+                          title: "Reports Cleared",
+                          description: "All email reports have been cleared from the inbox",
+                        });
+                      } catch (error) {
+                        toast({
+                          title: "Error",
+                          description: "Failed to clear email reports",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Clear All Reports
+                  </Button>
+                </div>
               </div>
             </DialogHeader>
             

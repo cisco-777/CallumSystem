@@ -145,6 +145,7 @@ export interface IStorage {
   // Email reports operations
   getAllEmailReports(): Promise<EmailReport[]>;
   storeEmailReport(reportData: InsertEmailReport): Promise<EmailReport>;
+  clearAllEmailReports(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1255,6 +1256,11 @@ export class DatabaseStorage implements IStorage {
       .values(reportData)
       .returning();
     return report;
+  }
+
+  async clearAllEmailReports(): Promise<void> {
+    const db = await getDb();
+    await db.delete(emailReports);
   }
 }
 
