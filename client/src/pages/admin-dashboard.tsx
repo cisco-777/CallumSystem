@@ -5707,7 +5707,7 @@ export function AdminDashboard() {
                             <SelectContent>
                               {products.map((product: any) => (
                                 <SelectItem key={product.id} value={product.id.toString()}>
-                                  {product.name} (Total: {(product.onShelfGrams || 0) + (product.internalGrams || 0) + (product.externalGrams || 0)}g)
+                                  {product.name} (Total: {(parseFloat(product.onShelfGrams?.toString() || '0') + parseFloat(product.internalGrams?.toString() || '0') + parseFloat(product.externalGrams?.toString() || '0')).toFixed(2)}g)
                                 </SelectItem>
                               ))}
                             </SelectContent>
