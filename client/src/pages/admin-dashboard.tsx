@@ -3850,7 +3850,12 @@ export function AdminDashboard() {
                   }
                 });
 
-                if (shiftsWithExpenses.length === 0) {
+                // Check for unassigned expenses (not associated with any shift)
+                const unassignedExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => 
+                  expense.shiftId === null && (expense.paymentStatus === 'unpaid' || expense.paymentStatus === 'partial')
+                ) : [];
+
+                if (shiftsWithExpenses.length === 0 && unassignedExpenses.length === 0) {
                   return (
                     <Card>
                       <CardContent className="text-center py-12">
@@ -3862,7 +3867,119 @@ export function AdminDashboard() {
                   );
                 }
 
-                return shiftsWithExpenses.map((shift: any, index: number) => {
+                const expenseElements = [];
+                
+                // Add unassigned expenses first if they exist
+                if (unassignedExpenses.length > 0) {
+                  const totalUnassignedExpenses = unassignedExpenses.reduce((sum: number, expense: any) => 
+                    sum + parseFloat(expense.paidAmount || "0"), 0
+                  );
+                  
+                  expenseElements.push(
+                    <Card key="unassigned" className="bg-orange-50 border-orange-200">
+                      {/* Unassigned Expenses Header */}
+                      <div className="px-4 py-3 border-b">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="font-semibold text-orange-800">
+                              Unassigned Outstanding Expenses
+                            </h3>
+                            <p className="text-sm text-orange-600">
+                              Expenses not associated with any shift
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-orange-700">
+                              €{totalUnassignedExpenses.toFixed(2)}
+                            </div>
+                            <div className="text-sm text-orange-600">
+                              {unassignedExpenses.length} expenses
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Unassigned Expenses List */}
+                      <div className="p-4">
+                        <div className="space-y-3">
+                          {unassignedExpenses.map((expense: any) => (
+                            <div key={expense.id} className="border rounded-lg p-3 bg-white">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex-1">
+                                      <h4 className="font-semibold">{expense.description}</h4>
+                                      <div className="flex items-center mt-1 space-x-2">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                          expense.paymentStatus === 'paid' 
+                                            ? 'bg-green-100 text-green-800' 
+                                            : expense.paymentStatus === 'partial'
+                                            ? 'bg-yellow-100 text-yellow-800'
+                                            : 'bg-red-100 text-red-800'
+                                        }`}>
+                                          {expense.paymentStatus === 'paid' ? 'Paid' : 
+                                           expense.paymentStatus === 'partial' ? 'Partial' : 'Unpaid'}
+                                        </span>
+                                        {expense.paymentStatus !== 'unpaid' && (
+                                          <span className="text-xs text-gray-600">
+                                            €{expense.paidAmount || '0.00'} of €{expense.amount} paid
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="font-bold text-lg text-green-600">€{expense.amount}</div>
+                                      {expense.paymentStatus !== 'paid' && (
+                                        <div className="text-sm text-red-600 font-medium">
+                                          €{expense.outstandingAmount || expense.amount} outstanding
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                    <div className="flex items-center">
+                                      <Users className="w-4 h-4 mr-1" />
+                                      {expense.workerName}
+                                    </div>
+                                    <div className="flex items-center">
+                                      <Timer className="w-4 h-4 mr-1" />
+                                      {new Date(expense.createdAt).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex space-x-2 ml-4">
+                                  <Button
+                                    onClick={() => handleEditExpense(expense)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleDeleteExpense(expense)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                }
+                
+                // Add shift-based expenses
+                expenseElements.push(...shiftsWithExpenses.map((shift: any, index: number) => {
                   const isActiveShift = !shift.endTime && activeShift?.id === shift.id;
                   // For current shift: show ALL expenses, for previous shifts: only show unpaid/partial
                   const shiftExpenses = Array.isArray(expenses) ? expenses.filter((expense: any) => {
@@ -4007,7 +4124,9 @@ export function AdminDashboard() {
                       </div>
                     </Card>
                   );
-                });
+                }));
+                
+                return expenseElements;
               })()}
             </div>
           </TabsContent>
