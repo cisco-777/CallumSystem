@@ -478,11 +478,18 @@ export class DatabaseStorage implements IStorage {
 
   async createStockEntry(stockData: any): Promise<Product> {
     const db = await getDb();
+    
+    // Fix decimal concatenation issue by parsing values as numbers
+    const onShelfGrams = parseFloat(stockData.onShelfGrams?.toString() || '0');
+    const internalGrams = parseFloat(stockData.internalGrams?.toString() || '0');
+    const externalGrams = parseFloat(stockData.externalGrams?.toString() || '0');
+    const totalQuantity = Math.round(onShelfGrams + internalGrams + externalGrams);
+    
     const [product] = await db
       .insert(products)
       .values({
         ...stockData,
-        stockQuantity: (stockData.onShelfGrams || 0) + (stockData.internalGrams || 0) + (stockData.externalGrams || 0),
+        stockQuantity: totalQuantity,
         adminPrice: stockData.shelfPrice, // For backward compatibility
         lastUpdated: new Date()
       })
@@ -750,46 +757,54 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Product not found');
     }
     
+    // Parse quantity as decimal for accurate calculations
+    const quantityValue = parseFloat(movementData.quantity?.toString() || '0');
+    
     const currentStock = {
       internal: parseFloat(product.internalGrams?.toString() || "0"),
       external: parseFloat(product.externalGrams?.toString() || "0"),
       shelf: parseFloat(product.onShelfGrams?.toString() || "0")
     };
     
-    if (currentStock[movementData.fromLocation as keyof typeof currentStock] < movementData.quantity) {
-      throw new Error(`Insufficient stock in ${movementData.fromLocation} location. Available: ${currentStock[movementData.fromLocation as keyof typeof currentStock]}g, Requested: ${movementData.quantity}g`);
+    if (currentStock[movementData.fromLocation as keyof typeof currentStock] < quantityValue) {
+      throw new Error(`Insufficient stock in ${movementData.fromLocation} location. Available: ${currentStock[movementData.fromLocation as keyof typeof currentStock]}g, Requested: ${quantityValue}g`);
     }
     
-    // Create the movement record first
+    // Create the movement record with both integer and decimal support
     const [movement] = await db
       .insert(stockMovements)
-      .values(movementData)
+      .values({
+        ...movementData,
+        quantity: Math.round(quantityValue), // Keep legacy integer field for compatibility
+        quantityDecimal: quantityValue.toString(), // Use decimal field for accurate tracking
+        movementDate: new Date().toISOString().slice(0, 19).replace('T', ' ') // Always provide movement_date
+      })
       .returning();
     
     // Update the product stock quantities with decimal precision
     const updateData: any = {};
     if (movementData.fromLocation === 'internal') {
-      updateData.internalGrams = (parseFloat(product.internalGrams?.toString() || "0") - movementData.quantity).toString();
+      updateData.internalGrams = (parseFloat(product.internalGrams?.toString() || "0") - quantityValue).toString();
     } else if (movementData.fromLocation === 'external') {
-      updateData.externalGrams = (parseFloat(product.externalGrams?.toString() || "0") - movementData.quantity).toString();
+      updateData.externalGrams = (parseFloat(product.externalGrams?.toString() || "0") - quantityValue).toString();
     } else if (movementData.fromLocation === 'shelf') {
-      updateData.onShelfGrams = (parseFloat(product.onShelfGrams?.toString() || "0") - movementData.quantity).toString();
+      updateData.onShelfGrams = (parseFloat(product.onShelfGrams?.toString() || "0") - quantityValue).toString();
       // For Cannabis products, also deduct from jar weight when moving from shelf
       if (product.productType === 'Cannabis' && product.jarWeight && parseFloat(product.jarWeight.toString()) > 0) {
         const currentJarWeight = parseFloat(product.jarWeight.toString());
-        updateData.jarWeight = Math.max(0, currentJarWeight - movementData.quantity).toString();
+        updateData.jarWeight = Math.max(0, currentJarWeight - quantityValue).toString();
       }
     }
     
     if (movementData.toLocation === 'internal') {
       const currentInternal = updateData.internalGrams !== undefined ? parseFloat(updateData.internalGrams) : parseFloat(product.internalGrams?.toString() || "0");
-      updateData.internalGrams = (currentInternal + movementData.quantity).toString();
+      updateData.internalGrams = (currentInternal + quantityValue).toString();
     } else if (movementData.toLocation === 'external') {
       const currentExternal = updateData.externalGrams !== undefined ? parseFloat(updateData.externalGrams) : parseFloat(product.externalGrams?.toString() || "0");
-      updateData.externalGrams = (currentExternal + movementData.quantity).toString();
+      updateData.externalGrams = (currentExternal + quantityValue).toString();
     } else if (movementData.toLocation === 'shelf') {
       const currentShelf = updateData.onShelfGrams !== undefined ? parseFloat(updateData.onShelfGrams) : parseFloat(product.onShelfGrams?.toString() || "0");
-      updateData.onShelfGrams = (currentShelf + movementData.quantity).toString();
+      updateData.onShelfGrams = (currentShelf + quantityValue).toString();
     }
     
     // Calculate new total stock (round for stockQuantity integer field)

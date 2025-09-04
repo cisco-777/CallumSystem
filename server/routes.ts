@@ -883,11 +883,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const stockData = req.body;
     
     try {
+      // Production deployment environment validation
+      if (!process.env.DATABASE_URL) {
+        console.error("Database URL not configured for stock operations");
+        return res.status(500).json({ message: "Database not configured" });
+      }
+
+      // Validate product ID
+      const productId = parseInt(id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+
       // Check if product code already exists for other products (if being changed)
       if (stockData.productCode) {
         const existingProducts = await storage.getProducts();
         const existingProduct = existingProducts.find((p: any) => 
-          p.productCode === stockData.productCode && p.id !== parseInt(id)
+          p.productCode === stockData.productCode && p.id !== productId
         );
         
         if (existingProduct) {
@@ -895,11 +907,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const updatedProduct = await storage.updateProductStock(parseInt(id), stockData);
+      const updatedProduct = await storage.updateProductStock(productId, stockData);
+      
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
       res.json(updatedProduct);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update stock error:', error);
-      res.status(500).json({ message: 'Failed to update stock' });
+      const isDevelopment = process.env.NODE_ENV !== 'production' && !process.env.REPLIT_DEPLOYMENT;
+      const message = isDevelopment ? error?.message || 'Unknown error' : 'Failed to update stock';
+      res.status(500).json({ message, error: isDevelopment ? error?.stack : undefined });
     }
   });
 
@@ -907,6 +926,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const stockData = req.body;
     
     try {
+      // Production deployment environment validation
+      if (!process.env.DATABASE_URL) {
+        console.error("Database URL not configured for stock operations");
+        return res.status(500).json({ message: "Database not configured" });
+      }
+
+      // Validate required stock data
+      if (!stockData.productCode || !stockData.name) {
+        return res.status(400).json({ message: "Product code and name are required" });
+      }
+
       // Check if product code already exists
       const existingProducts = await storage.getProducts();
       const existingProduct = existingProducts.find((p: any) => p.productCode === stockData.productCode);
@@ -922,10 +952,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const newProduct = await storage.createStockEntry(finalStockData);
+      
+      if (!newProduct) {
+        return res.status(500).json({ message: "Failed to create product in database" });
+      }
+      
       res.json(newProduct);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create stock entry error:', error);
-      res.status(500).json({ message: 'Failed to create stock entry' });
+      const isDevelopment = process.env.NODE_ENV !== 'production' && !process.env.REPLIT_DEPLOYMENT;
+      const message = isDevelopment ? error?.message || 'Unknown error' : 'Failed to create stock entry';
+      res.status(500).json({ message, error: isDevelopment ? error?.stack : undefined });
     }
   });
 
@@ -950,22 +987,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stock movement routes
   app.post('/api/stock-movements', async (req, res) => {
     try {
+      // Production deployment environment validation
+      if (!process.env.DATABASE_URL) {
+        console.error("Database URL not configured for stock movement operations");
+        return res.status(500).json({ message: "Database not configured" });
+      }
+
       const movementData = req.body;
+      
+      // Validate required movement data
+      if (!movementData.productId || !movementData.fromLocation || !movementData.toLocation || !movementData.quantity) {
+        return res.status(400).json({ message: "Product ID, locations, and quantity are required" });
+      }
+
+      // Validate quantity
+      const quantity = parseFloat(movementData.quantity);
+      if (isNaN(quantity) || quantity <= 0) {
+        return res.status(400).json({ message: "Invalid quantity" });
+      }
+      
+      // Ensure movementDate is provided for deployment compatibility
+      if (!movementData.movementDate) {
+        movementData.movementDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      }
+
       const movement = await storage.createStockMovement(movementData);
+      
+      if (!movement) {
+        return res.status(500).json({ message: "Failed to create stock movement in database" });
+      }
+      
       res.json(movement);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create stock movement error:', error);
-      res.status(500).json({ message: 'Failed to create stock movement' });
+      const isDevelopment = process.env.NODE_ENV !== 'production' && !process.env.REPLIT_DEPLOYMENT;
+      const message = isDevelopment ? error?.message || 'Unknown error' : 'Failed to create stock movement';
+      res.status(500).json({ message, error: isDevelopment ? error?.stack : undefined });
     }
   });
 
   app.get('/api/stock-movements', async (req, res) => {
     try {
+      // Production deployment environment validation
+      if (!process.env.DATABASE_URL) {
+        return res.status(500).json({ message: "Database not configured" });
+      }
+      
       const movements = await storage.getStockMovements();
+      
+      // Additional production validation
+      if (!Array.isArray(movements)) {
+        console.error("Invalid stock movements data structure returned from database");
+        return res.status(500).json({ message: "Data integrity error" });
+      }
+      
       res.json(movements);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Get stock movements error:', error);
-      res.status(500).json({ message: 'Failed to fetch stock movements' });
+      const isDevelopment = process.env.NODE_ENV !== 'production' && !process.env.REPLIT_DEPLOYMENT;
+      const message = isDevelopment ? error?.message || 'Unknown error' : 'Failed to fetch stock movements';
+      res.status(500).json({ message });
     }
   });
 

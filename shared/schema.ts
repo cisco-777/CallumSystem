@@ -184,12 +184,17 @@ export const stockMovements = pgTable("stock_movements", {
   productId: integer("product_id").references(() => products.id).notNull(),
   fromLocation: text("from_location").notNull(), // 'internal', 'external', 'shelf'
   toLocation: text("to_location").notNull(), // 'internal', 'external', 'shelf'
-  quantity: integer("quantity").notNull(), // Amount moved in grams
+  quantity: integer("quantity").notNull(), // Amount moved in grams (legacy integer field)
+  quantityDecimal: decimal("quantity_decimal", { precision: 10, scale: 2 }), // Decimal quantity support for deployment
   workerName: text("worker_name").notNull(), // Worker who performed the move
   movementDate: text("movement_date").notNull(), // Date/time of movement (UTC+2 Madrid timezone)
   notes: text("notes"), // Optional notes about the movement
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Production indexes for performance
+  productIdIdx: index("stock_movements_product_id_idx").on(table.productId),
+  movementDateIdx: index("stock_movements_movement_date_idx").on(table.movementDate),
+}));
 
 // Stock logs table for comprehensive inventory tracking
 export const stockLogs = pgTable("stock_logs", {
