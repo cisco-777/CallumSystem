@@ -11,7 +11,7 @@ import { Users, Package, Activity, ExternalLink, TrendingUp, DollarSign, BarChar
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -5459,20 +5459,9 @@ export function AdminDashboard() {
                                         <div className="flex flex-col">
                                           <div className="flex items-center space-x-2">
                                             <span>{product.name}</span>
-                                            {hasDeal && (
-                                              <Badge className="bg-green-100 text-green-800 text-xs px-1 py-0">
-                                                DEAL
-                                              </Badge>
-                                            )}
                                           </div>
                                           <div className="text-xs text-gray-600 mt-1">
-                                            {hasDeal ? (
-                                              <span>
-                                                €{displayPrice}/g <span className="line-through text-gray-400">€{originalPrice}/g</span> • {product.onShelfGrams || 0}g available
-                                              </span>
-                                            ) : (
-                                              <span>€{displayPrice}/g • {product.onShelfGrams || 0}g available</span>
-                                            )}
+                                            <span>€{displayPrice}/g • {product.onShelfGrams || 0}g available</span>
                                           </div>
                                         </div>
                                       </SelectItem>
