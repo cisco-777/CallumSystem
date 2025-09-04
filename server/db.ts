@@ -24,11 +24,15 @@ if (!pool) {
   pool = new Pool({ 
     connectionString: databaseUrl,
     // Deployment-optimized connection pool settings
-    max: isProduction ? 15 : 10, // Maximum pool size (reduced for deployment stability)
-    min: isProduction ? 3 : 2, // Minimum pool size
-    idleTimeoutMillis: isProduction ? 20000 : 30000, // Close idle connections faster in deployment
-    connectionTimeoutMillis: isProduction ? 5000 : 2000, // Longer timeout for deployment
-    ssl: isProduction ? { rejectUnauthorized: false } : false // SSL for production
+    max: isProduction ? 8 : 10, // Reduced max connections for deployment stability
+    min: isProduction ? 1 : 2, // Reduced minimum pool size
+    idleTimeoutMillis: isProduction ? 30000 : 30000, // Keep connections alive longer
+    connectionTimeoutMillis: isProduction ? 3000 : 2000, // Shorter timeout for faster failure detection
+    ssl: isProduction ? { rejectUnauthorized: false } : false, // SSL for production
+    // Additional deployment stability settings
+    allowExitOnIdle: false, // Keep pool alive
+    keepAlive: true, // TCP keep alive
+    keepAliveInitialDelayMillis: 0
   });
   
   // Handle pool errors gracefully with deployment-specific recovery

@@ -24,27 +24,42 @@ export async function seedDatabase(): Promise<void> {
 }
 
 async function seedAdminUser(): Promise<void> {
-  try {
-    const adminUser = await storage.getUserByEmail("admin123@gmail.com");
-    
-    if (!adminUser) {
-      console.log("📝 Creating admin123@gmail.com user...");
-      await storage.createUser({
-        email: "admin123@gmail.com",
-        password: "admin123",
-        firstName: "tom",
-        lastName: "tom",
-        role: "superadmin",
-        isOnboarded: true,
-        membershipStatus: "approved"
-      });
-      console.log("✅ Admin user created successfully");
-    } else {
-      console.log("ℹ️ Admin user already exists");
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 2000; // 2 seconds
+  
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      console.log(`📝 Attempting to check admin user (attempt ${attempt}/${MAX_RETRIES})...`);
+      const adminUser = await storage.getUserByEmail("admin123@gmail.com");
+      
+      if (!adminUser) {
+        console.log("📝 Creating admin123@gmail.com user...");
+        await storage.createUser({
+          email: "admin123@gmail.com",
+          password: "admin123",
+          firstName: "tom",
+          lastName: "tom",
+          role: "superadmin",
+          isOnboarded: true,
+          membershipStatus: "approved"
+        });
+        console.log("✅ Admin user created successfully");
+      } else {
+        console.log("ℹ️ Admin user already exists");
+      }
+      return; // Success, exit the retry loop
+    } catch (error) {
+      console.error(`❌ Error seeding admin user (attempt ${attempt}/${MAX_RETRIES}):`, error);
+      
+      if (attempt === MAX_RETRIES) {
+        console.error("❌ Failed to seed admin user after all retries, continuing anyway...");
+        return; // Don't throw error, continue with app startup
+      }
+      
+      // Wait before retrying
+      console.log(`⏳ Waiting ${RETRY_DELAY}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
     }
-  } catch (error) {
-    console.error("❌ Error seeding admin user:", error);
-    throw error;
   }
 }
 
