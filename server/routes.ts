@@ -1755,19 +1755,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const product of products) {
         const physicalCount = productCounts[product.id] || 0;
         
-        // For Cannabis products, use jar weight for calculations; for others use onShelfGrams
-        const expectedAmount = product.productType === 'Cannabis' && product.jarWeight 
-          ? parseFloat(product.jarWeight.toString()) 
-          : parseFloat((product.onShelfGrams || 0).toString());
+        // Expected amount is always onShelfGrams (product weight)
+        const expectedAmount = parseFloat((product.onShelfGrams || 0).toString());
         
-        const difference = expectedAmount - physicalCount;
+        // For Cannabis products, calculate actual product weight from total weight minus empty jar weight
+        // For other products, physicalCount is already the product weight
+        let actualProductWeight = physicalCount;
+        if (product.productType === 'Cannabis' && product.jarWeight && parseFloat(product.jarWeight.toString()) > 0) {
+          const jarWeight = parseFloat(product.jarWeight.toString());
+          actualProductWeight = Math.max(0, physicalCount - jarWeight); // Total weight - jar weight = product weight
+        }
+        
+        const difference = expectedAmount - actualProductWeight;
         
         if (difference !== 0) {
           discrepancies[product.id] = {
             productName: product.name,
             productType: product.productType,
             expected: expectedAmount,
-            actual: physicalCount,
+            actual: actualProductWeight, // Store calculated product weight, not total weight
             difference: difference, // Store actual difference (positive = missing, negative = excess)
             type: difference > 0 ? 'missing' : 'excess'
           };
@@ -2238,19 +2244,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const product of products) {
         const physicalCount = reqProductCounts[product.id] || 0;
         
-        // For Cannabis products, use jar weight for calculations; for others use onShelfGrams
-        const expectedAmount = product.productType === 'Cannabis' && product.jarWeight 
-          ? parseFloat(product.jarWeight.toString()) 
-          : parseFloat((product.onShelfGrams || 0).toString());
+        // Expected amount is always onShelfGrams (product weight)
+        const expectedAmount = parseFloat((product.onShelfGrams || 0).toString());
         
-        const difference = expectedAmount - physicalCount;
+        // For Cannabis products, calculate actual product weight from total weight minus empty jar weight
+        // For other products, physicalCount is already the product weight
+        let actualProductWeight = physicalCount;
+        if (product.productType === 'Cannabis' && product.jarWeight && parseFloat(product.jarWeight.toString()) > 0) {
+          const jarWeight = parseFloat(product.jarWeight.toString());
+          actualProductWeight = Math.max(0, physicalCount - jarWeight); // Total weight - jar weight = product weight
+        }
+        
+        const difference = expectedAmount - actualProductWeight;
         
         if (difference !== 0) {
           discrepancies[product.id] = {
             productName: product.name,
             productType: product.productType,
             expected: expectedAmount,
-            actual: physicalCount,
+            actual: actualProductWeight, // Store calculated product weight, not total weight
             difference: difference, // Store actual difference (positive = missing, negative = excess)
             type: difference > 0 ? 'missing' : 'excess'
           };

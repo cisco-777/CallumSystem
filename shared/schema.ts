@@ -57,7 +57,7 @@ export const products = pgTable("products", {
   workerName: text("worker_name"), // Worker who created/last modified the product entry
   entryDate: text("entry_date"), // Date when worker made the entry
   // Cannabis-specific jar weight tracking (for Callum's system)
-  jarWeight: decimal("jar_weight", { precision: 10, scale: 2 }), // Total weight including jar (grams) - only for Cannabis products
+  jarWeight: decimal("jar_weight", { precision: 10, scale: 2 }), // Empty jar weight only (grams) - only for Cannabis products
 });
 
 export const basketItems = pgTable("basket_items", {

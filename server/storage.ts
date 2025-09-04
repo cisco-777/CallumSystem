@@ -663,12 +663,7 @@ export class DatabaseStorage implements IStorage {
         lastUpdated: new Date()
       };
 
-      // For Cannabis products, also deduct from jar weight when processing orders
-      if (product.productType === 'Cannabis' && product.jarWeight && parseFloat(product.jarWeight.toString()) > 0) {
-        const currentJarWeight = parseFloat(product.jarWeight.toString());
-        const newJarWeight = Math.max(0, currentJarWeight - quantityAmount);
-        updateData.jarWeight = newJarWeight.toString();
-      }
+      // Note: Jar weight now represents empty jar weight only and should not be reduced during orders
 
       // Update product stock quantities
       await db
@@ -785,11 +780,7 @@ export class DatabaseStorage implements IStorage {
       updateData.externalGrams = (parseFloat(product.externalGrams?.toString() || "0") - quantityValue).toString();
     } else if (movementData.fromLocation === 'shelf') {
       updateData.onShelfGrams = (parseFloat(product.onShelfGrams?.toString() || "0") - quantityValue).toString();
-      // For Cannabis products, also deduct from jar weight when moving from shelf
-      if (product.productType === 'Cannabis' && product.jarWeight && parseFloat(product.jarWeight.toString()) > 0) {
-        const currentJarWeight = parseFloat(product.jarWeight.toString());
-        updateData.jarWeight = Math.max(0, currentJarWeight - quantityValue).toString();
-      }
+      // Note: Jar weight represents empty jar weight only and should not be reduced during stock movements
     }
     
     if (movementData.toLocation === 'internal') {

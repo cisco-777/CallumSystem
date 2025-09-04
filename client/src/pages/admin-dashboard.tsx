@@ -3533,7 +3533,7 @@ export function AdminDashboard() {
                           <div className="mobile-text-xs text-gray-600 ml-2 space-y-1">
                             <p>On shelf: {onShelfAmount.toFixed(2)}{unitLabel}</p>
                             {product.productType === 'Cannabis' && jarWeight > 0 && (
-                              <p>Jar weight: {jarWeight.toFixed(2)}g</p>
+                              <p>Empty jar: {jarWeight.toFixed(2)}g</p>
                             )}
                             <p>Internal: {internalAmount.toFixed(2)}{unitLabel}</p>
                             <p>External: {externalAmount.toFixed(2)}{unitLabel}</p>
@@ -4414,7 +4414,7 @@ export function AdminDashboard() {
                                 name="jarWeight"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Jar Weight (including product)</FormLabel>
+                                    <FormLabel>Empty Jar Weight</FormLabel>
                                     <FormControl>
                                       <Input 
                                         type="number" 
@@ -4436,6 +4436,9 @@ export function AdminDashboard() {
                                         }}
                                       />
                                     </FormControl>
+                                    <FormDescription className="text-xs text-gray-600">
+                                      Weight of empty jar only. During reconciliation, product weight = total weight - jar weight
+                                    </FormDescription>
                                     <FormMessage />
                                   </FormItem>
                                 )}
