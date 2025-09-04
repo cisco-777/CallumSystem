@@ -56,10 +56,6 @@ export const products = pgTable("products", {
   // Worker signature tracking fields
   workerName: text("worker_name"), // Worker who created/last modified the product entry
   entryDate: text("entry_date"), // Date when worker made the entry
-  // Deal pricing fields (admin only)
-  dealPrice: text("deal_price"), // Special deal price (null if no deal)
-  dealStartDate: text("deal_start_date"), // When deal becomes active
-  dealEndDate: text("deal_end_date"), // When deal expires
   // Cannabis-specific jar weight tracking (for Callum's system)
   jarWeight: decimal("jar_weight", { precision: 10, scale: 2 }), // Total weight including jar (grams) - only for Cannabis products
 });
@@ -92,6 +88,9 @@ export const orders = pgTable("orders", {
   status: text("status").default("pending"),
   archivedFromAdmin: boolean("archived_from_admin").default(false),
   shiftId: integer("shift_id").references(() => shifts.id), // Link orders to shifts
+  // Custom pricing fields for manual orders
+  customPricingUsed: boolean("custom_pricing_used").default(false), // Whether custom pricing was applied
+  customDescription: text("custom_description"), // Description like "5g for €30"
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -275,6 +274,8 @@ export const insertOrderSchema = createInsertSchema(orders).pick({
   quantities: true,
   totalPrice: true,
   shiftId: true,
+  customPricingUsed: true,
+  customDescription: true,
 });
 
 export const insertShiftReconciliationSchema = createInsertSchema(shiftReconciliations).pick({

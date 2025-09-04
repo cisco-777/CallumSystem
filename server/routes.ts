@@ -88,27 +88,35 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
                 };
               }
               
-              // Calculate price using deal price first, then shelf price, then product code
-              let itemPrice = 10; // fallback price
-              
-              // Check for active deal price first
-              if (product.dealPrice && parseFloat(product.dealPrice) > 0) {
-                itemPrice = parseFloat(product.dealPrice);
-              } 
-              // Then check shelf price
-              else if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
-                itemPrice = parseFloat(product.shelfPrice);
-              }
-              // Fallback to product code pricing (last 2 digits)
-              else {
-                const productCode = item.productCode || product.productCode || '';
-                itemPrice = parseInt(productCode.slice(-2)) || 10;
-              }
-              
               const quantity = quantityData.quantity || 1;
               
-              // Add to category totals
-              salesByCategory[productType].totalAmount += itemPrice * quantity;
+              // For orders with custom pricing, use the order's total price proportionally
+              if (order.customPricingUsed && parseFloat(order.totalPrice) > 0) {
+                // For custom pricing orders, distribute the total price proportionally across items
+                const orderTotalPrice = parseFloat(order.totalPrice);
+                const totalItemsInOrder = order.quantities.reduce((sum: number, q: any) => sum + (q.quantity || 1), 0);
+                const itemProportion = quantity / totalItemsInOrder;
+                const itemAmount = orderTotalPrice * itemProportion;
+                
+                salesByCategory[productType].totalAmount += itemAmount;
+              } else {
+                // Calculate price using shelf price, then product code
+                let itemPrice = 10; // fallback price
+                
+                // Check shelf price
+                if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
+                  itemPrice = parseFloat(product.shelfPrice);
+                }
+                // Fallback to product code pricing (last 2 digits)
+                else {
+                  const productCode = item.productCode || product.productCode || '';
+                  itemPrice = parseInt(productCode.slice(-2)) || 10;
+                }
+                
+                // Add to category totals
+                salesByCategory[productType].totalAmount += itemPrice * quantity;
+              }
+              
               salesByCategory[productType].totalQuantity += quantity;
             }
           });
@@ -124,8 +132,21 @@ async function generateShiftEmailReport(shiftId: number, storage: any, liveRecon
       } else {
         report += `No sales recorded during this shift\n`;
       }
+      
+      // Add custom pricing orders summary
+      const customPricingOrders = summary.orders ? summary.orders.filter((order: any) => 
+        order.status === 'completed' && order.customPricingUsed
+      ) : [];
+      
+      if (customPricingOrders.length > 0) {
+        report += `\nCUSTOM PRICING ORDERS: ${customPricingOrders.length}\n`;
+        customPricingOrders.forEach((order: any) => {
+          const description = order.customDescription || 'Custom pricing applied';
+          report += `Code ${order.pickupCode}: €${order.totalPrice} (${description})\n`;
+        });
+      }
     } else {
-      report += `No sales recorded during this shift\n`;
+      report += `No orders processed during this shift\n`;
     }
     
     report += `\n`;
@@ -1111,12 +1132,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const product = (item as any).product;
         let price = 10; // fallback price
         
-        // Check for active deal price first
-        if (product?.dealPrice && parseFloat(product.dealPrice) > 0) {
-          price = parseFloat(product.dealPrice);
-        } 
-        // Then check shelf price
-        else if (product?.shelfPrice && parseFloat(product.shelfPrice) > 0) {
+        // Check shelf price
+        if (product?.shelfPrice && parseFloat(product.shelfPrice) > 0) {
           price = parseFloat(product.shelfPrice);
         }
         // Fallback to product code pricing (last 2 digits)
@@ -1276,7 +1293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Manual order creation endpoint
   app.post("/api/orders/manual", async (req, res) => {
     try {
-      const { items } = req.body;
+      const { items, customPricing } = req.body;
       
       if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ message: "Items array is required" });
@@ -1297,6 +1314,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let totalPrice = 0;
       const orderItems = [];
       const orderQuantities = [];
+      
+      // If custom pricing is provided, use it directly
+      if (customPricing && customPricing.totalPrice && parseFloat(customPricing.totalPrice) > 0) {
+        totalPrice = parseFloat(customPricing.totalPrice);
+      }
 
       for (const item of items) {
         const product = products.find(p => p.id === item.productId);
@@ -1319,20 +1341,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Calculate price (use deal price first, then shelf price, then admin price, or product code last 2 digits)
-        let price = 0;
-        if (product.dealPrice && parseFloat(product.dealPrice) > 0) {
-          price = parseFloat(product.dealPrice);
-        } else if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
-          price = parseFloat(product.shelfPrice);
-        } else if (product.adminPrice && parseFloat(product.adminPrice) > 0) {
-          price = parseFloat(product.adminPrice);
-        } else {
-          const productCode = product.productCode || '';
-          price = parseInt(productCode.slice(-2)) || 10;
-        }
+        // Calculate price only if no custom pricing provided
+        if (!customPricing || !customPricing.totalPrice) {
+          let price = 0;
+          if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
+            price = parseFloat(product.shelfPrice);
+          } else if (product.adminPrice && parseFloat(product.adminPrice) > 0) {
+            price = parseFloat(product.adminPrice);
+          } else {
+            const productCode = product.productCode || '';
+            price = parseInt(productCode.slice(-2)) || 10;
+          }
 
-        totalPrice += price * item.quantity;
+          totalPrice += price * item.quantity;
+        }
 
         orderItems.push({
           name: product.name,
@@ -1357,6 +1379,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: orderItems,
         quantities: orderQuantities,
         totalPrice: totalPrice.toString(),
+        customPricingUsed: !!(customPricing && customPricing.totalPrice),
+        customDescription: customPricing?.description || null,
         shiftId: activeShift?.id || null,
         status: 'completed' // Manual orders are immediately completed and reduce stock
       };

@@ -401,10 +401,6 @@ const baseStockFormSchema = z.object({
   jarWeight: z.union([z.number(), z.string().transform((val) => parseFloat(val))]).refine(val => !isNaN(val) && val >= 0, 'Jar weight must be a valid positive number').optional(),
   costPrice: z.string().regex(/^\d+(\.\d{0,2})?$/, 'Cost price must be a valid number'),
   shelfPrice: z.string().regex(/^\d+(\.\d{0,2})?$/, 'Shelf price must be a valid number'),
-  // Deal pricing fields (optional)
-  dealPrice: z.string().optional(),
-  dealStartDate: z.string().optional(),
-  dealEndDate: z.string().optional(),
   // Worker signature fields
   workerName: z.string().min(1, 'Worker name is required'),
   entryDate: z.string().min(1, 'Entry date is required')
@@ -479,7 +475,12 @@ const manualOrderFormSchema = z.object({
       // Allow any positive decimal value - validation will be handled at the input level
       return val > 0;
     }, 'Quantity must be greater than 0')
-  })).min(1, 'At least one item is required')
+  })).min(1, 'At least one item is required'),
+  // Custom pricing fields (optional)
+  customPricing: z.object({
+    totalPrice: z.string().optional(),
+    description: z.string().optional()
+  }).optional()
 });
 
 // Stock movement form schema
@@ -742,7 +743,11 @@ export function AdminDashboard() {
   const manualOrderForm = useForm<z.infer<typeof manualOrderFormSchema>>({
     resolver: zodResolver(manualOrderFormSchema),
     defaultValues: {
-      items: [{ productId: 0, quantity: 1 }]
+      items: [{ productId: 0, quantity: 1 }],
+      customPricing: {
+        totalPrice: '',
+        description: ''
+      }
     }
   });
 
@@ -1661,7 +1666,11 @@ export function AdminDashboard() {
   const handleCreateManualOrder = () => {
     setShowManualOrderForm(true);
     manualOrderForm.reset({
-      items: [{ productId: 0, quantity: 1 }]
+      items: [{ productId: 0, quantity: 1 }],
+      customPricing: {
+        totalPrice: '',
+        description: ''
+      }
     });
   };
 
@@ -1688,9 +1697,7 @@ export function AdminDashboard() {
       if (product && item.productId > 0 && item.quantity > 0) {
         // Use deal price first, then shelf price, then admin price as fallback
         let price = 0;
-        if (product.dealPrice && parseFloat(product.dealPrice) > 0) {
-          price = parseFloat(product.dealPrice);
-        } else if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
+        if (product.shelfPrice && parseFloat(product.shelfPrice) > 0) {
           price = parseFloat(product.shelfPrice);
         } else {
           price = parseFloat(product.adminPrice || '0');
@@ -3535,27 +3542,9 @@ export function AdminDashboard() {
                         
                         {/* Pricing */}
                         <div className="mt-3 space-y-1">
-                          {product.dealPrice ? (
-                            <>
-                              <p className="mobile-text-sm text-green-700 font-semibold">
-                                Deal: €{product.dealPrice}/g <Badge className="ml-1 bg-green-100 text-green-800 mobile-text-xs">Active</Badge>
-                              </p>
-                              <p className="mobile-text-sm text-gray-500 line-through">
-                                Shelf: €{product.shelfPrice || product.adminPrice || '0'}/g
-                              </p>
-                              {(product.dealStartDate || product.dealEndDate) && (
-                                <p className="mobile-text-xs text-green-600">
-                                  {product.dealStartDate && `From: ${product.dealStartDate}`}
-                                  {product.dealStartDate && product.dealEndDate && ' | '}
-                                  {product.dealEndDate && `Until: ${product.dealEndDate}`}
-                                </p>
-                              )}
-                            </>
-                          ) : (
-                            <p className="mobile-text-sm text-green-700">
-                              Shelf: €{product.shelfPrice || product.adminPrice || '0'}/g
-                            </p>
-                          )}
+                          <p className="mobile-text-sm text-green-700">
+                            Shelf: €{product.shelfPrice || product.adminPrice || '0'}/g
+                          </p>
                           <p className="mobile-text-sm text-gray-600">
                             Cost: €{product.costPrice || '0'}/g
                           </p>
@@ -4592,99 +4581,6 @@ export function AdminDashboard() {
                               )}
                             />
                           </div>
-                          
-                          {/* Deal Pricing Section */}
-                          <div className="space-y-4 pt-4 border-t border-blue-200">
-                            <h6 className="font-medium text-sm text-green-700 flex items-center">
-                              <Tag className="w-4 h-4 mr-2" />
-                              Deal Pricing (Optional)
-                            </h6>
-                            <p className="text-xs text-gray-600 mb-3">
-                              Set special pricing that overrides shelf price in admin systems
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <FormField
-                                control={stockForm.control}
-                                name="dealPrice"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Deal Price</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="0.00" 
-                                        {...field} 
-                                        value={field.value || ''}
-                                        onChange={(e) => {
-                                          let value = e.target.value;
-                                          if (value && value !== '0' && value !== '0.') {
-                                            value = value.replace(/^0+(?=\d)/, '');
-                                          }
-                                          field.onChange(value);
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={stockForm.control}
-                                name="dealStartDate"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Start Date</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="date"
-                                        {...field} 
-                                        value={field.value || ''}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={stockForm.control}
-                                name="dealEndDate"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>End Date</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="date"
-                                        {...field} 
-                                        value={field.value || ''}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                            
-                            {/* Remove Deal Button */}
-                            {(stockForm.watch('dealPrice') || stockForm.watch('dealStartDate') || stockForm.watch('dealEndDate')) && (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  stockForm.setValue('dealPrice', '');
-                                  stockForm.setValue('dealStartDate', '');
-                                  stockForm.setValue('dealEndDate', '');
-                                }}
-                                className="text-red-600 border-red-300 hover:bg-red-50"
-                              >
-                                <X className="w-4 h-4 mr-2" />
-                                Remove Deal
-                              </Button>
-                            )}
-                          </div>
                         </div>
                       </div>
                       
@@ -5552,8 +5448,7 @@ export function AdminDashboard() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   {products.map((product: any) => {
-                                    const hasDeal = product.dealPrice && parseFloat(product.dealPrice) > 0;
-                                    const displayPrice = hasDeal ? product.dealPrice : (product.shelfPrice || product.adminPrice);
+                                    const displayPrice = product.shelfPrice || product.adminPrice;
                                     const originalPrice = product.shelfPrice || product.adminPrice;
                                     
                                     return (
@@ -5649,6 +5544,70 @@ export function AdminDashboard() {
                       {manualOrderForm.watch('items')?.length || 0} item(s)
                     </div>
                   </div>
+                </div>
+
+                {/* Custom Pricing Section */}
+                <div className="border border-orange-200 rounded-lg p-4 bg-orange-50">
+                  <h4 className="font-medium text-orange-800 mb-3 flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    Custom Pricing (Optional)
+                  </h4>
+                  <p className="text-sm text-orange-700 mb-4">
+                    Override calculated pricing with custom pricing like "5g for €30"
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={manualOrderForm.control}
+                      name="customPricing.totalPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Custom Total Price</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="30.00"
+                              {...field}
+                              className="bg-white"
+                            />
+                          </FormControl>
+                          <FormDescription className="text-xs">
+                            Enter total price in euros (overrides calculated pricing)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={manualOrderForm.control}
+                      name="customPricing.description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="e.g., 5g for €30"
+                              {...field}
+                              className="bg-white"
+                            />
+                          </FormControl>
+                          <FormDescription className="text-xs">
+                            Brief description of the custom pricing deal
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {manualOrderForm.watch('customPricing.totalPrice') && (
+                    <div className="mt-3 p-2 bg-orange-100 border border-orange-300 rounded text-sm">
+                      <strong>Custom pricing active:</strong> Order total will be €{manualOrderForm.watch('customPricing.totalPrice') || '0.00'} instead of €{calculateOrderTotal().toFixed(2)}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t">

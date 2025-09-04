@@ -448,7 +448,6 @@ export class DatabaseStorage implements IStorage {
         externalGrams: currentProduct.externalGrams,
         shelfPrice: currentProduct.shelfPrice,
         costPrice: currentProduct.costPrice,
-        dealPrice: currentProduct.dealPrice
       };
       const newValues = {
         onShelfGrams: newOnShelfGrams,
@@ -456,7 +455,6 @@ export class DatabaseStorage implements IStorage {
         externalGrams: newExternalGrams,
         shelfPrice: stockData.shelfPrice || currentProduct.shelfPrice,
         costPrice: stockData.costPrice || currentProduct.costPrice,
-        dealPrice: stockData.dealPrice !== undefined ? stockData.dealPrice : currentProduct.dealPrice
       };
       
       await this.createStockLog({
@@ -510,7 +508,6 @@ export class DatabaseStorage implements IStorage {
           externalGrams: stockData.externalGrams || 0,
           shelfPrice: stockData.shelfPrice,
           costPrice: stockData.costPrice,
-          dealPrice: stockData.dealPrice
         },
         notes: `New product created with initial stock`
       });
@@ -539,7 +536,6 @@ export class DatabaseStorage implements IStorage {
         isActive: products.isActive,
         createdAt: products.createdAt,
         shelfPrice: products.shelfPrice,
-        dealPrice: products.dealPrice,
         adminPrice: products.adminPrice,
       }
     })
