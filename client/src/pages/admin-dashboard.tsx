@@ -5625,7 +5625,7 @@ export function AdminDashboard() {
 
         {/* Stock Movement Dialog */}
         <Dialog open={showStockMovementForm} onOpenChange={setShowStockMovementForm}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold text-blue-800">
                 Move Stock Between Locations
