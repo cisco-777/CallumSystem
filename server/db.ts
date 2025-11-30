@@ -19,7 +19,7 @@ if (!pool) {
   }
 
   // Production-ready pool configuration
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.REPLIT_DEPLOYMENT;
+  const isProduction = process.env.NODE_ENV === 'production';
   
   pool = new Pool({ 
     connectionString: databaseUrl,

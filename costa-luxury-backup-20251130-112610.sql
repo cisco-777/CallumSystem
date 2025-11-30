@@ -2,8 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.9 (63f4182)
--- Dumped by pg_dump version 16.9
+\restrict dIESw97TyDBPTXX4BzFYKqz2LuVSE51n6jfHumOZpHLlnHSJKdqaNcwFTIjA9No
+
+-- Dumped from database version 16.10 (0374078)
+-- Dumped by pg_dump version 16.10
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -863,6 +865,7 @@ COPY public.donations (id, user_id, items, quantities, total_amount, status, cre
 37	1	[{"id": 58, "userId": 1, "product": {"id": 1, "name": "Zkittlez", "category": "Indica", "imageUrl": "/api/placeholder/300/200", "isActive": true, "createdAt": "2025-08-26T19:23:40.245Z", "description": "Premium indoor Indica strain with sweet fruity flavors", "productCode": "ZK4318"}, "quantity": 1, "createdAt": "2025-09-01T19:27:07.372Z", "productId": 1}]	\N	18	pending	2025-09-01 19:27:10.579098
 38	1	[{"id": 59, "userId": 1, "product": {"id": 1, "name": "Zkittlez", "category": "Indica", "imageUrl": "/api/placeholder/300/200", "isActive": true, "createdAt": "2025-08-26T19:23:40.245Z", "dealPrice": null, "adminPrice": "12.00", "shelfPrice": "12.00", "description": "Premium indoor Indica strain with sweet fruity flavors", "productCode": "ZK4318"}, "quantity": 1, "createdAt": "2025-09-01T19:33:25.845Z", "productId": 1}]	\N	12	pending	2025-09-01 19:33:28.920932
 39	1	[{"id": 60, "userId": 1, "product": {"id": 4, "name": "Wedding Cake", "category": "Hybrid", "imageUrl": "/api/placeholder/300/200", "isActive": true, "createdAt": "2025-08-26T19:23:40.245Z", "dealPrice": null, "adminPrice": "15", "shelfPrice": "15.00", "description": "Relaxing Indica-dominant hybrid with vanilla undertones", "productCode": "WC9615"}, "quantity": 1, "createdAt": "2025-09-02T09:52:25.793Z", "productId": 4}]	\N	15	pending	2025-09-02 09:52:28.712078
+40	1	[{"id": 62, "userId": 1, "product": {"id": 6, "name": "Dry-Shift Hash", "category": "Sativa", "imageUrl": "/api/placeholder/300/200", "isActive": true, "createdAt": "2025-08-26T19:23:40.245Z", "description": "Premium sativa hash with clean taste", "productCode": "DS1410"}, "quantity": 1, "createdAt": "2025-09-30T09:09:22.035Z", "productId": 6}, {"id": 61, "userId": 1, "product": {"id": 6, "name": "Dry-Shift Hash", "category": "Sativa", "imageUrl": "/api/placeholder/300/200", "isActive": true, "createdAt": "2025-08-26T19:23:40.245Z", "description": "Premium sativa hash with clean taste", "productCode": "DS1410"}, "quantity": 1, "createdAt": "2025-09-30T09:08:45.615Z", "productId": 6}]	\N	20	pending	2025-09-30 09:09:53.987157
 \.
 
 
@@ -872,6 +875,7 @@ COPY public.donations (id, user_id, items, quantities, total_amount, status, cre
 
 COPY public.email_reports (id, shift_id, report_type, subject, content, recipient_email, sent_at, shift_date, worker_name, metadata, created_at) FROM stdin;
 14	70	shift_end	Shift Report - Test - 03/09/2025	Worker: Test\nShift - 03/09/2025 01:01 - 10:56\n\nDISPENSARY\nNo orders processed during this shift\n\nSTOCK DISCREPANCIES\nZkittlez: 79.5g missing\nLemon Haze: 133g missing\nWedding Cake: 139g missing\nMoroccan Hash 2: 158g missing\nDry-Shift Hash: 150.5g missing\nvapes2: 94 units missing\nTest Product 3: 95.5g missing\nFinal Test Product: 195.5g missing\nWorking Product: 95g missing\n\nMEMBER DETAILS\nNew members: 0\nAll members: 3\nActive members: 3\nRenewed members: 0\nExpired members: 0\n\nFINANCIAL SUMMARY\nEXPENSES\nCurrent Shift Expenses:\n  Test: ₳200 paid of ₳800 (partial)\nOutstanding from Previous Shifts: None\nTotal payments made this shift: ₳200.00\n\nStarting till: ₳500\nCash in till: ₳5\nNotes: 5\nCoins: 5\nTotal collections: ₳0.00\nNet total: ₳0.00\n\nMONEY RECONCILIATION\nExpected in till: ₳300.00\nActual in till: ₳5.00\n₳295.00 missing\n\n	management@demo-social-club.com	2025-09-28 08:56:08.163169	03/09/2025	Test	{"netAmount": "0.00", "totalSales": "0.00", "shiftEndTime": "10:56", "totalExpenses": "0.00", "shiftStartTime": "01:01", "stockDiscrepancies": "1140.00"}	2025-09-28 08:56:08.163169
+15	72	shift_end	Shift Report - test - 30/09/2025	Worker: test\nShift - 30/09/2025 11:29 - 11:29\n\nDISPENSARY\nNo orders processed during this shift\n\nSTOCK DISCREPANCIES\nZkittlez: 75.5g missing\nLemon Haze: 133g missing\nWedding Cake: 139g missing\nDry-Shift Hash: 147g missing\nvapes2: 94 units missing\n\nMEMBER DETAILS\nNew members: 0\nAll members: 4\nActive members: 4\nRenewed members: 0\nExpired members: 0\n\nFINANCIAL SUMMARY\nEXPENSES\nCurrent Shift Expenses: None\nOutstanding from Previous Shifts:\n  Paid paul: ₳10 outstanding (₳0 of ₳10 paid)\nTotal payments made this shift: ₳0.00\n\nStarting till: ₳500\nCash in till: ₳5\nNotes: 5\nCoins: 5\nTotal collections: ₳0.00\nNet total: ₳0.00\n\nMONEY RECONCILIATION\nExpected in till: ₳500.00\nActual in till: ₳5.00\n₳495.00 missing\n\n	management@demo-social-club.com	2025-09-30 09:29:46.513601	30/09/2025	test	{"netAmount": "0.00", "totalSales": "0.00", "shiftEndTime": "11:29", "totalExpenses": "0.00", "shiftStartTime": "11:29", "stockDiscrepancies": "588.50"}	2025-09-30 09:29:46.513601
 \.
 
 
@@ -890,8 +894,8 @@ COPY public.expense_payments (id, expense_id, shift_id, payment_amount, payment_
 --
 
 COPY public.expenses (id, description, amount, worker_name, expense_date, created_at, shift_id, paid_amount, outstanding_amount, payment_status, last_payment_date) FROM stdin;
+41	Paid paul	10	test	2025-09-30 09:17:36.291132	2025-09-30 09:17:36.291132	\N	0.00	\N	unpaid	\N
 21	5	5	5	2025-08-27 22:57:19.528491	2025-08-27 22:57:19.528491	\N	5.00	0.00	paid	2025-09-02 18:53:40.692408
-39	Test	800	T	2025-09-03 23:02:16.951726	2025-09-03 23:02:16.951726	70	200.00	600.00	partial	\N
 \.
 
 
@@ -922,6 +926,7 @@ COPY public.orders (id, user_id, pickup_code, items, quantities, total_price, st
 63	\N	8405	[{"name": "Zkittlez", "category": "Cannabis", "productId": 1, "productCode": "ZK4318"}]	[{"quantity": 0.5, "productId": 1}]	6	completed	f	2025-09-02 18:22:07.375169	\N	f	\N
 65	\N	9606	[{"name": "Dry-Shift Hash", "category": "Hash", "productId": 6, "productCode": "DS1410"}]	[{"quantity": 0.5, "productId": 6}]	5	completed	f	2025-09-02 20:14:53.968767	60	f	\N
 66	\N	8737	[{"name": "Lemon Haze", "category": "Cannabis", "productId": 3, "productCode": "LH2213"}]	[{"quantity": 1, "productId": 3}]	10	completed	f	2025-09-03 10:08:31.1089	\N	f	\N
+67	1	5526	[{"name": "Dry-Shift Hash", "category": "Sativa", "productId": 6, "productCode": "DS1410"}, {"name": "Dry-Shift Hash", "category": "Sativa", "productId": 6, "productCode": "DS1410"}]	[{"quantity": 1, "productId": 6}, {"quantity": 1, "productId": 6}]	20	completed	f	2025-09-30 09:09:53.917697	71	f	\N
 8	1	3776	[{"name": "Blue Dream", "category": "Hybrid", "productId": 2, "productCode": "BD7010"}, {"name": "Zkittlez", "category": "Indica", "productId": 1, "productCode": "ZK4312"}]	[{"quantity": 1, "productId": 2}, {"quantity": 1, "productId": 1}]	22	completed	t	2025-08-27 15:54:27.656975	\N	f	\N
 2	1	8935	[{"name": "Blue Dream", "category": "Hybrid", "productId": 2, "productCode": "BD7010"}, {"name": "Lemon Haze", "category": "Sativa", "productId": 3, "productCode": "LH2213"}]	[{"quantity": 1, "productId": 2}, {"quantity": 1, "productId": 3}]	23	completed	t	2025-08-26 19:23:48.939127	\N	f	\N
 36	1	6956	[{"name": "Wedding Cake", "category": "Hybrid", "productId": 4, "productCode": "WC9615"}, {"name": "StarDog", "category": "Sativa", "productId": 7, "productCode": "BD7810"}, {"name": "Lemon Haze", "category": "Sativa", "productId": 3, "productCode": "LH2213"}]	[{"quantity": 1, "productId": 4}, {"quantity": 1, "productId": 7}, {"quantity": 2, "productId": 3}]	51	pending	t	2025-09-01 19:14:10.244299	48	f	\N
@@ -939,6 +944,7 @@ COPY public.orders (id, user_id, pickup_code, items, quantities, total_price, st
 57	\N	5264	[{"name": "vapes", "category": "Vapes", "productId": 23, "productCode": "999999"}]	[{"quantity": 1, "productId": 23}]	5	completed	f	2025-09-02 18:01:09.940275	58	f	\N
 61	\N	9177	[{"name": "weed", "category": "Cannabis", "productId": 24, "productCode": "GH8888"}]	[{"quantity": 0.5, "productId": 24}]	5	completed	f	2025-09-02 18:17:27.295591	\N	f	\N
 64	\N	5750	[{"name": "Zkittlez", "category": "Cannabis", "productId": 1, "productCode": "ZK4318"}]	[{"quantity": 0.5, "productId": 1}]	6	completed	f	2025-09-02 18:23:23.73889	\N	f	\N
+68	\N	6842	[{"name": "Dry-Shift Hash", "category": "Hash", "productId": 6, "productCode": "DS1410"}]	[{"quantity": 1, "productId": 6}]	10	completed	f	2025-09-30 09:11:22.577849	71	f	\N
 6	1	6714	[{"name": "Lemon Haze", "category": "Sativa", "productId": 3, "productCode": "LH2213"}, {"name": "Moroccan Hash", "category": "Indica", "productId": 5, "productCode": "MH5812"}, {"name": "Dry-Shift Hash", "category": "Sativa", "productId": 6, "productCode": "DS1410"}]	[{"quantity": 1, "productId": 3}, {"quantity": 1, "productId": 5}, {"quantity": 1, "productId": 6}]	35	completed	t	2025-08-26 21:18:58.100597	\N	f	\N
 9	1	2477	[{"name": "Wedding Cake", "category": "Hybrid", "productId": 4, "productCode": "WC9615"}, {"name": "Lemon Haze", "category": "Sativa", "productId": 3, "productCode": "LH2213"}]	[{"quantity": 1, "productId": 4}, {"quantity": 1, "productId": 3}]	28	completed	t	2025-08-27 15:59:02.677437	\N	f	\N
 10	1	5460	[{"name": "Blue Dream", "category": "Hybrid", "productId": 2, "productCode": "BD7010"}]	[{"quantity": 1, "productId": 2}]	10	completed	t	2025-08-27 16:21:26.036497	\N	f	\N
@@ -963,11 +969,11 @@ COPY public.orders (id, user_id, pickup_code, items, quantities, total_price, st
 --
 
 COPY public.products (id, name, description, image_url, category, product_type, product_code, stock_quantity, admin_price, supplier, on_shelf_grams, internal_grams, external_grams, cost_price, shelf_price, last_updated, is_active, created_at, worker_name, entry_date, jar_weight) FROM stdin;
-6	Dry-Shift Hash	Premium sativa hash with clean taste	/api/placeholder/300/200	Sativa	Hash	DS1410	235	10	Alpine Hash Co	155.50	29.00	50.00	7.50	10.00	2025-09-02 20:14:54.084	t	2025-08-26 19:23:40.245968	\N	\N	\N
 3	Lemon Haze	Energizing Sativa with citrusy lemon aroma	/api/placeholder/300/200	Sativa	Cannabis	LH2213	211	13.00	Dutch Masters	138.00	10.00	63.00	9.00	13.00	2025-09-03 10:08:31.225	t	2025-08-26 19:23:40.245968	dec	2025-09-01	\N
 4	Wedding Cake	Relaxing Indica-dominant hybrid with vanilla undertones	/api/placeholder/300/200	Hybrid	Cannabis	WC9615	259	15.00	Wedding Growers	139.00	70.00	50.00	11.00	15.00	2025-09-03 10:08:55.448	t	2025-08-26 19:23:40.245968	dec	2025-09-03	150.00
 26	vapes2			\N	Vapes	999999	99	9	9	99.00	0.00	0.00	9	9	2025-09-03 10:24:14.207	t	2025-09-03 10:24:14.22424	dec	2025-09-03	0.00
 1	Zkittlez	Premium indoor Indica strain with sweet fruity flavors	/api/placeholder/300/200	Indica	Cannabis	ZK4318	111	12.00	Premium Growers Ltd	80.50	20.50	10.00	8.00	12.00	2025-09-04 12:21:42.367	t	2025-08-26 19:23:40.245968	TestWorker	2025-09-02	\N
+6	Dry-Shift Hash	Premium sativa hash with clean taste	/api/placeholder/300/200	Sativa	Hash	DS1410	231	10	Alpine Hash Co	152.00	29.00	50.00	7.50	10.00	2025-09-30 09:11:22.723	t	2025-08-26 19:23:40.245968	\N	\N	\N
 \.
 
 
@@ -976,9 +982,8 @@ COPY public.products (id, name, description, image_url, category, product_type, 
 --
 
 COPY public.shift_activities (id, shift_id, activity_type, activity_id, description, amount, "timestamp", metadata) FROM stdin;
-206	70	shift_start	70	Shift started by Test	\N	2025-09-03 23:01:54.198799	{"action": "start", "worker": "Test"}
-207	70	expense	39	Expense logged: Test	800	2025-09-03 23:02:17.126775	{"worker": "T", "description": "Test"}
-208	70	reconciliation	108	Stock reconciliation completed. 1140.00 discrepancies found.	\N	2025-09-28 08:56:05.680362	{"products": 9, "discrepancies": "1140.00", "reconciliationId": 108}
+215	72	shift_start	72	Shift started by test	\N	2025-09-30 09:29:37.098387	{"action": "start", "worker": "test"}
+216	72	reconciliation	113	Stock reconciliation completed. 588.50 discrepancies found.	\N	2025-09-30 09:29:45.569241	{"products": 5, "discrepancies": "588.50", "reconciliationId": 113}
 \.
 
 
@@ -1085,6 +1090,10 @@ COPY public.shift_reconciliations (id, shift_date, product_counts, discrepancies
 105	2025-09-03 10:06:02.037916	{"1": 5, "3": 5, "4": 5, "5": 5, "6": 5}	{"1": {"type": "missing", "actual": 5, "expected": 49, "difference": 44, "productName": "Zkittlez", "productType": "Cannabis"}, "3": {"type": "missing", "actual": 5, "expected": 139, "difference": 134, "productName": "Lemon Haze", "productType": "Cannabis"}, "4": {"type": "missing", "actual": 5, "expected": 139, "difference": 134, "productName": "Wedding Cake", "productType": "Cannabis"}, "5": {"type": "missing", "actual": 5, "expected": 163, "difference": 158, "productName": "Moroccan Hash 2", "productType": "Hash"}, "6": {"type": "missing", "actual": 5, "expected": 155.5, "difference": 150.5, "productName": "Dry-Shift Hash", "productType": "Hash"}}	620.50	\N	2025-09-03 10:06:02.037916	5	5	5
 107	2025-09-28 08:56:04.995826	{"1": 1, "3": 5, "4": 5, "5": 5, "6": 5, "26": 5, "27": 5, "28": 5, "29": 5}	{"1": {"type": "missing", "actual": 1, "expected": 80.5, "difference": 79.5, "productName": "Zkittlez", "productType": "Cannabis"}, "3": {"type": "missing", "actual": 5, "expected": 138, "difference": 133, "productName": "Lemon Haze", "productType": "Cannabis"}, "4": {"type": "missing", "actual": 0, "expected": 139, "difference": 139, "productName": "Wedding Cake", "productType": "Cannabis"}, "5": {"type": "missing", "actual": 5, "expected": 163, "difference": 158, "productName": "Moroccan Hash 2", "productType": "Hash"}, "6": {"type": "missing", "actual": 5, "expected": 155.5, "difference": 150.5, "productName": "Dry-Shift Hash", "productType": "Hash"}, "26": {"type": "missing", "actual": 5, "expected": 99, "difference": 94, "productName": "vapes2", "productType": "Vapes"}, "27": {"type": "missing", "actual": 5, "expected": 100.5, "difference": 95.5, "productName": "Test Product 3", "productType": "Cannabis"}, "28": {"type": "missing", "actual": 5, "expected": 200.5, "difference": 195.5, "productName": "Final Test Product", "productType": "Cannabis"}, "29": {"type": "missing", "actual": 5, "expected": 100, "difference": 95, "productName": "Working Product", "productType": "Cannabis"}}	1140.00	\N	2025-09-28 08:56:04.995826	5	5	5
 108	2025-09-28 08:56:05.283921	{"1": 1, "3": 5, "4": 5, "5": 5, "6": 5, "26": 5, "27": 5, "28": 5, "29": 5}	{"1": {"type": "missing", "actual": 1, "expected": 80.5, "difference": 79.5, "productName": "Zkittlez", "productType": "Cannabis"}, "3": {"type": "missing", "actual": 5, "expected": 138, "difference": 133, "productName": "Lemon Haze", "productType": "Cannabis"}, "4": {"type": "missing", "actual": 0, "expected": 139, "difference": 139, "productName": "Wedding Cake", "productType": "Cannabis"}, "5": {"type": "missing", "actual": 5, "expected": 163, "difference": 158, "productName": "Moroccan Hash 2", "productType": "Hash"}, "6": {"type": "missing", "actual": 5, "expected": 155.5, "difference": 150.5, "productName": "Dry-Shift Hash", "productType": "Hash"}, "26": {"type": "missing", "actual": 5, "expected": 99, "difference": 94, "productName": "vapes2", "productType": "Vapes"}, "27": {"type": "missing", "actual": 5, "expected": 100.5, "difference": 95.5, "productName": "Test Product 3", "productType": "Cannabis"}, "28": {"type": "missing", "actual": 5, "expected": 200.5, "difference": 195.5, "productName": "Final Test Product", "productType": "Cannabis"}, "29": {"type": "missing", "actual": 5, "expected": 100, "difference": 95, "productName": "Working Product", "productType": "Cannabis"}}	1140.00	\N	2025-09-28 08:56:05.283921	5	5	5
+109	2025-09-30 09:20:58.987444	{"1": 80, "3": 138, "4": 259, "6": 150, "26": 99}	{"4": {"type": "excess", "actual": 259, "expected": 139, "difference": -120, "productName": "Wedding Cake", "productType": "Cannabis"}, "6": {"type": "missing", "actual": 150, "expected": 152, "difference": 2, "productName": "Dry-Shift Hash", "productType": "Hash"}}	122.00	\N	2025-09-30 09:20:58.987444	480	5	20
+111	2025-09-30 09:29:15.713599	{"1": 5, "3": 5, "4": 5, "6": 5, "26": 5}	{"1": {"type": "missing", "actual": 5, "expected": 80.5, "difference": 75.5, "productName": "Zkittlez", "productType": "Cannabis"}, "3": {"type": "missing", "actual": 5, "expected": 138, "difference": 133, "productName": "Lemon Haze", "productType": "Cannabis"}, "4": {"type": "missing", "actual": 0, "expected": 139, "difference": 139, "productName": "Wedding Cake", "productType": "Cannabis"}, "6": {"type": "missing", "actual": 5, "expected": 152, "difference": 147, "productName": "Dry-Shift Hash", "productType": "Hash"}, "26": {"type": "missing", "actual": 5, "expected": 99, "difference": 94, "productName": "vapes2", "productType": "Vapes"}}	588.50	\N	2025-09-30 09:29:15.713599	5	5	5
+112	2025-09-30 09:29:44.873121	{"1": 5, "3": 5, "4": 5, "6": 5, "26": 5}	{"1": {"type": "missing", "actual": 5, "expected": 80.5, "difference": 75.5, "productName": "Zkittlez", "productType": "Cannabis"}, "3": {"type": "missing", "actual": 5, "expected": 138, "difference": 133, "productName": "Lemon Haze", "productType": "Cannabis"}, "4": {"type": "missing", "actual": 0, "expected": 139, "difference": 139, "productName": "Wedding Cake", "productType": "Cannabis"}, "6": {"type": "missing", "actual": 5, "expected": 152, "difference": 147, "productName": "Dry-Shift Hash", "productType": "Hash"}, "26": {"type": "missing", "actual": 5, "expected": 99, "difference": 94, "productName": "vapes2", "productType": "Vapes"}}	588.50	\N	2025-09-30 09:29:44.873121	5	5	5
+113	2025-09-30 09:29:45.144735	{"1": 5, "3": 5, "4": 5, "6": 5, "26": 5}	{"1": {"type": "missing", "actual": 5, "expected": 80.5, "difference": 75.5, "productName": "Zkittlez", "productType": "Cannabis"}, "3": {"type": "missing", "actual": 5, "expected": 138, "difference": 133, "productName": "Lemon Haze", "productType": "Cannabis"}, "4": {"type": "missing", "actual": 0, "expected": 139, "difference": 139, "productName": "Wedding Cake", "productType": "Cannabis"}, "6": {"type": "missing", "actual": 5, "expected": 152, "difference": 147, "productName": "Dry-Shift Hash", "productType": "Hash"}, "26": {"type": "missing", "actual": 5, "expected": 99, "difference": 94, "productName": "vapes2", "productType": "Vapes"}}	588.50	\N	2025-09-30 09:29:45.144735	5	5	5
 \.
 
 
@@ -1121,6 +1130,8 @@ COPY public.shifts (id, shift_id, worker_name, start_time, end_time, status, shi
 59	SHIFT 02/09/2025 - 7	5	2025-09-02 18:05:57.786562	2025-09-02 18:06:42.53	completed	2025-09-02	15.00	5.00	10.00	1166.00	82	\N	2025-09-02 18:05:57.786562	5
 70	SHIFT 03/09/2025 - 6	Test	2025-09-03 23:01:54.14721	2025-09-28 08:56:05.617	completed	2025-09-03	0.00	0.00	0.00	1140.00	108	\N	2025-09-03 23:01:54.14721	500
 60	SHIFT 02/09/2025 - 8	test	2025-09-02 20:11:42.815202	2025-09-02 20:33:18.741	completed	2025-09-02	5.00	500.00	-495.00	1183.50	\N	\N	2025-09-02 20:11:42.815202	5
+72	SHIFT 30/09/2025 - 2	test	2025-09-30 09:29:37.056044	2025-09-30 09:29:45.508	completed	2025-09-30	0.00	0.00	0.00	588.50	113	\N	2025-09-30 09:29:37.056044	500
+71	SHIFT 30/09/2025	test	2025-09-30 09:04:00.951197	2025-09-30 09:20:59.72	completed	2025-09-30	30.00	10.00	20.00	122.00	\N	\N	2025-09-30 09:04:00.951197	500
 \.
 
 
@@ -1132,545 +1143,4 @@ COPY public.stock_logs (id, shift_id, product_id, action_type, worker_name, acti
 48	70	\N	product_created	TestWorker	2025-09-04 12:21:44.978317	Working Product	\N	{"onShelfGrams": "100.00", "externalGrams": "25.00", "internalGrams": "50.00"}	\N	\N	\N	New product created with initial stock	\N	2025-09-04 12:21:44.978317
 46	70	\N	product_created	TestWorker	2025-09-04 12:21:10.800213	Final Test Product	\N	{"onShelfGrams": "200.50", "externalGrams": "50.00", "internalGrams": "75.25"}	\N	\N	\N	New product created with initial stock	\N	2025-09-04 12:21:10.800213
 49	70	\N	product_deleted	Admin	2025-09-28 09:48:28.596	Final Test Product	{"id": 28, "name": "Final Test Product", "costPrice": "0", "shelfPrice": "0", "productType": "Cannabis", "onShelfGrams": "200.50", "externalGrams": "50.00", "internalGrams": "75.25"}	{"status": "deleted"}	\N	\N	\N	Product "Final Test Product" (ID: 28) has been deleted from inventory	\N	2025-09-28 09:48:28.606777
-50	70	\N	product_deleted	Admin	2025-09-28 09:48:31.395	Working Product	{"id": 29, "name": "Working Product", "costPrice": "0", "shelfPrice": "0", "productType": "Cannabis", "onShelfGrams": "100.00", "externalGrams": "25.00", "internalGrams": "50.00"}	{"status": "deleted"}	\N	\N	\N	Product "Working Product" (ID: 29) has been deleted from inventory	\N	2025-09-28 09:48:31.406
-45	70	\N	product_created	TestWorker	2025-09-04 12:19:42.484952	Test Product 3	\N	{"onShelfGrams": "100.50", "externalGrams": "25.00", "internalGrams": "50.25"}	\N	\N	\N	New product created with initial stock	\N	2025-09-04 12:19:42.484952
-51	70	\N	product_deleted	Admin	2025-09-28 09:48:35.743	Test Product 3	{"id": 27, "name": "Test Product 3", "costPrice": "0", "shelfPrice": "0", "productType": "Cannabis", "onShelfGrams": "100.50", "externalGrams": "25.00", "internalGrams": "50.25"}	{"status": "deleted"}	\N	\N	\N	Product "Test Product 3" (ID: 27) has been deleted from inventory	\N	2025-09-28 09:48:35.753163
-52	70	\N	product_deleted	Admin	2025-09-28 09:48:40.539	Moroccan Hash 2	{"id": 5, "name": "Moroccan Hash 2", "costPrice": "8.50", "shelfPrice": "12.00", "productType": "Hash", "onShelfGrams": "163.00", "externalGrams": "70.00", "internalGrams": "40.00"}	{"status": "deleted"}	\N	\N	\N	Product "Moroccan Hash 2" (ID: 5) has been deleted from inventory	\N	2025-09-28 09:48:40.549428
-43	\N	26	product_created	dec	2025-09-03 10:24:14.328458	vapes2	\N	{"costPrice": "9", "shelfPrice": "9", "onShelfGrams": 99, "externalGrams": 0, "internalGrams": 0}	\N	\N	\N	New product created with initial stock	\N	2025-09-03 10:24:14.328458
-44	70	1	product_edited	TestWorker	2025-09-04 12:18:36.196814	Zkittlez	{"costPrice": "8.00", "dealPrice": null, "shelfPrice": "12.00", "onShelfGrams": "49.00", "externalGrams": "35.00", "internalGrams": "38.00"}	{"costPrice": "8.00", "dealPrice": null, "shelfPrice": "12.00", "onShelfGrams": 75.25, "externalGrams": 10, "internalGrams": 25.75}	\N	\N	\N	Product stock and pricing updated	\N	2025-09-04 12:18:36.196814
-47	70	1	stock_movement	TestWorker	2025-09-04 12:21:42.463747	Zkittlez	{"onShelfGrams": "75.25", "externalGrams": "10.00", "internalGrams": "25.75"}	{"onShelfGrams": "80.5", "externalGrams": "10.00", "internalGrams": "20.5"}	\N	\N	\N	5.25g moved from internal to shelf - Test after restart	\N	2025-09-04 12:21:42.463747
-\.
-
-
---
--- Data for Name: stock_logs_decimal; Type: TABLE DATA; Schema: public; Owner: neondb_owner
---
-
-COPY public.stock_logs_decimal (id, stock_log_id, quantity_changed_decimal, created_at) FROM stdin;
-\.
-
-
---
--- Data for Name: stock_movements; Type: TABLE DATA; Schema: public; Owner: neondb_owner
---
-
-COPY public.stock_movements (id, product_id, from_location, to_location, quantity, worker_name, movement_date, notes, created_at, quantity_decimal) FROM stdin;
-1	1	external	internal	50	dec	2025-09-01 21:00:43		2025-09-01 19:00:44.828007	\N
-2	1	internal	shelf	10	dec	2025-09-01 21:01:33		2025-09-01 19:01:34.403945	\N
-3	6	internal	shelf	1	dec	2025-09-01 21:36:06		2025-09-01 19:36:10.258583	\N
-4	3	internal	shelf	50	dec	2025-09-02 12:15:26		2025-09-02 10:15:28.87717	\N
-9	1	internal	shelf	5	TestWorker	2025-09-04 12:21:42	Test after restart	2025-09-04 12:21:42.342494	5.25
-\.
-
-
---
--- Data for Name: stock_movements_decimal; Type: TABLE DATA; Schema: public; Owner: neondb_owner
---
-
-COPY public.stock_movements_decimal (id, stock_movement_id, quantity_decimal, created_at) FROM stdin;
-\.
-
-
---
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: neondb_owner
---
-
-COPY public.users (id, email, password, first_name, last_name, phone_number, date_of_birth, address, profile_image_url, id_image_url, is_onboarded, onboarding_data, created_at, membership_status, approval_date, expiry_date, approved_by, renewal_count, last_active, id_back_image_url, role, is_banned, banned_by, banned_at, ban_reason) FROM stdin;
-22	test123!@gmail.com	test123						\N	\N	f	\N	2025-09-28 09:47:42.418097	pending	\N	\N	\N	0	\N	\N	\N	f	\N	\N	\N
-1	demo@member.com	demo123	John	Doe	+44 7700 900123	1990-01-15	123 Demo Street, London, UK	\N	\N	t	\N	2025-08-26 19:23:26.75159	approved	2025-08-26 21:57:21.551	2026-08-26 21:57:21.551	System Migration	0	2025-09-28 11:22:23.417	\N	\N	f	\N	\N	\N
-23	jack123@gmail.com	test123						\N	\N	f	\N	2025-09-28 11:22:46.437987	pending	\N	\N	\N	0	\N	\N	\N	f	\N	\N	\N
-2	admin123@gmail.com	admin123	tom	tom	+341241224	2025-08-06	tom	\N	\N	t	\N	2025-08-26 19:23:26.75159	approved	2025-08-26 21:57:21.551	2026-08-26 21:57:21.551	System Migration	0	\N	\N	superadmin	f	\N	\N	\N
-21	test123@gmail.com	test123	Vincenzo	test	0610252060	2025-09-25	2, Benalmadena	\N	\N	t	\N	2025-09-01 19:52:34.740163	approved	2025-09-01 19:53:23.412	2026-09-01 19:53:23.412	Admin Panel	0	2025-09-01 19:53:33.474	\N	\N	f	\N	\N	\N
-19	Tim123@gmail.com	tim123						\N	\N	f	\N	2025-08-28 12:35:49.3767	approved	2025-08-31 19:07:41.559	2026-08-31 19:07:41.559	Admin Panel	0	2025-09-01 18:12:45.672	\N	\N	f	\N	\N	\N
-\.
-
-
---
--- Name: basket_items_decimal_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.basket_items_decimal_id_seq', 1, false);
-
-
---
--- Name: basket_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.basket_items_id_seq', 60, true);
-
-
---
--- Name: donations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.donations_id_seq', 39, true);
-
-
---
--- Name: email_reports_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.email_reports_id_seq', 14, true);
-
-
---
--- Name: expense_payments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.expense_payments_id_seq', 2, true);
-
-
---
--- Name: expenses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.expenses_id_seq', 39, true);
-
-
---
--- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.orders_id_seq', 66, true);
-
-
---
--- Name: products_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.products_id_seq', 29, true);
-
-
---
--- Name: shift_activities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.shift_activities_id_seq', 208, true);
-
-
---
--- Name: shift_reconciliations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.shift_reconciliations_id_seq', 108, true);
-
-
---
--- Name: shifts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.shifts_id_seq', 70, true);
-
-
---
--- Name: stock_logs_decimal_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.stock_logs_decimal_id_seq', 1, false);
-
-
---
--- Name: stock_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.stock_logs_id_seq', 52, true);
-
-
---
--- Name: stock_movements_decimal_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.stock_movements_decimal_id_seq', 1, false);
-
-
---
--- Name: stock_movements_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.stock_movements_id_seq', 9, true);
-
-
---
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
---
-
-SELECT pg_catalog.setval('public.users_id_seq', 23, true);
-
-
---
--- Name: basket_items_decimal basket_items_decimal_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.basket_items_decimal
-    ADD CONSTRAINT basket_items_decimal_pkey PRIMARY KEY (id);
-
-
---
--- Name: basket_items basket_items_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.basket_items
-    ADD CONSTRAINT basket_items_pkey PRIMARY KEY (id);
-
-
---
--- Name: donations donations_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.donations
-    ADD CONSTRAINT donations_pkey PRIMARY KEY (id);
-
-
---
--- Name: email_reports email_reports_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.email_reports
-    ADD CONSTRAINT email_reports_pkey PRIMARY KEY (id);
-
-
---
--- Name: expense_payments expense_payments_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.expense_payments
-    ADD CONSTRAINT expense_payments_pkey PRIMARY KEY (id);
-
-
---
--- Name: expenses expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.expenses
-    ADD CONSTRAINT expenses_pkey PRIMARY KEY (id);
-
-
---
--- Name: orders orders_pickup_code_unique; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_pickup_code_unique UNIQUE (pickup_code);
-
-
---
--- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
-
-
---
--- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.products
-    ADD CONSTRAINT products_pkey PRIMARY KEY (id);
-
-
---
--- Name: products products_product_code_unique; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.products
-    ADD CONSTRAINT products_product_code_unique UNIQUE (product_code);
-
-
---
--- Name: shift_activities shift_activities_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.shift_activities
-    ADD CONSTRAINT shift_activities_pkey PRIMARY KEY (id);
-
-
---
--- Name: shift_reconciliations shift_reconciliations_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.shift_reconciliations
-    ADD CONSTRAINT shift_reconciliations_pkey PRIMARY KEY (id);
-
-
---
--- Name: shifts shifts_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.shifts
-    ADD CONSTRAINT shifts_pkey PRIMARY KEY (id);
-
-
---
--- Name: shifts shifts_shift_id_unique; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.shifts
-    ADD CONSTRAINT shifts_shift_id_unique UNIQUE (shift_id);
-
-
---
--- Name: stock_logs_decimal stock_logs_decimal_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_logs_decimal
-    ADD CONSTRAINT stock_logs_decimal_pkey PRIMARY KEY (id);
-
-
---
--- Name: stock_logs stock_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_logs
-    ADD CONSTRAINT stock_logs_pkey PRIMARY KEY (id);
-
-
---
--- Name: stock_movements_decimal stock_movements_decimal_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_movements_decimal
-    ADD CONSTRAINT stock_movements_decimal_pkey PRIMARY KEY (id);
-
-
---
--- Name: stock_movements stock_movements_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_movements
-    ADD CONSTRAINT stock_movements_pkey PRIMARY KEY (id);
-
-
---
--- Name: users users_email_unique; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_email_unique UNIQUE (email);
-
-
---
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
-
-
---
--- Name: expense_payments_expense_id_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX expense_payments_expense_id_idx ON public.expense_payments USING btree (expense_id);
-
-
---
--- Name: expense_payments_payment_date_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX expense_payments_payment_date_idx ON public.expense_payments USING btree (payment_date);
-
-
---
--- Name: expense_payments_shift_id_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX expense_payments_shift_id_idx ON public.expense_payments USING btree (shift_id);
-
-
---
--- Name: expenses_expense_date_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX expenses_expense_date_idx ON public.expenses USING btree (expense_date);
-
-
---
--- Name: expenses_payment_status_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX expenses_payment_status_idx ON public.expenses USING btree (payment_status);
-
-
---
--- Name: expenses_shift_id_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX expenses_shift_id_idx ON public.expenses USING btree (shift_id);
-
-
---
--- Name: expenses_worker_name_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX expenses_worker_name_idx ON public.expenses USING btree (worker_name);
-
-
---
--- Name: stock_movements_movement_date_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX stock_movements_movement_date_idx ON public.stock_movements USING btree (movement_date);
-
-
---
--- Name: stock_movements_product_id_idx; Type: INDEX; Schema: public; Owner: neondb_owner
---
-
-CREATE INDEX stock_movements_product_id_idx ON public.stock_movements USING btree (product_id);
-
-
---
--- Name: basket_items_decimal basket_items_decimal_basket_item_id_basket_items_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.basket_items_decimal
-    ADD CONSTRAINT basket_items_decimal_basket_item_id_basket_items_id_fk FOREIGN KEY (basket_item_id) REFERENCES public.basket_items(id);
-
-
---
--- Name: basket_items basket_items_product_id_products_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.basket_items
-    ADD CONSTRAINT basket_items_product_id_products_id_fk FOREIGN KEY (product_id) REFERENCES public.products(id);
-
-
---
--- Name: basket_items basket_items_user_id_users_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.basket_items
-    ADD CONSTRAINT basket_items_user_id_users_id_fk FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-
---
--- Name: donations donations_user_id_users_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.donations
-    ADD CONSTRAINT donations_user_id_users_id_fk FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-
---
--- Name: email_reports email_reports_shift_id_shifts_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.email_reports
-    ADD CONSTRAINT email_reports_shift_id_shifts_id_fk FOREIGN KEY (shift_id) REFERENCES public.shifts(id);
-
-
---
--- Name: expense_payments expense_payments_expense_id_expenses_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.expense_payments
-    ADD CONSTRAINT expense_payments_expense_id_expenses_id_fk FOREIGN KEY (expense_id) REFERENCES public.expenses(id) ON DELETE CASCADE;
-
-
---
--- Name: expense_payments expense_payments_shift_id_shifts_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.expense_payments
-    ADD CONSTRAINT expense_payments_shift_id_shifts_id_fk FOREIGN KEY (shift_id) REFERENCES public.shifts(id);
-
-
---
--- Name: expenses expenses_shift_id_shifts_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.expenses
-    ADD CONSTRAINT expenses_shift_id_shifts_id_fk FOREIGN KEY (shift_id) REFERENCES public.shifts(id);
-
-
---
--- Name: orders orders_shift_id_shifts_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_shift_id_shifts_id_fk FOREIGN KEY (shift_id) REFERENCES public.shifts(id);
-
-
---
--- Name: orders orders_user_id_users_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_user_id_users_id_fk FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-
---
--- Name: shift_activities shift_activities_shift_id_shifts_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.shift_activities
-    ADD CONSTRAINT shift_activities_shift_id_shifts_id_fk FOREIGN KEY (shift_id) REFERENCES public.shifts(id);
-
-
---
--- Name: shifts shifts_reconciliation_id_shift_reconciliations_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.shifts
-    ADD CONSTRAINT shifts_reconciliation_id_shift_reconciliations_id_fk FOREIGN KEY (reconciliation_id) REFERENCES public.shift_reconciliations(id);
-
-
---
--- Name: stock_logs_decimal stock_logs_decimal_stock_log_id_stock_logs_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_logs_decimal
-    ADD CONSTRAINT stock_logs_decimal_stock_log_id_stock_logs_id_fk FOREIGN KEY (stock_log_id) REFERENCES public.stock_logs(id);
-
-
---
--- Name: stock_logs stock_logs_product_id_products_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_logs
-    ADD CONSTRAINT stock_logs_product_id_products_id_fk FOREIGN KEY (product_id) REFERENCES public.products(id);
-
-
---
--- Name: stock_logs stock_logs_shift_id_shifts_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_logs
-    ADD CONSTRAINT stock_logs_shift_id_shifts_id_fk FOREIGN KEY (shift_id) REFERENCES public.shifts(id);
-
-
---
--- Name: stock_movements_decimal stock_movements_decimal_stock_movement_id_stock_movements_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_movements_decimal
-    ADD CONSTRAINT stock_movements_decimal_stock_movement_id_stock_movements_id_fk FOREIGN KEY (stock_movement_id) REFERENCES public.stock_movements(id);
-
-
---
--- Name: stock_movements stock_movements_product_id_products_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
---
-
-ALTER TABLE ONLY public.stock_movements
-    ADD CONSTRAINT stock_movements_product_id_products_id_fk FOREIGN KEY (product_id) REFERENCES public.products(id);
-
-
---
--- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: cloud_admin
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON SEQUENCES TO neon_superuser WITH GRANT OPTION;
-
-
---
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: cloud_admin
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON TABLES TO neon_superuser WITH GRANT OPTION;
-
-
---
--- PostgreSQL database dump complete
---
-
+50	70	\N	product_deleted	Admin	2025-09-
